@@ -7,6 +7,8 @@ import SwiftUI
 
 struct HomeDashboardView: View {
     let snapshot: DashboardSnapshot
+    @Binding var selectedTab: AppTab
+    @State private var isShowingSettings = false
 
     var body: some View {
         NavigationStack {
@@ -16,7 +18,9 @@ struct HomeDashboardView: View {
                 ScrollView {
                     GlassEffectContainer(spacing: 22) {
                         VStack(alignment: .leading, spacing: 20) {
-                            DashboardHeader()
+                            DashboardHeader {
+                                isShowingSettings = true
+                            }
                             WelcomeView(name: snapshot.userName)
                             BalanceCard(snapshot: snapshot)
                             BudgetCard(snapshot: snapshot)
@@ -31,19 +35,28 @@ struct HomeDashboardView: View {
                 .scrollIndicators(.hidden)
             }
             .safeAreaInset(edge: .bottom) {
-                DashboardTabBar()
+                AppTabBar(selection: $selectedTab)
                     .padding(.horizontal, 20)
                     .padding(.bottom, 8)
             }
             .toolbar(.hidden, for: .navigationBar)
+            .fullScreenCover(isPresented: $isShowingSettings) {
+                SettingsView()
+            }
         }
     }
 }
 
 private struct DashboardHeader: View {
+    let showSettings: () -> Void
+
     var body: some View {
         HStack {
-            Image(systemName: "line.3.horizontal")
+            Button(action: showSettings) {
+                Image(systemName: "line.3.horizontal")
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Настройки")
             Spacer()
             Text("Главная")
                 .font(.subheadline.weight(.semibold))
@@ -250,51 +263,6 @@ private struct TransactionRow: View {
     }
 }
 
-private struct DashboardTabBar: View {
-    var body: some View {
-        GlassEffectContainer(spacing: 18) {
-            HStack(spacing: 0) {
-                TabItem(title: "Главная", symbol: "house.fill", isSelected: true)
-                TabItem(title: "Операции", symbol: "list.bullet", isSelected: false)
-
-                Image(systemName: "plus")
-                    .font(.headline.weight(.bold))
-                    .foregroundStyle(.white)
-                    .frame(width: 52, height: 52)
-                    .glassEffect(.regular.tint(.indigo), in: .circle)
-                    .offset(y: -16)
-                    .accessibilityLabel("Добавить операцию")
-
-                TabItem(title: "Помощник", symbol: "sparkles", isSelected: false)
-                TabItem(title: "План", symbol: "calendar", isSelected: false)
-            }
-            .padding(.horizontal, 6)
-            .padding(.top, 8)
-            .frame(maxWidth: .infinity)
-            .glassEffect(.regular, in: .capsule)
-        }
-        .frame(height: 62)
-    }
-}
-
-private struct TabItem: View {
-    let title: String
-    let symbol: String
-    let isSelected: Bool
-
-    var body: some View {
-        VStack(spacing: 4) {
-            Image(systemName: symbol)
-                .font(.subheadline.weight(.semibold))
-            Text(title)
-                .font(.caption2.weight(.medium))
-        }
-        .foregroundStyle(isSelected ? .indigo : .secondary)
-        .frame(maxWidth: .infinity)
-        .accessibilityElement(children: .combine)
-    }
-}
-
 private struct GlassCard<Content: View>: View {
     let tint: Color
     @ViewBuilder let content: Content
@@ -307,7 +275,7 @@ private struct GlassCard<Content: View>: View {
     }
 }
 
-private struct DashboardBackground: View {
+struct DashboardBackground: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
@@ -360,10 +328,10 @@ struct DashboardTransaction: Identifiable {
 }
 
 #Preview("Светлая тема") {
-    HomeDashboardView(snapshot: .preview)
+    HomeDashboardView(snapshot: .preview, selectedTab: .constant(.home))
 }
 
 #Preview("Тёмная тема") {
-    HomeDashboardView(snapshot: .preview)
+    HomeDashboardView(snapshot: .preview, selectedTab: .constant(.home))
         .preferredColorScheme(.dark)
 }
