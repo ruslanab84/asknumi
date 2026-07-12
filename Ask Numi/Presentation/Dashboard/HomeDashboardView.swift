@@ -56,6 +56,8 @@ struct HomeDashboardView: View {
                 }
                 .scrollIndicators(.hidden)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipped()
             .safeAreaInset(edge: .bottom) {
                 AppTabBar(selection: $selectedTab)
                     .padding(.horizontal, 20)
@@ -93,9 +95,9 @@ private struct DashboardHeader: View {
                 Image(systemName: "line.3.horizontal")
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Настройки")
+            .accessibilityLabel(L10n.Dashboard.settingsLabel)
             Spacer()
-            Text("Главная")
+            Text(L10n.Dashboard.title)
                 .font(.subheadline.weight(.semibold))
             Spacer()
             Image(systemName: "bell")
@@ -114,7 +116,7 @@ private struct WelcomeView: View {
                 .font(.title2)
                 .foregroundStyle(.orange, .pink)
 
-            Text("Добрый вечер, \(name)!")
+            Text(L10n.Dashboard.greeting(name))
                 .font(.subheadline.weight(.medium))
         }
     }
@@ -128,7 +130,7 @@ private struct BalanceCard: View {
         GlassCard(tint: .indigo.opacity(0.12)) {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text("Общий баланс")
+                    Text(L10n.Dashboard.totalBalance)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                     Spacer()
@@ -144,7 +146,7 @@ private struct BalanceCard: View {
 
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 5) {
-                        Label("Доходы", systemImage: "arrow.down.left.circle.fill")
+                        Label(L10n.Dashboard.income, systemImage: "arrow.down.left.circle.fill")
                             .font(.caption.weight(.medium))
                             .foregroundStyle(.green)
                         Text(OperationFormatting.amount(summary.totalIncome, sign: .income))
@@ -154,7 +156,7 @@ private struct BalanceCard: View {
                     Spacer()
 
                     VStack(alignment: .trailing, spacing: 5) {
-                        Label("Расходы", systemImage: "arrow.up.right.circle.fill")
+                        Label(L10n.Dashboard.expenses, systemImage: "arrow.up.right.circle.fill")
                             .font(.caption.weight(.medium))
                             .foregroundStyle(.red)
                         Text(OperationFormatting.amount(summary.totalExpenses, sign: .expense))
@@ -174,7 +176,7 @@ private struct BudgetCard: View {
         GlassCard(tint: .mint.opacity(0.12)) {
             VStack(alignment: .leading, spacing: 12) {
                 HStack {
-                    Text("Бюджет июля")
+                    Text(L10n.Dashboard.budgetTitle)
                         .font(.subheadline.weight(.semibold))
                     Spacer()
                     Text(snapshot.budgetProgress.formatted(.percent.precision(.fractionLength(0))))
@@ -186,9 +188,9 @@ private struct BudgetCard: View {
                     .tint(.mint)
 
                 HStack {
-                    AmountCaption(title: "Потрачено", value: snapshot.spent)
+                    AmountCaption(title: L10n.Dashboard.spent, value: snapshot.spent)
                     Spacer()
-                    AmountCaption(title: "План", value: snapshot.budget, alignment: .trailing)
+                    AmountCaption(title: L10n.Dashboard.budgetPlan, value: snapshot.budget, alignment: .trailing)
                 }
             }
         }
@@ -224,12 +226,12 @@ private struct InsightCard: View {
                     .background(.purple.opacity(0.15), in: .circle)
 
                 VStack(alignment: .leading, spacing: 7) {
-                    Text("AI-инсайт")
+                    Text(L10n.Dashboard.insightTitle)
                         .font(.subheadline.weight(.bold))
                     Text(insight)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text("Показать детали  →")
+                    Text(L10n.Dashboard.insightShowDetails)
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.purple)
                 }
@@ -243,12 +245,12 @@ private struct RecentTransactions: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Последние операции")
+            Text(L10n.Dashboard.recentTitle)
                 .font(.headline)
 
             GlassCard(tint: .clear) {
                 if transactions.isEmpty {
-                    Text("Пока нет операций — добавьте первую во вкладке «Операции».")
+                    Text(L10n.Dashboard.recentEmpty)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 } else {

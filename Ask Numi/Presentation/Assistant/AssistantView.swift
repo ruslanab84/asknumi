@@ -23,38 +23,45 @@ struct AssistantView: View {
             ZStack {
                 DashboardBackground()
 
-                ScrollView {
-                    GlassEffectContainer(spacing: 18) {
-                        LazyVStack(alignment: .leading, spacing: 16) {
-                            header
-                            availabilityNotice
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        GlassEffectContainer(spacing: 18) {
+                            LazyVStack(alignment: .leading, spacing: 16) {
+                                header
+                                availabilityNotice
 
-                            if exchanges.isEmpty {
-                                intro
-                                suggestions
-                            }
+                                if exchanges.isEmpty {
+                                    intro
+                                    suggestions
+                                }
 
-                            ForEach(exchanges) { exchange in
-                                UserBubble(text: exchange.question)
+                                ForEach(exchanges) { exchange in
+                                    VStack(alignment: .leading, spacing: 16) {
+                                        UserBubble(text: exchange.question)
 
-                                switch exchange.phase {
-                                case .loading:
-                                    ThinkingBubble()
-                                case .answered(let report):
-                                    AnswerCard(report: report)
-                                case .failed(let message):
-                                    ErrorBubble(message: message)
+                                        switch exchange.phase {
+                                        case .loading:
+                                            ThinkingBubble()
+                                        case .answered(let report):
+                                            AnswerCard(report: report)
+                                        case .failed(let message):
+                                            ErrorBubble(message: message)
+                                        }
+                                    }
+                                    .id(exchange.id)
                                 }
                             }
+                            .padding(.horizontal, 16)
+                            .padding(.top, 12)
+                            .padding(.bottom, 24)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 12)
-                        .padding(.bottom, 24)
+                    }
+                    .scrollIndicators(.hidden)
+                    .scrollDismissesKeyboard(.interactively)
+                    .onChange(of: exchanges.count) {
+                        scrollToLatest(using: proxy)
                     }
                 }
-                .scrollIndicators(.hidden)
-                .scrollDismissesKeyboard(.interactively)
-                .defaultScrollAnchor(exchanges.isEmpty ? .top : .bottom)
             }
             .safeAreaInset(edge: .bottom) {
                 VStack(spacing: 10) {
@@ -70,17 +77,17 @@ struct AssistantView: View {
 
     private var header: some View {
         HStack {
-            Text("Помощник")
+            Text(L10n.Assistant.title)
                 .font(.title3.weight(.bold))
             Spacer()
             Image(systemName: "clock.arrow.circlepath")
                 .font(.body.weight(.semibold))
-                .accessibilityLabel("История")
+                .accessibilityLabel(L10n.Assistant.historyLabel)
         }
     }
 
     private var intro: some View {
-        Text("Задайте вопрос о финансах — я отвечу на основе ваших операций за текущий месяц. Всё считается на устройстве.")
+        Text(L10n.Assistant.intro)
             .font(.subheadline)
             .foregroundStyle(.secondary)
     }
@@ -91,9 +98,9 @@ struct AssistantView: View {
         case .available:
             EmptyView()
         case .downloading:
-            notice("Модель ИИ ещё загружается на устройство. Попробуйте чуть позже.", symbol: "arrow.down.circle")
+            notice(L10n.Assistant.noticeDownloading, symbol: "arrow.down.circle")
         case .unavailable:
-            notice("ИИ-помощник недоступен: требуется включённый Apple Intelligence.", symbol: "exclamationmark.triangle")
+            notice(L10n.Assistant.noticeUnavailable, symbol: "exclamationmark.triangle")
         }
     }
 
@@ -108,9 +115,9 @@ struct AssistantView: View {
 
     private var suggestions: some View {
         VStack(alignment: .leading, spacing: 10) {
-            suggestion("Куда ушли деньги в этом месяце?")
-            suggestion("На чем можно сэкономить?")
-            suggestion("Хватит ли мне денег до зарплаты?")
+            suggestion(L10n.Assistant.suggestionWhereMoneyWent)
+            suggestion(L10n.Assistant.suggestionHowToSave)
+            suggestion(L10n.Assistant.suggestionEnoughUntilSalary)
         }
     }
 
@@ -128,7 +135,7 @@ struct AssistantView: View {
 
     private var inputBar: some View {
         HStack(spacing: 10) {
-            TextField("Спросите что-нибудь...", text: $draft)
+            TextField(L10n.Assistant.inputPlaceholder, text: $draft)
                 .focused($isInputFocused)
                 .submitLabel(.send)
                 .onSubmit { submit(draft) }
@@ -152,7 +159,7 @@ struct AssistantView: View {
                     || availability != .available
                     || isResponding
             )
-            .accessibilityLabel("Отправить")
+            .accessibilityLabel(L10n.Assistant.sendLabel)
         }
         .padding(.leading, 16)
         .padding(.trailing, 5)
@@ -160,15 +167,11 @@ struct AssistantView: View {
         .glassEffect(.regular, in: .capsule)
     }
 
-    private var currentMonth: DateInterval {
-        Calendar.current.dateInterval(of: .month, for: .now)
-            ?? DateInterval(start: .distantPast, end: .distantFuture)
-    }
-
     private func submit(_ text: String) {
         let question = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !question.isEmpty, availability == .available, !isResponding else { return }
         draft = ""
+        isInputFocused = false
 
         let exchange = AssistantExchange(question: question)
         exchanges.append(exchange)
@@ -176,17 +179,22 @@ struct AssistantView: View {
         Task {
             let phase: AssistantExchange.Phase
             do {
-                let report = try await getAdvice.execute(question: question, for: currentMonth)
+                let report = try await getAdvice.execute(question: question)
                 phase = .answered(report)
             } catch DomainError.notEnoughData {
-                phase = .failed("За этот месяц ещё нет операций. Добавьте несколько — и я смогу помочь.")
+                phase = .failed(L10n.Assistant.errorNoData)
             } catch {
-                phase = .failed("Не получилось составить ответ. Попробуйте ещё раз.")
+                phase = .failed(L10n.Assistant.errorGeneric)
             }
             if let index = exchanges.firstIndex(where: { $0.id == exchange.id }) {
                 exchanges[index].phase = phase
             }
         }
+    }
+
+    private func scrollToLatest(using proxy: ScrollViewProxy) {
+        guard let id = exchanges.last?.id else { return }
+        withAnimation { proxy.scrollTo(id, anchor: .bottom) }
     }
 }
 
@@ -224,7 +232,7 @@ private struct ThinkingBubble: View {
         HStack(spacing: 10) {
             ProgressView()
                 .controlSize(.small)
-            Text("Нуми готовит ответ…")
+            Text(L10n.Assistant.thinking)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -266,7 +274,7 @@ private struct AnswerCard: View {
         }
         let rest = ranked.dropFirst(Self.palette.count).reduce(Decimal(0)) { $0 + $1.amount }
         if rest > 0 {
-            items.append(SpendingCategory(id: "other", title: "Другое", share: Self.share(rest, of: total), color: .purple))
+            items.append(SpendingCategory(id: "other", title: L10n.Assistant.chartOther, share: Self.share(rest, of: total), color: .purple))
         }
         return items
     }
@@ -339,7 +347,7 @@ private struct SpendingRing: View {
             }
 
             VStack(spacing: 2) {
-                Text("Всего")
+                Text(L10n.Assistant.chartTotal)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                 Text(total)
@@ -348,7 +356,7 @@ private struct SpendingRing: View {
         }
         .frame(width: 112, height: 112)
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Всего расходов \(total)")
+        .accessibilityLabel(L10n.Assistant.chartTotalExpenses(total))
     }
 
     private func start(for index: Int) -> Double {

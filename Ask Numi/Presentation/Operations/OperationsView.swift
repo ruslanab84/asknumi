@@ -91,13 +91,13 @@ struct OperationsView: View {
                 }
             }
             .alert(
-                "Не удалось удалить операцию",
+                L10n.Operations.deleteAlertTitle,
                 isPresented: Binding(
                     get: { deleteErrorMessage != nil },
                     set: { if !$0 { deleteErrorMessage = nil } }
                 )
             ) {
-                Button("Понятно", role: .cancel) {}
+                Button(L10n.Operations.deleteAlertOk, role: .cancel) {}
             } message: {
                 Text(deleteErrorMessage ?? "")
             }
@@ -109,7 +109,7 @@ struct OperationsView: View {
 
     private var header: some View {
         HStack {
-            Text("Операции")
+            Text(L10n.Operations.title)
                 .font(.title3.weight(.bold))
 
             Spacer()
@@ -123,7 +123,7 @@ struct OperationsView: View {
                     .frame(width: 42, height: 42)
                     .glassEffect(.regular.tint(.indigo).interactive(), in: .circle)
             }
-            .accessibilityLabel("Добавить операцию")
+            .accessibilityLabel(L10n.Operations.addLabel)
         }
     }
 
@@ -131,7 +131,7 @@ struct OperationsView: View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.secondary)
-            TextField("Поиск по категории", text: $query)
+            TextField(L10n.Operations.searchPlaceholder, text: $query)
                 .font(.subheadline)
             if !query.isEmpty {
                 Button {
@@ -140,7 +140,7 @@ struct OperationsView: View {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundStyle(.secondary)
                 }
-                .accessibilityLabel("Очистить поиск")
+                .accessibilityLabel(L10n.Operations.clearSearchLabel)
             }
         }
         .padding(.horizontal, 14)
@@ -169,27 +169,27 @@ struct OperationsView: View {
     @ViewBuilder
     private var content: some View {
         if isLoading && transactions.isEmpty {
-            ProgressView("Загрузка операций…")
+            ProgressView(L10n.Operations.loading)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 80)
         } else if let errorMessage, transactions.isEmpty {
             ContentUnavailableView {
-                Label("Не удалось загрузить операции", systemImage: "exclamationmark.triangle")
+                Label(L10n.Operations.loadErrorTitle, systemImage: "exclamationmark.triangle")
             } description: {
                 Text(errorMessage)
             } actions: {
-                Button("Повторить") {
+                Button(L10n.Common.retry) {
                     Task { await loadTransactions() }
                 }
             }
             .padding(.top, 48)
         } else if transactions.isEmpty {
             ContentUnavailableView {
-                Label("Нет операций", systemImage: "tray")
+                Label(L10n.Operations.emptyTitle, systemImage: "tray")
             } description: {
-                Text("Нажмите +, чтобы добавить первый расход или доход.")
+                Text(L10n.Operations.emptyMessage)
             } actions: {
-                Button("Добавить операцию") {
+                Button(L10n.Operations.emptyAddButton) {
                     isPresentingAddOperation = true
                 }
                 .buttonStyle(.borderedProminent)
@@ -215,11 +215,11 @@ struct OperationsView: View {
 
                 VStack(alignment: .trailing, spacing: 2) {
                     if section.totalExpenses > 0 {
-                        Text("Расходы \(OperationFormatting.amount(section.totalExpenses, sign: .expense))")
+                        Text(L10n.Operations.sectionExpenses(OperationFormatting.amount(section.totalExpenses, sign: .expense)))
                             .foregroundStyle(.red)
                     }
                     if section.totalIncome > 0 {
-                        Text("Доходы \(OperationFormatting.amount(section.totalIncome, sign: .income))")
+                        Text(L10n.Operations.sectionIncome(OperationFormatting.amount(section.totalIncome, sign: .income)))
                             .foregroundStyle(.green)
                     }
                 }
@@ -353,7 +353,7 @@ private struct SwipeToDeleteRow<Content: View>: View {
                 }
                 .buttonStyle(.plain)
                 .opacity(offsetX < -8 ? 1 : 0)
-                .accessibilityLabel("Удалить операцию")
+                .accessibilityLabel(L10n.Operations.deleteLabel)
             }
             .contentShape(.rect)
             .onTapGesture {
@@ -378,11 +378,11 @@ private struct SwipeToDeleteRow<Content: View>: View {
                     }
             )
             .contextMenu {
-                Button("Удалить", systemImage: "trash", role: .destructive) {
+                Button(L10n.Operations.deleteAction, systemImage: "trash", role: .destructive) {
                     onDelete()
                 }
             }
-            .accessibilityAction(named: "Удалить") { onDelete() }
+            .accessibilityAction(named: L10n.Operations.deleteAction) { onDelete() }
     }
 
     private func close() {
@@ -422,8 +422,8 @@ private struct AddOperationView: View {
     }
 
     private static let defaultCategories: [TransactionKind: [String]] = [
-        .expense: ["Продукты", "Еда", "Транспорт", "Авто", "Дом", "Здоровье", "Развлечения", "Одежда"],
-        .income: ["Зарплата", "Фриланс", "Подарок", "Проценты"]
+        .expense: L10n.AddOperation.defaultExpenseCategories,
+        .income: L10n.AddOperation.defaultIncomeCategories
     ]
 
     @Environment(\.dismiss) private var dismiss
@@ -473,8 +473,8 @@ private struct AddOperationView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Тип операции") {
-                    Picker("Тип операции", selection: $kind) {
+                Section(L10n.AddOperation.sectionKind) {
+                    Picker(L10n.AddOperation.sectionKind, selection: $kind) {
                         ForEach(TransactionKind.allCases, id: \.self) { kind in
                             Text(kind.title).tag(kind)
                         }
@@ -483,14 +483,14 @@ private struct AddOperationView: View {
                     .tint(kind == .expense ? .red : .green)
                 }
 
-                Section("Категория") {
-                    TextField("Например: Продукты, Bolt или зарплата", text: $category)
+                Section(L10n.AddOperation.sectionCategory) {
+                    TextField(L10n.AddOperation.categoryPlaceholder, text: $category)
                         .focused($focusedField, equals: .category)
                         .submitLabel(.next)
                         .onSubmit { focusedField = .amount }
 
                     if category.count > 60 {
-                        Text("Название должно быть не длиннее 60 символов.")
+                        Text(L10n.AddOperation.categoryTooLong)
                             .font(.caption)
                             .foregroundStyle(.red)
                     }
@@ -517,7 +517,7 @@ private struct AddOperationView: View {
                     }
                 }
 
-                Section("Сумма") {
+                Section(L10n.AddOperation.sectionAmount) {
                     HStack {
                         TextField("0", text: $amountText)
                             .keyboardType(.decimalPad)
@@ -527,9 +527,9 @@ private struct AddOperationView: View {
                     }
                 }
 
-                Section("Дата операции") {
+                Section(L10n.AddOperation.sectionDate) {
                     DatePicker(
-                        "Дата и время",
+                        L10n.AddOperation.dateLabel,
                         selection: $date,
                         displayedComponents: [.date, .hourAndMinute]
                     )
@@ -546,15 +546,15 @@ private struct AddOperationView: View {
             .scrollContentBackground(.hidden)
             .background { DashboardBackground() }
             .scrollDismissesKeyboard(.interactively)
-            .navigationTitle(editing == nil ? "Новая операция" : "Изменить операцию")
+            .navigationTitle(editing == nil ? L10n.AddOperation.titleNew : L10n.AddOperation.titleEdit)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Отмена") { dismiss() }
+                    Button(L10n.Common.cancel) { dismiss() }
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(isSaving ? "Сохранение…" : "Сохранить") {
+                    Button(isSaving ? L10n.Common.saving : L10n.Common.save) {
                         Task { await save() }
                     }
                     .disabled(!canSave)
@@ -605,9 +605,9 @@ private enum OperationsFilter: CaseIterable {
 
     var title: String {
         switch self {
-        case .all: "Все"
-        case .expenses: "Расходы"
-        case .income: "Доходы"
+        case .all: L10n.Operations.filterAll
+        case .expenses: L10n.Operations.filterExpenses
+        case .income: L10n.Operations.filterIncome
         }
     }
 
@@ -630,10 +630,10 @@ private struct OperationDaySection: Identifiable {
 
     var title: String {
         if Calendar.current.isDateInToday(date) {
-            return "Сегодня"
+            return L10n.Operations.today
         }
         if Calendar.current.isDateInYesterday(date) {
-            return "Вчера"
+            return L10n.Operations.yesterday
         }
         return date.formatted(
             .dateTime
@@ -667,8 +667,8 @@ enum OperationFormatting {
 extension TransactionKind {
     var title: String {
         switch self {
-        case .income: "Доход"
-        case .expense: "Расход"
+        case .income: L10n.Common.income
+        case .expense: L10n.Common.expense
         }
     }
 }

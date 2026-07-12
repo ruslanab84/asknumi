@@ -1,0 +1,176 @@
+/* Tab Bar */
+"tab.home" = "Главная";
+"tab.operations" = "Операции";
+"tab.assistant" = "Помощник";
+"tab.plan" = "План";
+
+/* Common */
+"common.button.cancel" = "Отмена";
+"common.button.save" = "Сохранить";
+"common.button.saving" = "Сохранение…";
+"common.button.retry" = "Повторить";
+"common.accessibility.back" = "Назад";
+"common.kind.income" = "Доход";
+"common.kind.expense" = "Расход";
+
+/* Dashboard — Header */
+"dashboard.header.title" = "Главная";
+"dashboard.header.accessibility.settings" = "Настройки";
+"dashboard.greeting" = "Добрый вечер, %@!";
+
+/* Dashboard — Balance Card */
+"dashboard.balance_card.label.total_balance" = "Общий баланс";
+"dashboard.balance_card.label.income" = "Доходы";
+"dashboard.balance_card.label.expenses" = "Расходы";
+
+/* Dashboard — Budget Card */
+"dashboard.budget_card.title" = "Бюджет июля";
+"dashboard.budget_card.label.spent" = "Потрачено";
+"dashboard.budget_card.label.plan" = "План";
+
+/* Dashboard — Insight Card */
+"dashboard.insight_card.title" = "AI-инсайт";
+"dashboard.insight_card.cta.show_details" = "Показать детали  →";
+
+/* Dashboard — Recent Transactions */
+"dashboard.recent.title" = "Последние операции";
+"dashboard.recent.empty" = "Пока нет операций — добавьте первую во вкладке «Операции».";
+
+/* Operations — Header & Search */
+"operations.header.title" = "Операции";
+"operations.header.accessibility.add" = "Добавить операцию";
+"operations.search.placeholder" = "Поиск по категории";
+"operations.search.accessibility.clear" = "Очистить поиск";
+
+/* Operations — Filters */
+"operations.filter.all" = "Все";
+"operations.filter.expenses" = "Расходы";
+"operations.filter.income" = "Доходы";
+
+/* Operations — List states */
+"operations.list.loading" = "Загрузка операций…";
+"operations.list.error.title" = "Не удалось загрузить операции";
+"operations.list.empty.title" = "Нет операций";
+"operations.list.empty.message" = "Нажмите +, чтобы добавить первый расход или доход.";
+"operations.list.empty.cta.add" = "Добавить операцию";
+
+/* Operations — Day sections */
+"operations.section.today" = "Сегодня";
+"operations.section.yesterday" = "Вчера";
+"operations.section.label.expenses" = "Расходы %@";
+"operations.section.label.income" = "Доходы %@";
+
+/* Operations — Row actions */
+"operations.row.accessibility.delete" = "Удалить операцию";
+"operations.row.action.delete" = "Удалить";
+"operations.delete_alert.title" = "Не удалось удалить операцию";
+"operations.delete_alert.button.ok" = "Понятно";
+
+/* Add Operation */
+"add_operation.title.new" = "Новая операция";
+"add_operation.title.edit" = "Изменить операцию";
+"add_operation.section.kind" = "Тип операции";
+"add_operation.section.category" = "Категория";
+"add_operation.section.amount" = "Сумма";
+"add_operation.section.date" = "Дата операции";
+"add_operation.field.category.placeholder" = "Например: Продукты, Bolt или зарплата";
+"add_operation.field.category.too_long" = "Название должно быть не длиннее 60 символов.";
+"add_operation.field.date.label" = "Дата и время";
+
+/* Add Operation — Default category suggestions */
+"add_operation.category.default.groceries" = "Продукты";
+"add_operation.category.default.food" = "Еда";
+"add_operation.category.default.transport" = "Транспорт";
+"add_operation.category.default.auto" = "Авто";
+"add_operation.category.default.home" = "Дом";
+"add_operation.category.default.health" = "Здоровье";
+"add_operation.category.default.entertainment" = "Развлечения";
+"add_operation.category.default.clothes" = "Одежда";
+"add_operation.category.default.salary" = "Зарплата";
+"add_operation.category.default.freelance" = "Фриланс";
+"add_operation.category.default.gift" = "Подарок";
+"add_operation.category.default.interest" = "Проценты";
+
+/* Assistant */
+"assistant.header.title" = "Помощник";
+"assistant.header.accessibility.history" = "История";
+"assistant.intro" = "Задайте вопрос о финансах — я отвечу только на основе сохранённых операций. Всё анализируется на устройстве.";
+"assistant.notice.downloading" = "Модель ИИ ещё загружается на устройство. Попробуйте чуть позже.";
+"assistant.notice.unavailable" = "ИИ-помощник недоступен: требуется включённый Apple Intelligence.";
+"assistant.suggestion.where_money_went" = "Куда ушли деньги в этом месяце?";
+"assistant.suggestion.how_to_save" = "На чем можно сэкономить?";
+"assistant.suggestion.enough_until_salary" = "Хватит ли мне денег до зарплаты?";
+"assistant.input.placeholder" = "Спросите что-нибудь...";
+"assistant.input.accessibility.send" = "Отправить";
+"assistant.thinking" = "Нуми готовит ответ…";
+"assistant.error.no_data" = "За указанный период вы не записали ни одной операции.";
+"assistant.error.generic" = "Не получилось составить ответ. Попробуйте ещё раз.";
+"assistant.chart.category.other" = "Другое";
+"assistant.chart.label.total" = "Всего";
+"assistant.chart.accessibility.total_expenses" = "Всего расходов %@";
+
+/* Plan */
+"plan.header.title" = "План";
+"plan.header.accessibility.calendar" = "Календарь";
+"plan.section_picker.label" = "Раздел плана";
+"plan.section.payments" = "Платежи";
+"plan.section.budgets" = "Бюджеты";
+"plan.section.goals" = "Цели";
+"plan.payments.title" = "Ближайшие платежи";
+"plan.payments.cta.all" = "Все платежи";
+"plan.forecast.title" = "Прогнозируемый остаток";
+"plan.budgets.title" = "Бюджеты";
+"plan.budgets.cta.all" = "Все";
+"plan.budgets.label.remaining" = "Осталось %@";
+"plan.placeholder.title" = "Раздел «%@»";
+"plan.placeholder.message" = "Скоро здесь появятся ваши данные.";
+
+/* Settings */
+"settings.title" = "Настройки";
+"settings.section.account" = "Аккаунт";
+"settings.section.appearance" = "Внешний вид";
+"settings.section.notifications" = "Уведомления";
+"settings.section.security" = "Безопасность";
+"settings.section.data" = "Данные";
+"settings.section.about" = "О приложении";
+"settings.row.profile" = "Профиль";
+"settings.row.currency" = "Валюта";
+"settings.row.currency.detail" = "AZN — Азербайджанский манат";
+"settings.row.language" = "Язык";
+"settings.row.language.value" = "Русский";
+"settings.row.theme" = "Тема";
+"settings.row.theme.value" = "Системная";
+"settings.row.accent" = "Цвет акцента";
+"settings.row.accent.value" = "Фиолетовый";
+"settings.row.reminders" = "Напоминания";
+"settings.row.weekly_summary" = "Еженедельная сводка";
+"settings.row.face_id" = "Face ID";
+"settings.row.passcode" = "Код-пароль";
+"settings.row.export" = "Экспорт данных";
+"settings.row.backup" = "Резервная копия";
+"settings.row.rate" = "Оценить приложение";
+"settings.row.feedback" = "Написать отзыв";
+"settings.version" = "Версия %@";
+"settings.placeholder.message" = "Настройка будет доступна позже.";
+
+/* New Category */
+"new_category.title" = "Новая категория";
+"new_category.kind_picker.label" = "Тип категории";
+"new_category.field.name.label" = "Название категории";
+"new_category.field.name.placeholder" = "Например: Продукты";
+"new_category.field.color.label" = "Цвет";
+"new_category.field.icon.label" = "Иконка";
+"new_category.field.icon.accessibility.select" = "Выбрать иконку";
+"new_category.field.description.label" = "Описание (необязательно)";
+"new_category.field.description.placeholder" = "Введите описание категории";
+
+/* New Category — Color accessibility names */
+"new_category.color.red" = "Красный";
+"new_category.color.pink" = "Розовый";
+"new_category.color.orange" = "Оранжевый";
+"new_category.color.yellow" = "Жёлтый";
+"new_category.color.green" = "Зелёный";
+"new_category.color.mint" = "Мятный";
+"new_category.color.cyan" = "Голубой";
+"new_category.color.blue" = "Синий";
+"new_category.color.purple" = "Фиолетовый";

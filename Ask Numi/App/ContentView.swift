@@ -7,7 +7,7 @@ import SwiftUI
 
 struct ContentView: View {
     let container: AppContainer
-    @State private var selectedTab: AppTab = .operations
+    @State private var selectedTab: AppTab = .home
 
     var body: some View {
         Group {
@@ -46,10 +46,10 @@ enum AppTab: CaseIterable {
 
     var title: String {
         switch self {
-        case .home: "Главная"
-        case .operations: "Операции"
-        case .assistant: "Помощник"
-        case .plan: "План"
+        case .home: L10n.Tab.home
+        case .operations: L10n.Tab.operations
+        case .assistant: L10n.Tab.assistant
+        case .plan: L10n.Tab.plan
         }
     }
 
@@ -75,8 +75,7 @@ struct AppTabBar: View {
                 tabButton(.plan)
             }
             .padding(.horizontal, 6)
-            .padding(.top, 8)
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, minHeight: 54)
             .glassEffect(.regular, in: .capsule)
         }
         .frame(height: 62)
@@ -93,7 +92,8 @@ struct AppTabBar: View {
                     .font(.caption2.weight(.medium))
             }
             .foregroundStyle(tab == selection ? .indigo : .secondary)
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, minHeight: 54)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(tab == selection ? .isSelected : [])

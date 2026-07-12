@@ -1,0 +1,205 @@
+//
+//  L10n.swift
+//  Ask Numi
+//
+//  The single access point for all localized strings.
+//  Only this file may call into LocalizationManager.
+//
+
+import Foundation
+
+enum L10n {
+
+    // MARK: - Tab Bar
+
+    enum Tab {
+        static var home: String       { l("tab.home") }
+        static var operations: String { l("tab.operations") }
+        static var assistant: String  { l("tab.assistant") }
+        static var plan: String       { l("tab.plan") }
+    }
+
+    // MARK: - Common
+
+    enum Common {
+        static var cancel: String  { l("common.button.cancel") }
+        static var save: String    { l("common.button.save") }
+        static var saving: String  { l("common.button.saving") }
+        static var retry: String   { l("common.button.retry") }
+        static var back: String    { l("common.accessibility.back") }
+        static var income: String  { l("common.kind.income") }
+        static var expense: String { l("common.kind.expense") }
+    }
+
+    // MARK: - Dashboard
+
+    enum Dashboard {
+        static var title: String            { l("dashboard.header.title") }
+        static var settingsLabel: String    { l("dashboard.header.accessibility.settings") }
+        static func greeting(_ name: String) -> String {
+            String(format: l("dashboard.greeting"), name)
+        }
+        static var totalBalance: String     { l("dashboard.balance_card.label.total_balance") }
+        static var income: String           { l("dashboard.balance_card.label.income") }
+        static var expenses: String         { l("dashboard.balance_card.label.expenses") }
+        static var budgetTitle: String      { l("dashboard.budget_card.title") }
+        static var spent: String            { l("dashboard.budget_card.label.spent") }
+        static var budgetPlan: String       { l("dashboard.budget_card.label.plan") }
+        static var insightTitle: String     { l("dashboard.insight_card.title") }
+        static var insightShowDetails: String { l("dashboard.insight_card.cta.show_details") }
+        static var recentTitle: String      { l("dashboard.recent.title") }
+        static var recentEmpty: String      { l("dashboard.recent.empty") }
+    }
+
+    // MARK: - Operations
+
+    enum Operations {
+        static var title: String            { l("operations.header.title") }
+        static var addLabel: String         { l("operations.header.accessibility.add") }
+        static var searchPlaceholder: String { l("operations.search.placeholder") }
+        static var clearSearchLabel: String { l("operations.search.accessibility.clear") }
+        static var filterAll: String        { l("operations.filter.all") }
+        static var filterExpenses: String   { l("operations.filter.expenses") }
+        static var filterIncome: String     { l("operations.filter.income") }
+        static var loading: String          { l("operations.list.loading") }
+        static var loadErrorTitle: String   { l("operations.list.error.title") }
+        static var emptyTitle: String       { l("operations.list.empty.title") }
+        static var emptyMessage: String     { l("operations.list.empty.message") }
+        static var emptyAddButton: String   { l("operations.list.empty.cta.add") }
+        static var today: String            { l("operations.section.today") }
+        static var yesterday: String        { l("operations.section.yesterday") }
+        static func sectionExpenses(_ amount: String) -> String {
+            String(format: l("operations.section.label.expenses"), amount)
+        }
+        static func sectionIncome(_ amount: String) -> String {
+            String(format: l("operations.section.label.income"), amount)
+        }
+        static var deleteLabel: String      { l("operations.row.accessibility.delete") }
+        static var deleteAction: String     { l("operations.row.action.delete") }
+        static var deleteAlertTitle: String { l("operations.delete_alert.title") }
+        static var deleteAlertOk: String    { l("operations.delete_alert.button.ok") }
+    }
+
+    // MARK: - Add Operation
+
+    enum AddOperation {
+        static var titleNew: String            { l("add_operation.title.new") }
+        static var titleEdit: String           { l("add_operation.title.edit") }
+        static var sectionKind: String         { l("add_operation.section.kind") }
+        static var sectionCategory: String     { l("add_operation.section.category") }
+        static var sectionAmount: String       { l("add_operation.section.amount") }
+        static var sectionDate: String         { l("add_operation.section.date") }
+        static var categoryPlaceholder: String { l("add_operation.field.category.placeholder") }
+        static var categoryTooLong: String     { l("add_operation.field.category.too_long") }
+        static var dateLabel: String           { l("add_operation.field.date.label") }
+
+        static var defaultExpenseCategories: [String] {
+            ["groceries", "food", "transport", "auto", "home", "health", "entertainment", "clothes"]
+                .map { l("add_operation.category.default.\($0)") }
+        }
+        static var defaultIncomeCategories: [String] {
+            ["salary", "freelance", "gift", "interest"]
+                .map { l("add_operation.category.default.\($0)") }
+        }
+    }
+
+    // MARK: - Assistant
+
+    enum Assistant {
+        static var title: String              { l("assistant.header.title") }
+        static var historyLabel: String       { l("assistant.header.accessibility.history") }
+        static var intro: String              { l("assistant.intro") }
+        static var noticeDownloading: String  { l("assistant.notice.downloading") }
+        static var noticeUnavailable: String  { l("assistant.notice.unavailable") }
+        static var suggestionWhereMoneyWent: String { l("assistant.suggestion.where_money_went") }
+        static var suggestionHowToSave: String { l("assistant.suggestion.how_to_save") }
+        static var suggestionEnoughUntilSalary: String { l("assistant.suggestion.enough_until_salary") }
+        static var inputPlaceholder: String   { l("assistant.input.placeholder") }
+        static var sendLabel: String          { l("assistant.input.accessibility.send") }
+        static var thinking: String           { l("assistant.thinking") }
+        static var errorNoData: String        { l("assistant.error.no_data") }
+        static var errorGeneric: String       { l("assistant.error.generic") }
+        static var chartOther: String         { l("assistant.chart.category.other") }
+        static var chartTotal: String         { l("assistant.chart.label.total") }
+        static func chartTotalExpenses(_ amount: String) -> String {
+            String(format: l("assistant.chart.accessibility.total_expenses"), amount)
+        }
+    }
+
+    // MARK: - Plan
+
+    enum Plan {
+        static var title: String            { l("plan.header.title") }
+        static var calendarLabel: String    { l("plan.header.accessibility.calendar") }
+        static var sectionPickerLabel: String { l("plan.section_picker.label") }
+        static var sectionPayments: String  { l("plan.section.payments") }
+        static var sectionBudgets: String   { l("plan.section.budgets") }
+        static var sectionGoals: String     { l("plan.section.goals") }
+        static var paymentsTitle: String    { l("plan.payments.title") }
+        static var allPayments: String      { l("plan.payments.cta.all") }
+        static var forecastTitle: String    { l("plan.forecast.title") }
+        static var budgetsTitle: String     { l("plan.budgets.title") }
+        static var budgetsAll: String       { l("plan.budgets.cta.all") }
+        static func remaining(_ amount: String) -> String {
+            String(format: l("plan.budgets.label.remaining"), amount)
+        }
+        static func placeholderTitle(_ section: String) -> String {
+            String(format: l("plan.placeholder.title"), section)
+        }
+        static var placeholderMessage: String { l("plan.placeholder.message") }
+    }
+
+    // MARK: - Settings
+
+    enum Settings {
+        static var title: String            { l("settings.title") }
+        static var sectionAccount: String   { l("settings.section.account") }
+        static var sectionAppearance: String { l("settings.section.appearance") }
+        static var sectionNotifications: String { l("settings.section.notifications") }
+        static var sectionSecurity: String  { l("settings.section.security") }
+        static var sectionData: String      { l("settings.section.data") }
+        static var sectionAbout: String     { l("settings.section.about") }
+        static var profile: String          { l("settings.row.profile") }
+        static var currency: String         { l("settings.row.currency") }
+        static var currencyDetail: String   { l("settings.row.currency.detail") }
+        static var language: String         { l("settings.row.language") }
+        static var languageValue: String    { l("settings.row.language.value") }
+        static var theme: String            { l("settings.row.theme") }
+        static var themeValue: String       { l("settings.row.theme.value") }
+        static var accent: String           { l("settings.row.accent") }
+        static var accentValue: String      { l("settings.row.accent.value") }
+        static var reminders: String        { l("settings.row.reminders") }
+        static var weeklySummary: String    { l("settings.row.weekly_summary") }
+        static var faceID: String           { l("settings.row.face_id") }
+        static var passcode: String         { l("settings.row.passcode") }
+        static var exportData: String       { l("settings.row.export") }
+        static var backup: String           { l("settings.row.backup") }
+        static var rateApp: String          { l("settings.row.rate") }
+        static var writeFeedback: String    { l("settings.row.feedback") }
+        static func version(_ version: String) -> String {
+            String(format: l("settings.version"), version)
+        }
+        static var placeholderMessage: String { l("settings.placeholder.message") }
+    }
+
+    // MARK: - New Category
+
+    enum NewCategory {
+        static var title: String                  { l("new_category.title") }
+        static var kindPickerLabel: String        { l("new_category.kind_picker.label") }
+        static var nameLabel: String              { l("new_category.field.name.label") }
+        static var namePlaceholder: String        { l("new_category.field.name.placeholder") }
+        static var colorLabel: String             { l("new_category.field.color.label") }
+        static var iconLabel: String              { l("new_category.field.icon.label") }
+        static var selectIconLabel: String        { l("new_category.field.icon.accessibility.select") }
+        static var descriptionLabel: String       { l("new_category.field.description.label") }
+        static var descriptionPlaceholder: String { l("new_category.field.description.placeholder") }
+        static func color(_ id: String) -> String { l("new_category.color.\(id)") }
+    }
+
+    // MARK: - Private helpers
+
+    private static func l(_ key: String) -> String {
+        LocalizationManager.shared.localizedString(for: key)
+    }
+}

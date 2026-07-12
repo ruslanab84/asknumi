@@ -25,9 +25,9 @@ struct PlanView: View {
                             case .payments:
                                 paymentsContent
                             case .budgets:
-                                PlanPlaceholder(title: "Бюджеты", symbol: "chart.bar.fill")
+                                PlanPlaceholder(title: L10n.Plan.sectionBudgets, symbol: "chart.bar.fill")
                             case .goals:
-                                PlanPlaceholder(title: "Цели", symbol: "target")
+                                PlanPlaceholder(title: L10n.Plan.sectionGoals, symbol: "target")
                             }
                         }
                         .padding(.horizontal, 16)
@@ -48,17 +48,17 @@ struct PlanView: View {
 
     private var header: some View {
         HStack {
-            Text("План")
+            Text(L10n.Plan.title)
                 .font(.title3.weight(.bold))
             Spacer()
             Image(systemName: "calendar")
                 .font(.body.weight(.semibold))
-                .accessibilityLabel("Календарь")
+                .accessibilityLabel(L10n.Plan.calendarLabel)
         }
     }
 
     private var sectionPicker: some View {
-        Picker("Раздел плана", selection: $section) {
+        Picker(L10n.Plan.sectionPickerLabel, selection: $section) {
             ForEach(PlanSection.allCases, id: \.self) { item in
                 Text(item.title).tag(item)
             }
@@ -70,7 +70,7 @@ struct PlanView: View {
         VStack(alignment: .leading, spacing: 20) {
             UpcomingPayments(payments: snapshot.payments)
 
-            Button("Все платежи") { }
+            Button(L10n.Plan.allPayments) { }
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.indigo)
 
@@ -85,7 +85,7 @@ private struct UpcomingPayments: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Ближайшие платежи")
+            Text(L10n.Plan.paymentsTitle)
                 .font(.subheadline.weight(.bold))
 
             VStack(spacing: 0) {
@@ -129,7 +129,7 @@ private struct BalanceForecast: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Прогнозируемый остаток")
+            Text(L10n.Plan.forecastTitle)
                 .font(.caption)
                 .foregroundStyle(.green)
 
@@ -167,10 +167,10 @@ private struct BudgetProgress: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Бюджеты")
+                Text(L10n.Plan.budgetsTitle)
                     .font(.subheadline.weight(.bold))
                 Spacer()
-                Button("Все") { }
+                Button(L10n.Plan.budgetsAll) { }
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.indigo)
             }
@@ -198,7 +198,7 @@ private struct BudgetProgress: View {
                 }
             }
 
-            Text("Осталось \(budget.remaining)")
+            Text(L10n.Plan.remaining(budget.remaining))
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -211,9 +211,9 @@ private struct PlanPlaceholder: View {
 
     var body: some View {
         ContentUnavailableView(
-            "Раздел «\(title)»",
+            L10n.Plan.placeholderTitle(title),
             systemImage: symbol,
-            description: Text("Скоро здесь появятся ваши данные.")
+            description: Text(L10n.Plan.placeholderMessage)
         )
         .frame(maxWidth: .infinity)
         .padding(.vertical, 60)
@@ -228,9 +228,9 @@ private enum PlanSection: CaseIterable {
 
     var title: String {
         switch self {
-        case .payments: "Платежи"
-        case .budgets: "Бюджеты"
-        case .goals: "Цели"
+        case .payments: L10n.Plan.sectionPayments
+        case .budgets: L10n.Plan.sectionBudgets
+        case .goals: L10n.Plan.sectionGoals
         }
     }
 }

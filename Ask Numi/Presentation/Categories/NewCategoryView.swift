@@ -36,7 +36,7 @@ struct NewCategoryView: View {
                 .scrollIndicators(.hidden)
                 .scrollDismissesKeyboard(.interactively)
             }
-            .navigationTitle("Новая категория")
+            .navigationTitle(L10n.NewCategory.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -45,11 +45,11 @@ struct NewCategoryView: View {
                     } label: {
                         Image(systemName: "chevron.left")
                     }
-                    .accessibilityLabel("Назад")
+                    .accessibilityLabel(L10n.Common.back)
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Сохранить") {
+                    Button(L10n.Common.save) {
                         dismiss()
                     }
                     .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -59,7 +59,7 @@ struct NewCategoryView: View {
     }
 
     private var kindPicker: some View {
-        Picker("Тип категории", selection: $kind) {
+        Picker(L10n.NewCategory.kindPickerLabel, selection: $kind) {
             ForEach(CategoryKind.allCases, id: \.self) { item in
                 Label(item.title, systemImage: item.symbol).tag(item)
             }
@@ -70,10 +70,10 @@ struct NewCategoryView: View {
 
     private var nameField: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Название категории")
+            Text(L10n.NewCategory.nameLabel)
                 .font(.caption.weight(.semibold))
 
-            TextField("Например: Продукты", text: $name)
+            TextField(L10n.NewCategory.namePlaceholder, text: $name)
                 .focused($focusedField, equals: .name)
                 .submitLabel(.next)
                 .onSubmit { focusedField = .description }
@@ -84,7 +84,7 @@ struct NewCategoryView: View {
 
     private var colorPicker: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Цвет")
+            Text(L10n.NewCategory.colorLabel)
                 .font(.caption.weight(.semibold))
 
             HStack(spacing: 12) {
@@ -111,7 +111,7 @@ struct NewCategoryView: View {
 
     private var iconPicker: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Иконка")
+            Text(L10n.NewCategory.iconLabel)
                 .font(.caption.weight(.semibold))
 
             LazyVGrid(columns: columns, spacing: 10) {
@@ -132,7 +132,7 @@ struct NewCategoryView: View {
                             )
                     }
                     .buttonStyle(.plain)
-                    .accessibilityLabel("Выбрать иконку")
+                    .accessibilityLabel(L10n.NewCategory.selectIconLabel)
                     .accessibilityAddTraits(icon == selectedIcon ? .isSelected : [])
                 }
             }
@@ -141,10 +141,10 @@ struct NewCategoryView: View {
 
     private var descriptionField: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Описание (необязательно)")
+            Text(L10n.NewCategory.descriptionLabel)
                 .font(.caption.weight(.semibold))
 
-            TextField("Введите описание категории", text: $description, axis: .vertical)
+            TextField(L10n.NewCategory.descriptionPlaceholder, text: $description, axis: .vertical)
                 .lineLimit(3, reservesSpace: true)
                 .focused($focusedField, equals: .description)
                 .padding(14)
@@ -164,8 +164,8 @@ private enum CategoryKind: CaseIterable {
 
     var title: String {
         switch self {
-        case .expense: "Расход"
-        case .income: "Доход"
+        case .expense: L10n.Common.expense
+        case .income: L10n.Common.income
         }
     }
 
@@ -183,15 +183,15 @@ private struct CategoryColorOption: Identifiable, Equatable {
     let color: Color
 
     static let options = [
-        CategoryColorOption(id: "red", title: "Красный", color: .red),
-        CategoryColorOption(id: "pink", title: "Розовый", color: .pink),
-        CategoryColorOption(id: "orange", title: "Оранжевый", color: .orange),
-        CategoryColorOption(id: "yellow", title: "Жёлтый", color: .yellow),
-        CategoryColorOption(id: "green", title: "Зелёный", color: .green),
-        CategoryColorOption(id: "mint", title: "Мятный", color: .mint),
-        CategoryColorOption(id: "cyan", title: "Голубой", color: .cyan),
-        CategoryColorOption(id: "blue", title: "Синий", color: .blue),
-        CategoryColorOption(id: "purple", title: "Фиолетовый", color: .purple)
+        CategoryColorOption(id: "red", title: L10n.NewCategory.color("red"), color: .red),
+        CategoryColorOption(id: "pink", title: L10n.NewCategory.color("pink"), color: .pink),
+        CategoryColorOption(id: "orange", title: L10n.NewCategory.color("orange"), color: .orange),
+        CategoryColorOption(id: "yellow", title: L10n.NewCategory.color("yellow"), color: .yellow),
+        CategoryColorOption(id: "green", title: L10n.NewCategory.color("green"), color: .green),
+        CategoryColorOption(id: "mint", title: L10n.NewCategory.color("mint"), color: .mint),
+        CategoryColorOption(id: "cyan", title: L10n.NewCategory.color("cyan"), color: .cyan),
+        CategoryColorOption(id: "blue", title: L10n.NewCategory.color("blue"), color: .blue),
+        CategoryColorOption(id: "purple", title: L10n.NewCategory.color("purple"), color: .purple)
     ]
 
     static func == (lhs: CategoryColorOption, rhs: CategoryColorOption) -> Bool {

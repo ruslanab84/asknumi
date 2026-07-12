@@ -22,48 +22,58 @@ final class FoundationModelsAdvisor: FinancialAdvisor {
         }
     }
 
-    func advise(on summary: FinancialSummary, question: String?) async throws -> FinancialAdvice {
+    func advise(on summary: FinancialSummary, transactions: [Transaction], question: String?) async throws -> FinancialAdvice {
         // ponytail: session per request — advice is stateless; switch to one
         // shared session + isResponding checks when a chat screen appears.
         let session = LanguageModelSession {
             """
-            Ты — дружелюбный финансовый помощник в приложении для личных финансов.
-            Валюта пользователя — азербайджанский манат (AZN).
-            Все суммы в запросе уже посчитаны приложением. DO NOT пересчитывать их
-            и DO NOT придумывать числа, которых нет в запросе.
-            Отвечай на русском языке, коротко и конкретно.
+            You are a friendly personal finance assistant.
+            The user's currency is Azerbaijani manat (AZN).
+            All amounts are already calculated by the app. Do not recalculate them
+            or invent numbers that are not present in the request.
+            Answer briefly and concretely in simple English.
             """
         }
         let response = try await session.respond(
-            to: prompt(for: summary, question: question),
+            to: prompt(for: summary, transactions: transactions, question: question),
             generating: AdviceOutput.self
         )
         return FinancialAdvice(headline: response.content.headline, tips: response.content.tips)
     }
 
-    private func prompt(for summary: FinancialSummary, question: String?) -> String {
+    private func prompt(for summary: FinancialSummary, transactions: [Transaction], question: String?) -> String {
         var lines = [
-            "Финансовая сводка пользователя за период:",
-            "Доход: \(plain(summary.totalIncome)) AZN",
-            "Расходы: \(plain(summary.totalExpenses)) AZN",
-            "Баланс: \(plain(summary.balance)) AZN",
+            "User financial summary:",
+            "Income: \(plain(summary.totalIncome)) AZN",
+            "Expenses: \(plain(summary.totalExpenses)) AZN",
+            "Balance: \(plain(summary.balance)) AZN",
         ]
         if let rate = summary.savingsRate {
-            lines.append("Доля сбережений: \(Int(rate * 100))%")
+            lines.append("Savings rate: \(Int(rate * 100))%")
         }
         if !summary.expensesByCategory.isEmpty {
-            lines.append("Расходы по категориям (по убыванию):")
+            lines.append("Expenses by category, descending:")
             for item in summary.expensesByCategory.prefix(8) {
-                lines.append("- \(item.category): \(plain(item.amount)) AZN")
+                lines.append("- \(latin(item.category)): \(plain(item.amount)) AZN")
             }
         }
+        lines.append("Saved transactions, newest first:")
+        // ponytail: cap keeps the on-device model within its context window.
+        for transaction in transactions.sorted(by: { $0.date > $1.date }).prefix(100) {
+            let kind = transaction.kind == .income ? "income" : "expense"
+            lines.append("- \(transaction.date.formatted(date: .numeric, time: .omitted)); \(kind); \(latin(transaction.category)); \(plain(transaction.amount)) AZN")
+        }
         if let question, !question.isEmpty {
-            lines.append("Вопрос пользователя: «\(question)»")
-            lines.append("Заголовок — краткий ответ на вопрос по числам выше, затем три практичных совета.")
+            lines.append("User question: \(latin(question))")
+            lines.append("Give a short direct answer as the headline, followed by three practical tips.")
         } else {
-            lines.append("Дай заголовок и три практичных совета, как улучшить финансы.")
+            lines.append("Give a headline and three practical tips to improve the user's finances.")
         }
         return lines.joined(separator: "\n")
+    }
+
+    private func latin(_ value: String) -> String {
+        value.applyingTransform(.toLatin, reverse: false) ?? value
     }
 
     private func plain(_ value: Decimal) -> String {
@@ -73,9 +83,9 @@ final class FoundationModelsAdvisor: FinancialAdvisor {
 
 @Generable
 private struct AdviceOutput {
-    @Guide(description: "Короткий заголовок совета, до восьми слов")
+    @Guide(description: "A short direct answer, up to eight words")
     var headline: String
 
-    @Guide(description: "Конкретные практичные советы по личным финансам", .count(3))
+    @Guide(description: "Concrete and practical personal finance tips", .count(3))
     var tips: [String]
 }

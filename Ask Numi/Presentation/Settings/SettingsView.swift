@@ -17,38 +17,38 @@ struct SettingsView: View {
                 DashboardBackground()
 
                 Form {
-                    Section("Аккаунт") {
-                        destinationRow(title: "Профиль", symbol: "person.crop.circle")
-                        destinationRow(title: "Валюта", symbol: "banknote", detail: "AZN — Азербайджанский манат")
-                        destinationRow(title: "Язык", symbol: "globe", value: "Русский")
+                    Section(L10n.Settings.sectionAccount) {
+                        destinationRow(title: L10n.Settings.profile, symbol: "person.crop.circle")
+                        destinationRow(title: L10n.Settings.currency, symbol: "banknote", detail: L10n.Settings.currencyDetail)
+                        destinationRow(title: L10n.Settings.language, symbol: "globe", value: L10n.Settings.languageValue)
                     }
 
-                    Section("Внешний вид") {
-                        destinationRow(title: "Тема", symbol: "circle.lefthalf.filled", value: "Системная")
-                        destinationRow(title: "Цвет акцента", symbol: "paintpalette", value: "Фиолетовый")
+                    Section(L10n.Settings.sectionAppearance) {
+                        destinationRow(title: L10n.Settings.theme, symbol: "circle.lefthalf.filled", value: L10n.Settings.themeValue)
+                        destinationRow(title: L10n.Settings.accent, symbol: "paintpalette", value: L10n.Settings.accentValue)
                     }
 
-                    Section("Уведомления") {
-                        settingsToggle(title: "Напоминания", symbol: "bell", isOn: $notificationsEnabled)
-                        settingsToggle(title: "Еженедельная сводка", symbol: "calendar", isOn: $weeklySummaryEnabled)
+                    Section(L10n.Settings.sectionNotifications) {
+                        settingsToggle(title: L10n.Settings.reminders, symbol: "bell", isOn: $notificationsEnabled)
+                        settingsToggle(title: L10n.Settings.weeklySummary, symbol: "calendar", isOn: $weeklySummaryEnabled)
                     }
 
-                    Section("Безопасность") {
-                        settingsToggle(title: "Face ID", symbol: "faceid", isOn: $faceIDEnabled)
-                        destinationRow(title: "Код-пароль", symbol: "lock")
+                    Section(L10n.Settings.sectionSecurity) {
+                        settingsToggle(title: L10n.Settings.faceID, symbol: "faceid", isOn: $faceIDEnabled)
+                        destinationRow(title: L10n.Settings.passcode, symbol: "lock")
                     }
 
-                    Section("Данные") {
-                        destinationRow(title: "Экспорт данных", symbol: "square.and.arrow.up")
-                        destinationRow(title: "Резервная копия", symbol: "externaldrive")
+                    Section(L10n.Settings.sectionData) {
+                        destinationRow(title: L10n.Settings.exportData, symbol: "square.and.arrow.up")
+                        destinationRow(title: L10n.Settings.backup, symbol: "externaldrive")
                     }
 
-                    Section("О приложении") {
-                        destinationRow(title: "Оценить приложение", symbol: "star")
-                        destinationRow(title: "Написать отзыв", symbol: "bubble.left")
+                    Section(L10n.Settings.sectionAbout) {
+                        destinationRow(title: L10n.Settings.rateApp, symbol: "star")
+                        destinationRow(title: L10n.Settings.writeFeedback, symbol: "bubble.left")
                     }
 
-                    Text("Версия \(appVersion)")
+                    Text(L10n.Settings.version(appVersion))
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .frame(maxWidth: .infinity, alignment: .center)
@@ -57,7 +57,7 @@ struct SettingsView: View {
                 .formStyle(.grouped)
                 .scrollContentBackground(.hidden)
             }
-            .navigationTitle("Настройки")
+            .navigationTitle(L10n.Settings.title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -66,7 +66,7 @@ struct SettingsView: View {
                     } label: {
                         Image(systemName: "chevron.left")
                     }
-                    .accessibilityLabel("Назад")
+                    .accessibilityLabel(L10n.Common.back)
                 }
             }
             .tint(.indigo)
@@ -144,7 +144,7 @@ private struct SettingsPlaceholder: View {
             ContentUnavailableView(
                 title,
                 systemImage: symbol,
-                description: Text("Настройка будет доступна позже.")
+                description: Text(L10n.Settings.placeholderMessage)
             )
         }
         .navigationTitle(title)
