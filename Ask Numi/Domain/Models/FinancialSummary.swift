@@ -14,7 +14,7 @@ struct FinancialSummary: Sendable {
     let totalIncome: Decimal
     let totalExpenses: Decimal
     /// Expense totals per category, sorted descending by amount.
-    let expensesByCategory: [(category: TransactionCategory, amount: Decimal)]
+    let expensesByCategory: [(category: String, amount: Decimal)]
 
     var balance: Decimal { totalIncome - totalExpenses }
 
@@ -30,7 +30,7 @@ struct FinancialSummary: Sendable {
 
         var income: Decimal = 0
         var expenses: Decimal = 0
-        var byCategory: [TransactionCategory: Decimal] = [:]
+        var byCategory: [String: Decimal] = [:]
 
         for transaction in transactions {
             switch transaction.kind {

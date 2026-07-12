@@ -34,7 +34,7 @@ extension TransactionEntity {
             id: transaction.id,
             amount: transaction.amount,
             kindRaw: transaction.kind.rawValue,
-            categoryRaw: transaction.category.rawValue,
+            categoryRaw: transaction.category,
             date: transaction.date,
             note: transaction.note
         )
@@ -48,7 +48,7 @@ extension TransactionEntity {
             id: id,
             amount: amount,
             kind: kind,
-            category: TransactionCategory(rawValue: categoryRaw) ?? .other,
+            category: categoryRaw,
             date: date,
             note: note
         )

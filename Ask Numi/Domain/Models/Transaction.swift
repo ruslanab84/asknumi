@@ -10,27 +10,11 @@ enum TransactionKind: String, Codable, CaseIterable, Sendable {
     case expense
 }
 
-enum TransactionCategory: String, Codable, CaseIterable, Sendable {
-    case salary
-    case business
-    case gifts
-    case groceries
-    case restaurants
-    case transport
-    case housing
-    case utilities
-    case health
-    case entertainment
-    case shopping
-    case education
-    case other
-}
-
 struct Transaction: Identifiable, Hashable, Sendable {
     let id: UUID
     var amount: Decimal        // always positive; `kind` defines direction
     var kind: TransactionKind
-    var category: TransactionCategory
+    var category: String
     var date: Date
     var note: String?
 
@@ -38,7 +22,7 @@ struct Transaction: Identifiable, Hashable, Sendable {
         id: UUID = UUID(),
         amount: Decimal,
         kind: TransactionKind,
-        category: TransactionCategory,
+        category: String,
         date: Date = .now,
         note: String? = nil
     ) {

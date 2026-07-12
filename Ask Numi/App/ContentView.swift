@@ -7,7 +7,7 @@ import SwiftUI
 
 struct ContentView: View {
     let container: AppContainer
-    @State private var selectedTab: AppTab = .home
+    @State private var selectedTab: AppTab = .operations
 
     var body: some View {
         Group {
@@ -15,7 +15,11 @@ struct ContentView: View {
             case .home:
                 HomeDashboardView(snapshot: .preview, selectedTab: $selectedTab)
             case .operations:
-                OperationsView(snapshot: .preview, selectedTab: $selectedTab)
+                OperationsView(
+                    fetchTransactions: container.makeFetchTransactionsUseCase(),
+                    addTransaction: container.makeAddTransactionUseCase(),
+                    selectedTab: $selectedTab
+                )
             case .assistant:
                 AssistantView(snapshot: .preview, selectedTab: $selectedTab)
             case .plan:
@@ -52,26 +56,12 @@ enum AppTab: CaseIterable {
 
 struct AppTabBar: View {
     @Binding var selection: AppTab
-    @State private var isAddingCategory = false
 
     var body: some View {
         GlassEffectContainer(spacing: 18) {
             HStack(spacing: 0) {
                 tabButton(.home)
                 tabButton(.operations)
-
-                Button {
-                    isAddingCategory = true
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.headline.weight(.bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 52, height: 52)
-                        .glassEffect(.regular.tint(.indigo), in: .circle)
-                }
-                .offset(y: -16)
-                .accessibilityLabel("Добавить категорию")
-
                 tabButton(.assistant)
                 tabButton(.plan)
             }
@@ -81,9 +71,6 @@ struct AppTabBar: View {
             .glassEffect(.regular, in: .capsule)
         }
         .frame(height: 62)
-        .fullScreenCover(isPresented: $isAddingCategory) {
-            NewCategoryView()
-        }
     }
 
     private func tabButton(_ tab: AppTab) -> some View {
@@ -105,5 +92,5 @@ struct AppTabBar: View {
 }
 
 #Preview {
-    ContentView(container: AppContainer())
+    ContentView(container: AppContainer(isStoredInMemoryOnly: true))
 }

@@ -54,7 +54,7 @@ final class FoundationModelsAdvisor: FinancialAdvisor {
         if !summary.expensesByCategory.isEmpty {
             lines.append("Расходы по категориям (по убыванию):")
             for item in summary.expensesByCategory.prefix(8) {
-                lines.append("- \(item.category.promptLabel): \(plain(item.amount)) AZN")
+                lines.append("- \(item.category): \(plain(item.amount)) AZN")
             }
         }
         lines.append("Дай заголовок и три практичных совета, как улучшить финансы.")
@@ -73,26 +73,4 @@ private struct AdviceOutput {
 
     @Guide(description: "Конкретные практичные советы по личным финансам", .count(3))
     var tips: [String]
-}
-
-/// Russian labels for the prompt only — user-facing category names
-/// go through L10n in the Presentation layer, not here.
-private extension TransactionCategory {
-    var promptLabel: String {
-        switch self {
-        case .salary: "зарплата"
-        case .business: "бизнес"
-        case .gifts: "подарки"
-        case .groceries: "продукты"
-        case .restaurants: "рестораны и кафе"
-        case .transport: "транспорт"
-        case .housing: "жильё"
-        case .utilities: "коммунальные услуги"
-        case .health: "здоровье"
-        case .entertainment: "развлечения"
-        case .shopping: "покупки"
-        case .education: "образование"
-        case .other: "прочее"
-        }
-    }
 }

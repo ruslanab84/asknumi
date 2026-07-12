@@ -14,9 +14,10 @@ final class AppContainer {
     let transactionRepository: TransactionRepository
     let advisor: FinancialAdvisor
 
-    init() {
+    init(isStoredInMemoryOnly: Bool = false) {
         do {
-            modelContainer = try ModelContainer(for: TransactionEntity.self)
+            let configuration = ModelConfiguration(isStoredInMemoryOnly: isStoredInMemoryOnly)
+            modelContainer = try ModelContainer(for: TransactionEntity.self, configurations: configuration)
         } catch {
             // A store that fails to open at launch is unrecoverable.
             fatalError("Failed to create ModelContainer: \(error)")
