@@ -64,7 +64,10 @@ struct OperationsView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $isPresentingAddOperation) {
-                AddOperationView(addTransaction: addTransaction) { transaction in
+                AddOperationView(
+                    addTransaction: addTransaction,
+                    existingTransactions: transactions
+                ) { transaction in
                     transactions.append(transaction)
                     transactions.sort { $0.date > $1.date }
                 }
@@ -268,7 +271,13 @@ private struct OperationsRow: View {
 
 private struct AddOperationView: View {
     let addTransaction: AddTransactionUseCase
+    let existingTransactions: [Transaction]
     let onSaved: (Transaction) -> Void
+
+    private static let defaultCategories: [TransactionKind: [String]] = [
+        .expense: ["Продукты", "Еда", "Транспорт", "Авто", "Дом", "Здоровье", "Развлечения", "Одежда"],
+        .income: ["Зарплата", "Фриланс", "Подарок", "Проценты"]
+    ]
 
     @Environment(\.dismiss) private var dismiss
     @State private var kind: TransactionKind = .expense
@@ -297,6 +306,23 @@ private struct AddOperationView: View {
         !trimmedCategory.isEmpty && trimmedCategory.count <= 60 && amount != nil && !isSaving
     }
 
+    // Saved categories for the selected kind, most recent first, then defaults; deduped case-insensitively.
+    private var suggestedCategories: [String] {
+        let saved = existingTransactions
+            .filter { $0.kind == kind }
+            .sorted { $0.date > $1.date }
+            .map(\.category)
+
+        var seen = Set<String>()
+        return (saved + (Self.defaultCategories[kind] ?? []))
+            .filter { seen.insert($0.lowercased()).inserted }
+            .filter {
+                trimmedCategory.isEmpty ||
+                    ($0.localizedCaseInsensitiveContains(trimmedCategory) &&
+                        $0.caseInsensitiveCompare(trimmedCategory) != .orderedSame)
+            }
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -320,6 +346,27 @@ private struct AddOperationView: View {
                         Text("Название должно быть не длиннее 60 символов.")
                             .font(.caption)
                             .foregroundStyle(.red)
+                    }
+
+                    if !suggestedCategories.isEmpty {
+                        ScrollView(.horizontal) {
+                            HStack(spacing: 8) {
+                                ForEach(suggestedCategories, id: \.self) { name in
+                                    Button(name) {
+                                        category = name
+                                        focusedField = .amount
+                                    }
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.primary)
+                                    .padding(.horizontal, 14)
+                                    .frame(height: 32)
+                                    .glassEffect(.regular.interactive(), in: .capsule)
+                                    .buttonStyle(.plain)
+                                }
+                            }
+                            .padding(.vertical, 2)
+                        }
+                        .scrollIndicators(.hidden)
                     }
                 }
 
