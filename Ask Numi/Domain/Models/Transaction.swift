@@ -19,7 +19,7 @@ struct Transaction: Identifiable, Hashable, Sendable {
     var date: Date
     var note: String?
 
-    init(
+    nonisolated init(
         id: UUID = UUID(),
         amount: Decimal,
         kind: TransactionKind,

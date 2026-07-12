@@ -7,8 +7,15 @@ import SwiftUI
 
 struct PlanView: View {
     let snapshot: PlanSnapshot
+    let fetchTransactions: FetchTransactionsUseCase
+    let fetchSubscriptions: FetchSubscriptionsUseCase
+    let saveSubscription: SaveSubscriptionUseCase
+    let deleteSubscription: DeleteSubscriptionUseCase
     @Binding var selectedTab: AppTab
     @State private var section: PlanSection = .payments
+    @State private var subscriptions: [Subscription] = []
+    @State private var editorItem: SubscriptionEditorItem?
+    @State private var errorMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -43,6 +50,20 @@ struct PlanView: View {
                     .padding(.bottom, 8)
             }
             .toolbar(.hidden, for: .navigationBar)
+            .sheet(item: $editorItem) { item in
+                SubscriptionEditorView(
+                    subscription: item.subscription,
+                    saveSubscription: saveSubscription
+                ) { saved in
+                    if let index = subscriptions.firstIndex(where: { $0.id == saved.id }) {
+                        subscriptions[index] = saved
+                    } else {
+                        subscriptions.append(saved)
+                    }
+                    subscriptions.sort { $0.nextChargeDate < $1.nextChargeDate }
+                }
+            }
+            .task { await loadSubscriptions() }
         }
     }
 
@@ -51,9 +72,18 @@ struct PlanView: View {
             Text(L10n.Plan.title)
                 .font(.title3.weight(.bold))
             Spacer()
-            Image(systemName: "calendar")
-                .font(.body.weight(.semibold))
-                .accessibilityLabel(L10n.Plan.calendarLabel)
+            if section == .payments {
+                Button {
+                    editorItem = SubscriptionEditorItem(subscription: nil)
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 42, height: 42)
+                        .glassEffect(.regular.tint(.indigo).interactive(), in: .circle)
+                }
+                .accessibilityLabel(L10n.Plan.addSubscription)
+            }
         }
     }
 
@@ -68,60 +98,228 @@ struct PlanView: View {
 
     private var paymentsContent: some View {
         VStack(alignment: .leading, spacing: 20) {
-            UpcomingPayments(payments: snapshot.payments)
+            UpcomingPayments(
+                subscriptions: subscriptions,
+                onEdit: { editorItem = SubscriptionEditorItem(subscription: $0) },
+                onDelete: delete
+            )
 
-            Button(L10n.Plan.allPayments) { }
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.indigo)
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
 
             BalanceForecast(balance: snapshot.forecastBalance)
             BudgetProgress(budget: snapshot.budget)
         }
     }
+
+    private func loadSubscriptions() async {
+        do {
+            _ = try await fetchTransactions.execute()
+            subscriptions = try await fetchSubscriptions.execute()
+            errorMessage = nil
+        } catch {
+            errorMessage = L10n.Plan.loadError
+        }
+    }
+
+    private func delete(_ subscription: Subscription) {
+        Task {
+            do {
+                try await deleteSubscription.execute(id: subscription.id)
+                subscriptions.removeAll { $0.id == subscription.id }
+            } catch {
+                errorMessage = L10n.Plan.deleteError
+            }
+        }
+    }
 }
 
 private struct UpcomingPayments: View {
-    let payments: [PlannedPayment]
+    let subscriptions: [Subscription]
+    let onEdit: (Subscription) -> Void
+    let onDelete: (Subscription) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text(L10n.Plan.paymentsTitle)
                 .font(.subheadline.weight(.bold))
 
-            VStack(spacing: 0) {
-                ForEach(Array(payments.enumerated()), id: \.element.id) { index, payment in
-                    HStack(alignment: .top, spacing: 12) {
-                        VStack(spacing: 0) {
-                            Circle()
-                                .fill(payment.color)
-                                .frame(width: 10, height: 10)
-                            if index < payments.count - 1 {
-                                Rectangle()
-                                    .fill(.secondary.opacity(0.25))
-                                    .frame(width: 2, height: 46)
+            if subscriptions.isEmpty {
+                ContentUnavailableView(
+                    L10n.Plan.subscriptionsEmptyTitle,
+                    systemImage: "repeat.circle",
+                    description: Text(L10n.Plan.subscriptionsEmptyMessage)
+                )
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 24)
+            } else {
+                VStack(spacing: 0) {
+                    ForEach(Array(subscriptions.enumerated()), id: \.element.id) { index, subscription in
+                        HStack(alignment: .top, spacing: 12) {
+                            VStack(spacing: 0) {
+                                Circle()
+                                    .fill(.indigo)
+                                    .frame(width: 10, height: 10)
+                                if index < subscriptions.count - 1 {
+                                    Rectangle()
+                                        .fill(.secondary.opacity(0.25))
+                                        .frame(width: 2, height: 46)
+                                }
+                            }
+                            .padding(.top, 4)
+
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(subscription.nextChargeDate.formatted(
+                                    .dateTime.day().month(.wide).locale(Locale(identifier: LocalizationManager.shared.currentLanguage))
+                                ))
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                                Text(subscription.name)
+                                    .font(.subheadline.weight(.semibold))
+                            }
+
+                            Spacer()
+
+                            Text(OperationFormatting.amount(subscription.amount, sign: .expense))
+                                .font(.subheadline.weight(.semibold))
+                                .foregroundStyle(.primary)
+                        }
+                        .contentShape(.rect)
+                        .onTapGesture { onEdit(subscription) }
+                        .contextMenu {
+                            Button(L10n.Plan.deleteSubscription, systemImage: "trash", role: .destructive) {
+                                onDelete(subscription)
                             }
                         }
-                        .padding(.top, 4)
-
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(payment.date)
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                            Text(payment.title)
-                                .font(.subheadline.weight(.semibold))
-                        }
-
-                        Spacer()
-
-                        Text(payment.amount)
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(payment.isIncome ? .green : .primary)
+                        .accessibilityElement(children: .combine)
                     }
-                    .accessibilityElement(children: .combine)
                 }
             }
         }
     }
+}
+
+private struct SubscriptionEditorView: View {
+    let subscription: Subscription?
+    let saveSubscription: SaveSubscriptionUseCase
+    let onSaved: (Subscription) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var name: String
+    @State private var amountText: String
+    @State private var chargeDate: Date
+    @State private var isSaving = false
+    @State private var errorMessage: String?
+
+    init(
+        subscription: Subscription?,
+        saveSubscription: SaveSubscriptionUseCase,
+        onSaved: @escaping (Subscription) -> Void
+    ) {
+        self.subscription = subscription
+        self.saveSubscription = saveSubscription
+        self.onSaved = onSaved
+        _name = State(initialValue: subscription?.name ?? "")
+        _amountText = State(initialValue: subscription.map { "\($0.amount)" } ?? "")
+        _chargeDate = State(initialValue: subscription?.nextChargeDate ?? .now)
+    }
+
+    private var trimmedName: String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var amount: Decimal? {
+        let normalized = amountText
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: ",", with: ".")
+        guard let value = Decimal(string: normalized, locale: Locale(identifier: "en_US_POSIX")), value > 0 else {
+            return nil
+        }
+        return value
+    }
+
+    private var canSave: Bool {
+        !trimmedName.isEmpty && trimmedName.count <= 60 && amount != nil && !isSaving
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section(L10n.Plan.subscriptionSectionDetails) {
+                    TextField(L10n.Plan.subscriptionNamePlaceholder, text: $name)
+                    if name.count > 60 {
+                        Text(L10n.Plan.subscriptionNameTooLong)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+                }
+
+                Section(L10n.Plan.subscriptionSectionAmount) {
+                    HStack {
+                        TextField("0", text: $amountText)
+                            .keyboardType(.decimalPad)
+                        Text(CurrencySettings.selectedCode)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+
+                Section(L10n.Plan.subscriptionSectionDate) {
+                    DatePicker(
+                        L10n.Plan.subscriptionDateLabel,
+                        selection: $chargeDate,
+                        in: Calendar.current.startOfDay(for: .now)...,
+                        displayedComponents: .date
+                    )
+                }
+
+                if let errorMessage {
+                    Text(errorMessage).foregroundStyle(.red)
+                }
+            }
+            .navigationTitle(subscription == nil ? L10n.Plan.subscriptionTitleNew : L10n.Plan.subscriptionTitleEdit)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(L10n.Common.cancel) { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(isSaving ? L10n.Common.saving : L10n.Common.save) {
+                        Task { await save() }
+                    }
+                    .disabled(!canSave)
+                }
+            }
+        }
+    }
+
+    private func save() async {
+        guard let amount, canSave else { return }
+        isSaving = true
+        errorMessage = nil
+
+        let saved = Subscription(
+            id: subscription?.id ?? UUID(),
+            name: trimmedName,
+            amount: amount,
+            nextChargeDate: chargeDate
+        )
+        do {
+            try await saveSubscription.execute(saved)
+            onSaved(saved)
+            dismiss()
+        } catch {
+            errorMessage = L10n.Plan.saveError
+            isSaving = false
+        }
+    }
+}
+
+private struct SubscriptionEditorItem: Identifiable {
+    let id = UUID()
+    let subscription: Subscription?
 }
 
 private struct BalanceForecast: View {
@@ -236,28 +434,13 @@ private enum PlanSection: CaseIterable {
 }
 
 struct PlanSnapshot {
-    let payments: [PlannedPayment]
     let forecastBalance: String
     let budget: PlannedBudget
 
     static let preview = PlanSnapshot(
-        payments: [
-            PlannedPayment(id: "icloud", date: "15 июля", title: "iCloud", amount: "−5 AZN", color: .blue, isIncome: false),
-            PlannedPayment(id: "credit", date: "20 июля", title: "Кредит", amount: "−340 AZN", color: .gray, isIncome: false),
-            PlannedPayment(id: "salary", date: "1 августа", title: "Зарплата", amount: "+3 200 AZN", color: .green, isIncome: true)
-        ],
         forecastBalance: "3 890 AZN",
         budget: PlannedBudget(title: "Кафе и рестораны", spent: "186 AZN", limit: "250 AZN", remaining: "64 AZN", progress: 0.74)
     )
-}
-
-struct PlannedPayment: Identifiable {
-    let id: String
-    let date: String
-    let title: String
-    let amount: String
-    let color: Color
-    let isIncome: Bool
 }
 
 struct PlannedBudget {
@@ -269,10 +452,26 @@ struct PlannedBudget {
 }
 
 #Preview("Светлая тема") {
-    PlanView(snapshot: .preview, selectedTab: .constant(.plan))
+    let container = AppContainer(isStoredInMemoryOnly: true)
+    PlanView(
+        snapshot: .preview,
+        fetchTransactions: container.makeFetchTransactionsUseCase(),
+        fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
+        saveSubscription: container.makeSaveSubscriptionUseCase(),
+        deleteSubscription: container.makeDeleteSubscriptionUseCase(),
+        selectedTab: .constant(.plan)
+    )
 }
 
 #Preview("Тёмная тема") {
-    PlanView(snapshot: .preview, selectedTab: .constant(.plan))
+    let container = AppContainer(isStoredInMemoryOnly: true)
+    PlanView(
+        snapshot: .preview,
+        fetchTransactions: container.makeFetchTransactionsUseCase(),
+        fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
+        saveSubscription: container.makeSaveSubscriptionUseCase(),
+        deleteSubscription: container.makeDeleteSubscriptionUseCase(),
+        selectedTab: .constant(.plan)
+    )
         .preferredColorScheme(.dark)
 }

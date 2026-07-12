@@ -11,6 +11,7 @@ struct SettingsView: View {
     @AppStorage("notificationsEnabled") private var notificationsEnabled = true
     @AppStorage("weeklySummaryEnabled") private var weeklySummaryEnabled = true
     @AppStorage("faceIDEnabled") private var faceIDEnabled = true
+    @AppStorage(CurrencySettings.storageKey) private var currencyCode = CurrencySettings.defaultCode
 
     var body: some View {
         NavigationStack {
@@ -20,7 +21,12 @@ struct SettingsView: View {
                 Form {
                     Section(L10n.Settings.sectionAccount) {
                         destinationRow(title: L10n.Settings.profile, symbol: "person.crop.circle")
-                        destinationRow(title: L10n.Settings.currency, symbol: "banknote", detail: L10n.Settings.currencyDetail)
+                        Picker(L10n.Settings.currency, selection: $currencyCode) {
+                            ForEach(CurrencySettings.supportedCodes, id: \.self) { code in
+                                Text("\(code) — \(CurrencySettings.displayName(for: code))").tag(code)
+                            }
+                        }
+                        .pickerStyle(.navigationLink)
                         Picker(L10n.Settings.language, selection: Binding(
                             get: { localization.currentLanguage },
                             set: localization.setLanguage

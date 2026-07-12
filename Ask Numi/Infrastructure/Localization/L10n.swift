@@ -149,6 +149,21 @@ enum L10n {
             String(format: l("plan.placeholder.title"), section)
         }
         static var placeholderMessage: String { l("plan.placeholder.message") }
+        static var addSubscription: String { l("plan.subscription.accessibility.add") }
+        static var subscriptionsEmptyTitle: String { l("plan.subscription.empty.title") }
+        static var subscriptionsEmptyMessage: String { l("plan.subscription.empty.message") }
+        static var deleteSubscription: String { l("plan.subscription.action.delete") }
+        static var subscriptionTitleNew: String { l("plan.subscription.title.new") }
+        static var subscriptionTitleEdit: String { l("plan.subscription.title.edit") }
+        static var subscriptionSectionDetails: String { l("plan.subscription.section.details") }
+        static var subscriptionSectionAmount: String { l("plan.subscription.section.amount") }
+        static var subscriptionSectionDate: String { l("plan.subscription.section.date") }
+        static var subscriptionNamePlaceholder: String { l("plan.subscription.field.name.placeholder") }
+        static var subscriptionNameTooLong: String { l("plan.subscription.field.name.too_long") }
+        static var subscriptionDateLabel: String { l("plan.subscription.field.date.label") }
+        static var loadError: String { l("plan.subscription.error.load") }
+        static var saveError: String { l("plan.subscription.error.save") }
+        static var deleteError: String { l("plan.subscription.error.delete") }
     }
 
     // MARK: - Settings
@@ -163,7 +178,6 @@ enum L10n {
         static var sectionAbout: String     { l("settings.section.about") }
         static var profile: String          { l("settings.row.profile") }
         static var currency: String         { l("settings.row.currency") }
-        static var currencyDetail: String   { l("settings.row.currency.detail") }
         static var language: String         { l("settings.row.language") }
         static func languageName(_ code: String) -> String { l("settings.row.language.\(code)") }
         static var theme: String            { l("settings.row.theme") }

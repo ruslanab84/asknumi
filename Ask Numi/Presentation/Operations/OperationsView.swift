@@ -741,7 +741,7 @@ enum OperationFormatting {
     static func plain(_ amount: Decimal) -> String {
         let number = amountFormatter(for: LocalizationManager.shared.currentLanguage)
             .string(from: NSDecimalNumber(decimal: amount)) ?? amount.description
-        return "\(number) AZN"
+        return "\(number) \(CurrencySettings.selectedCode)"
     }
 
     private static let russianAmountFormatter = makeAmountFormatter(locale: "ru_RU")

@@ -126,6 +126,21 @@
 "plan.budgets.label.remaining" = "Осталось %@";
 "plan.placeholder.title" = "Раздел «%@»";
 "plan.placeholder.message" = "Скоро здесь появятся ваши данные.";
+"plan.subscription.accessibility.add" = "Добавить подписку";
+"plan.subscription.empty.title" = "Нет подписок";
+"plan.subscription.empty.message" = "Добавьте ежемесячную подписку, и списания будут автоматически попадать в историю операций.";
+"plan.subscription.action.delete" = "Удалить подписку";
+"plan.subscription.title.new" = "Новая подписка";
+"plan.subscription.title.edit" = "Изменить подписку";
+"plan.subscription.section.details" = "Подписка";
+"plan.subscription.section.amount" = "Сумма списания";
+"plan.subscription.section.date" = "Следующее списание";
+"plan.subscription.field.name.placeholder" = "Например: iCloud или Netflix";
+"plan.subscription.field.name.too_long" = "Название должно быть не длиннее 60 символов.";
+"plan.subscription.field.date.label" = "Дата списания";
+"plan.subscription.error.load" = "Не удалось загрузить подписки.";
+"plan.subscription.error.save" = "Не удалось сохранить подписку.";
+"plan.subscription.error.delete" = "Не удалось удалить подписку.";
 
 /* Settings */
 "settings.title" = "Настройки";
@@ -137,7 +152,6 @@
 "settings.section.about" = "О приложении";
 "settings.row.profile" = "Профиль";
 "settings.row.currency" = "Валюта";
-"settings.row.currency.detail" = "AZN — Азербайджанский манат";
 "settings.row.language" = "Язык";
 "settings.row.language.ru" = "Русский";
 "settings.row.language.en" = "Английский";

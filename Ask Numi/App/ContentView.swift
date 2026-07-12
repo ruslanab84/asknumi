@@ -34,7 +34,14 @@ struct ContentView: View {
                     selectedTab: $selectedTab
                 )
             case .plan:
-                PlanView(snapshot: .preview, selectedTab: $selectedTab)
+                PlanView(
+                    snapshot: .preview,
+                    fetchTransactions: container.makeFetchTransactionsUseCase(),
+                    fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
+                    saveSubscription: container.makeSaveSubscriptionUseCase(),
+                    deleteSubscription: container.makeDeleteSubscriptionUseCase(),
+                    selectedTab: $selectedTab
+                )
             }
         }
     }

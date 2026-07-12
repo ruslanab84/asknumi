@@ -13,6 +13,7 @@ final class AppContainer {
     let modelContainer: ModelContainer
     let transactionRepository: TransactionRepository
     let transactionCategoryRepository: TransactionCategoryRepository
+    let subscriptionRepository: SubscriptionRepository
     let advisor: FinancialAdvisor
 
     init(isStoredInMemoryOnly: Bool = false) {
@@ -21,6 +22,7 @@ final class AppContainer {
             modelContainer = try ModelContainer(
                 for: TransactionEntity.self,
                 TransactionCategoryEntity.self,
+                SubscriptionEntity.self,
                 configurations: configuration
             )
         } catch {
@@ -29,6 +31,7 @@ final class AppContainer {
         }
         transactionRepository = SwiftDataTransactionRepository(modelContainer: modelContainer)
         transactionCategoryRepository = SwiftDataTransactionCategoryRepository(modelContainer: modelContainer)
+        subscriptionRepository = SwiftDataSubscriptionRepository(modelContainer: modelContainer)
         advisor = FoundationModelsAdvisor()
     }
 
@@ -54,6 +57,18 @@ final class AppContainer {
 
     func makeFetchTransactionsUseCase() -> FetchTransactionsUseCase {
         FetchTransactionsUseCase(repository: transactionRepository)
+    }
+
+    func makeFetchSubscriptionsUseCase() -> FetchSubscriptionsUseCase {
+        FetchSubscriptionsUseCase(repository: subscriptionRepository)
+    }
+
+    func makeSaveSubscriptionUseCase() -> SaveSubscriptionUseCase {
+        SaveSubscriptionUseCase(repository: subscriptionRepository)
+    }
+
+    func makeDeleteSubscriptionUseCase() -> DeleteSubscriptionUseCase {
+        DeleteSubscriptionUseCase(repository: subscriptionRepository)
     }
 
     func makeAdviceUseCase() -> GetFinancialAdviceUseCase {

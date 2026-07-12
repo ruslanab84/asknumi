@@ -108,6 +108,21 @@
 "plan.budgets.label.remaining" = "%@ remaining";
 "plan.placeholder.title" = "%@ section";
 "plan.placeholder.message" = "Your data will appear here soon.";
+"plan.subscription.accessibility.add" = "Add subscription";
+"plan.subscription.empty.title" = "No subscriptions";
+"plan.subscription.empty.message" = "Add a monthly subscription and its charges will automatically appear in your operation history.";
+"plan.subscription.action.delete" = "Delete subscription";
+"plan.subscription.title.new" = "New subscription";
+"plan.subscription.title.edit" = "Edit subscription";
+"plan.subscription.section.details" = "Subscription";
+"plan.subscription.section.amount" = "Charge amount";
+"plan.subscription.section.date" = "Next charge";
+"plan.subscription.field.name.placeholder" = "For example: iCloud or Netflix";
+"plan.subscription.field.name.too_long" = "The name must be 60 characters or fewer.";
+"plan.subscription.field.date.label" = "Charge date";
+"plan.subscription.error.load" = "Couldn't load subscriptions.";
+"plan.subscription.error.save" = "Couldn't save the subscription.";
+"plan.subscription.error.delete" = "Couldn't delete the subscription.";
 
 /* Settings */
 "settings.title" = "Settings";
@@ -119,7 +134,6 @@
 "settings.section.about" = "About";
 "settings.row.profile" = "Profile";
 "settings.row.currency" = "Currency";
-"settings.row.currency.detail" = "AZN — Azerbaijani manat";
 "settings.row.language" = "Language";
 "settings.row.language.ru" = "Russian";
 "settings.row.language.en" = "English";
