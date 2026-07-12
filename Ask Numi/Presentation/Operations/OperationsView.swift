@@ -492,20 +492,26 @@ private struct OperationDaySection: Identifiable {
     }
 }
 
-private enum OperationFormatting {
+enum OperationFormatting {
     static func amount(_ amount: Decimal, sign kind: TransactionKind) -> String {
+        "\(kind == .income ? "+" : "−")\(plain(amount))"
+    }
+
+    /// Amount with currency and no forced sign, e.g. "4 280 AZN"; negative values keep the typographic minus.
+    static func plain(_ amount: Decimal) -> String {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
         formatter.locale = Locale(identifier: "ru_RU")
+        formatter.minusSign = "−"
         formatter.minimumFractionDigits = 0
         formatter.maximumFractionDigits = 2
 
         let number = formatter.string(from: NSDecimalNumber(decimal: amount)) ?? amount.description
-        return "\(kind == .income ? "+" : "−")\(number) AZN"
+        return "\(number) AZN"
     }
 }
 
-private extension TransactionKind {
+extension TransactionKind {
     var title: String {
         switch self {
         case .income: "Доход"

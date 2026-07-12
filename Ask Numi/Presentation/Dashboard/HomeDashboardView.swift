@@ -6,9 +6,24 @@
 import SwiftUI
 
 struct HomeDashboardView: View {
-    let snapshot: DashboardSnapshot
+    let snapshot: DashboardSnapshot // ponytail: budget & insight cards still mock, wire when those features land
+    let fetchTransactions: FetchTransactionsUseCase
     @Binding var selectedTab: AppTab
     @State private var isShowingSettings = false
+    @State private var transactions: [Transaction] = []
+    @State private var isLoading = true
+    @State private var errorMessage: String?
+
+    private var summary: FinancialSummary {
+        FinancialSummary(
+            transactions: transactions,
+            period: DateInterval(start: .distantPast, end: .distantFuture)
+        )
+    }
+
+    private var recentTransactions: [Transaction] {
+        Array(transactions.sorted { $0.date > $1.date }.prefix(5))
+    }
 
     var body: some View {
         NavigationStack {
@@ -22,10 +37,17 @@ struct HomeDashboardView: View {
                                 isShowingSettings = true
                             }
                             WelcomeView(name: snapshot.userName)
-                            BalanceCard(snapshot: snapshot)
+                            BalanceCard(summary: summary, isLoading: isLoading)
+
+                            if let errorMessage {
+                                Text(errorMessage)
+                                    .font(.caption)
+                                    .foregroundStyle(.red)
+                            }
+
                             BudgetCard(snapshot: snapshot)
                             InsightCard(insight: snapshot.insight)
-                            RecentTransactions(transactions: snapshot.transactions)
+                            RecentTransactions(transactions: recentTransactions)
                         }
                         .padding(.horizontal, 16)
                         .padding(.top, 12)
@@ -43,6 +65,21 @@ struct HomeDashboardView: View {
             .fullScreenCover(isPresented: $isShowingSettings) {
                 SettingsView()
             }
+            .task {
+                await loadTransactions()
+            }
+        }
+    }
+
+    private func loadTransactions() async {
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            transactions = try await fetchTransactions.execute()
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
         }
     }
 }
@@ -84,7 +121,8 @@ private struct WelcomeView: View {
 }
 
 private struct BalanceCard: View {
-    let snapshot: DashboardSnapshot
+    let summary: FinancialSummary
+    let isLoading: Bool
 
     var body: some View {
         GlassCard(tint: .indigo.opacity(0.12)) {
@@ -98,31 +136,32 @@ private struct BalanceCard: View {
                         .foregroundStyle(.secondary)
                 }
 
-                Text(snapshot.balance)
+                Text(OperationFormatting.plain(summary.balance))
                     .font(.system(size: 30, weight: .bold, design: .rounded))
+                    .redacted(reason: isLoading ? .placeholder : [])
 
                 Divider()
 
-                HStack(alignment: .center) {
+                HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 5) {
-                        Label("Безопасно потратить", systemImage: "checkmark.circle.fill")
+                        Label("Доходы", systemImage: "arrow.down.left.circle.fill")
                             .font(.caption.weight(.medium))
                             .foregroundStyle(.green)
-                        Text(snapshot.safeToSpend)
-                            .font(.title2.weight(.bold))
-                        Text("до 1 августа")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        Text(OperationFormatting.amount(summary.totalIncome, sign: .income))
+                            .font(.title3.weight(.bold))
                     }
 
                     Spacer()
 
-                    Image(systemName: "shield.checkered")
-                        .font(.title3)
-                        .foregroundStyle(.green)
-                        .frame(width: 42, height: 42)
-                        .background(.green.opacity(0.14), in: .circle)
+                    VStack(alignment: .trailing, spacing: 5) {
+                        Label("Расходы", systemImage: "arrow.up.right.circle.fill")
+                            .font(.caption.weight(.medium))
+                            .foregroundStyle(.red)
+                        Text(OperationFormatting.amount(summary.totalExpenses, sign: .expense))
+                            .font(.title3.weight(.bold))
+                    }
                 }
+                .redacted(reason: isLoading ? .placeholder : [])
             }
         }
     }
@@ -200,27 +239,27 @@ private struct InsightCard: View {
 }
 
 private struct RecentTransactions: View {
-    let transactions: [DashboardTransaction]
+    let transactions: [Transaction]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Последние операции")
-                    .font(.headline)
-                Spacer()
-                Text("Все")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.purple)
-            }
+            Text("Последние операции")
+                .font(.headline)
 
             GlassCard(tint: .clear) {
-                VStack(spacing: 0) {
-                    ForEach(transactions) { transaction in
-                        TransactionRow(transaction: transaction)
+                if transactions.isEmpty {
+                    Text("Пока нет операций — добавьте первую во вкладке «Операции».")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    VStack(spacing: 0) {
+                        ForEach(transactions) { transaction in
+                            TransactionRow(transaction: transaction)
 
-                        if transaction.id != transactions.last?.id {
-                            Divider()
-                                .padding(.leading, 52)
+                            if transaction.id != transactions.last?.id {
+                                Divider()
+                                    .padding(.leading, 52)
+                            }
                         }
                     }
                 }
@@ -230,20 +269,23 @@ private struct RecentTransactions: View {
 }
 
 private struct TransactionRow: View {
-    let transaction: DashboardTransaction
+    let transaction: Transaction
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: transaction.symbol)
+            Image(systemName: transaction.kind == .income ? "arrow.down.left" : "arrow.up.right")
                 .font(.subheadline.weight(.semibold))
-                .foregroundStyle(transaction.tint)
+                .foregroundStyle(transaction.kind == .income ? .green : .red)
                 .frame(width: 38, height: 38)
-                .background(transaction.tint.opacity(0.14), in: .rect(cornerRadius: 12))
+                .background(
+                    (transaction.kind == .income ? Color.green : .red).opacity(0.14),
+                    in: .rect(cornerRadius: 12)
+                )
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(transaction.title)
-                    .font(.subheadline.weight(.semibold))
                 Text(transaction.category)
+                    .font(.subheadline.weight(.semibold))
+                Text(transaction.kind.title)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -251,15 +293,24 @@ private struct TransactionRow: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 3) {
-                Text(transaction.amount)
+                Text(OperationFormatting.amount(transaction.amount, sign: transaction.kind))
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(transaction.isIncome ? .green : .primary)
-                Text(transaction.time)
+                    .foregroundStyle(transaction.kind == .income ? .green : .primary)
+                Text(timeLabel)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
         }
         .padding(.vertical, 10)
+    }
+
+    private var timeLabel: String {
+        if Calendar.current.isDateInToday(transaction.date) {
+            return transaction.date.formatted(.dateTime.hour().minute())
+        }
+        return transaction.date.formatted(
+            .dateTime.day().month().locale(Locale(identifier: "ru_RU"))
+        )
     }
 }
 
@@ -292,46 +343,33 @@ struct DashboardBackground: View {
 
 struct DashboardSnapshot {
     let userName: String
-    let balance: String
-    let safeToSpend: String
     let budgetProgress: Double
     let spent: String
     let budget: String
     let insight: String
-    let transactions: [DashboardTransaction]
 
     static let preview = DashboardSnapshot(
         userName: "Руслан",
-        balance: "4 280 AZN",
-        safeToSpend: "740 AZN",
         budgetProgress: 0.68,
         spent: "2 904 AZN",
         budget: "4 280 AZN",
-        insight: "Расходы на кафе выросли на 24% за последние 2 недели.",
-        transactions: [
-            DashboardTransaction(id: "bravo", title: "Bravo Supermarket", category: "Продукты", amount: "−48 AZN", time: "19:42", symbol: "cart.fill", tint: .green, isIncome: false),
-            DashboardTransaction(id: "bolt", title: "Bolt", category: "Транспорт", amount: "−12 AZN", time: "18:17", symbol: "car.fill", tint: .gray, isIncome: false),
-            DashboardTransaction(id: "salary", title: "Зарплата", category: "Доход", amount: "+3 200 AZN", time: "09:15", symbol: "arrow.down.left.circle.fill", tint: .mint, isIncome: true)
-        ]
+        insight: "Расходы на кафе выросли на 24% за последние 2 недели."
     )
 }
 
-struct DashboardTransaction: Identifiable {
-    let id: String
-    let title: String
-    let category: String
-    let amount: String
-    let time: String
-    let symbol: String
-    let tint: Color
-    let isIncome: Bool
-}
-
 #Preview("Светлая тема") {
-    HomeDashboardView(snapshot: .preview, selectedTab: .constant(.home))
+    HomeDashboardView(
+        snapshot: .preview,
+        fetchTransactions: AppContainer(isStoredInMemoryOnly: true).makeFetchTransactionsUseCase(),
+        selectedTab: .constant(.home)
+    )
 }
 
 #Preview("Тёмная тема") {
-    HomeDashboardView(snapshot: .preview, selectedTab: .constant(.home))
-        .preferredColorScheme(.dark)
+    HomeDashboardView(
+        snapshot: .preview,
+        fetchTransactions: AppContainer(isStoredInMemoryOnly: true).makeFetchTransactionsUseCase(),
+        selectedTab: .constant(.home)
+    )
+    .preferredColorScheme(.dark)
 }

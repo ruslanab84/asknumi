@@ -13,7 +13,11 @@ struct ContentView: View {
         Group {
             switch selectedTab {
             case .home:
-                HomeDashboardView(snapshot: .preview, selectedTab: $selectedTab)
+                HomeDashboardView(
+                    snapshot: .preview,
+                    fetchTransactions: container.makeFetchTransactionsUseCase(),
+                    selectedTab: $selectedTab
+                )
             case .operations:
                 OperationsView(
                     fetchTransactions: container.makeFetchTransactionsUseCase(),
