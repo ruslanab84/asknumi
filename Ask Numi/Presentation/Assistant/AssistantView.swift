@@ -181,6 +181,8 @@ struct AssistantView: View {
             do {
                 let report = try await getAdvice.execute(question: question)
                 phase = .answered(report)
+            } catch DomainError.invalidQuestion {
+                phase = .failed(L10n.Assistant.errorInvalidQuestion)
             } catch DomainError.notEnoughData {
                 phase = .failed(L10n.Assistant.errorNoData)
             } catch {

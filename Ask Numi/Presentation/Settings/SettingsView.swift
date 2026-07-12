@@ -7,6 +7,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var localization: LocalizationManager
     @AppStorage("notificationsEnabled") private var notificationsEnabled = true
     @AppStorage("weeklySummaryEnabled") private var weeklySummaryEnabled = true
     @AppStorage("faceIDEnabled") private var faceIDEnabled = true
@@ -20,7 +21,14 @@ struct SettingsView: View {
                     Section(L10n.Settings.sectionAccount) {
                         destinationRow(title: L10n.Settings.profile, symbol: "person.crop.circle")
                         destinationRow(title: L10n.Settings.currency, symbol: "banknote", detail: L10n.Settings.currencyDetail)
-                        destinationRow(title: L10n.Settings.language, symbol: "globe", value: L10n.Settings.languageValue)
+                        Picker(L10n.Settings.language, selection: Binding(
+                            get: { localization.currentLanguage },
+                            set: localization.setLanguage
+                        )) {
+                            Text(L10n.Settings.languageName("ru")).tag("ru")
+                            Text(L10n.Settings.languageName("en")).tag("en")
+                        }
+                        .pickerStyle(.navigationLink)
                     }
 
                     Section(L10n.Settings.sectionAppearance) {
@@ -154,9 +162,11 @@ private struct SettingsPlaceholder: View {
 
 #Preview("Светлая тема") {
     SettingsView()
+        .environmentObject(LocalizationManager.shared)
 }
 
 #Preview("Тёмная тема") {
     SettingsView()
+        .environmentObject(LocalizationManager.shared)
         .preferredColorScheme(.dark)
 }

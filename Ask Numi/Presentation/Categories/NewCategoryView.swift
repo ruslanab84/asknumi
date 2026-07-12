@@ -6,15 +6,36 @@
 import SwiftUI
 
 struct NewCategoryView: View {
+    let addCategory: AddTransactionCategoryUseCase?
+    let onSaved: (TransactionCategory) -> Void
+
     @Environment(\.dismiss) private var dismiss
-    @State private var kind: CategoryKind = .expense
+    @State private var kind: TransactionKind
     @State private var name = ""
-    @State private var selectedColor = CategoryColorOption.options[0]
-    @State private var selectedIcon = "cart"
-    @State private var description = ""
-    @FocusState private var focusedField: Field?
+    @State private var selectedIcon = CategoryIcon.options[0]
+    @State private var isSaving = false
+    @State private var errorMessage: String?
+    @FocusState private var isNameFocused: Bool
 
     private let columns = Array(repeating: GridItem(.flexible(), spacing: 10), count: 5)
+
+    init(
+        kind: TransactionKind = .expense,
+        addCategory: AddTransactionCategoryUseCase? = nil,
+        onSaved: @escaping (TransactionCategory) -> Void = { _ in }
+    ) {
+        self.addCategory = addCategory
+        self.onSaved = onSaved
+        _kind = State(initialValue: kind)
+    }
+
+    private var trimmedName: String {
+        name.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var canSave: Bool {
+        !trimmedName.isEmpty && trimmedName.count <= 60 && !isSaving
+    }
 
     var body: some View {
         NavigationStack {
@@ -26,9 +47,13 @@ struct NewCategoryView: View {
                         VStack(alignment: .leading, spacing: 24) {
                             kindPicker
                             nameField
-                            colorPicker
                             iconPicker
-                            descriptionField
+
+                            if let errorMessage {
+                                Text(errorMessage)
+                                    .font(.caption)
+                                    .foregroundStyle(.red)
+                            }
                         }
                         .padding(16)
                     }
@@ -40,28 +65,25 @@ struct NewCategoryView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button {
-                        dismiss()
-                    } label: {
-                        Image(systemName: "chevron.left")
-                    }
-                    .accessibilityLabel(L10n.Common.back)
+                    Button(L10n.Common.cancel) { dismiss() }
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(L10n.Common.save) {
-                        dismiss()
+                    Button(isSaving ? L10n.Common.saving : L10n.Common.save) {
+                        Task { await save() }
                     }
-                    .disabled(name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .disabled(!canSave)
                 }
             }
+            .onAppear { isNameFocused = true }
         }
     }
 
     private var kindPicker: some View {
         Picker(L10n.NewCategory.kindPickerLabel, selection: $kind) {
-            ForEach(CategoryKind.allCases, id: \.self) { item in
-                Label(item.title, systemImage: item.symbol).tag(item)
+            ForEach(TransactionKind.allCases, id: \.self) { kind in
+                Label(kind.title, systemImage: kind == .expense ? "minus.circle.fill" : "plus.circle.fill")
+                    .tag(kind)
             }
         }
         .pickerStyle(.segmented)
@@ -74,38 +96,11 @@ struct NewCategoryView: View {
                 .font(.caption.weight(.semibold))
 
             TextField(L10n.NewCategory.namePlaceholder, text: $name)
-                .focused($focusedField, equals: .name)
-                .submitLabel(.next)
-                .onSubmit { focusedField = .description }
+                .focused($isNameFocused)
+                .submitLabel(.done)
+                .onSubmit { Task { await save() } }
                 .padding(14)
                 .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 14))
-        }
-    }
-
-    private var colorPicker: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(L10n.NewCategory.colorLabel)
-                .font(.caption.weight(.semibold))
-
-            HStack(spacing: 12) {
-                ForEach(CategoryColorOption.options) { option in
-                    Button {
-                        selectedColor = option
-                    } label: {
-                        Circle()
-                            .fill(option.color)
-                            .frame(width: 28, height: 28)
-                            .padding(3)
-                            .overlay {
-                                Circle()
-                                    .stroke(option == selectedColor ? option.color : .clear, lineWidth: 2)
-                            }
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(option.title)
-                    .accessibilityAddTraits(option == selectedColor ? .isSelected : [])
-                }
-            }
         }
     }
 
@@ -115,18 +110,18 @@ struct NewCategoryView: View {
                 .font(.caption.weight(.semibold))
 
             LazyVGrid(columns: columns, spacing: 10) {
-                ForEach(categoryIcons, id: \.self) { icon in
+                ForEach(CategoryIcon.options, id: \.self) { icon in
                     Button {
                         selectedIcon = icon
                     } label: {
                         Image(systemName: icon)
                             .font(.body.weight(.medium))
-                            .foregroundStyle(icon == selectedIcon ? selectedColor.color : .primary)
+                            .foregroundStyle(icon == selectedIcon ? (kind == .expense ? .red : .green) : .primary)
                             .frame(maxWidth: .infinity)
                             .frame(height: 48)
                             .glassEffect(
                                 .regular
-                                    .tint(icon == selectedIcon ? selectedColor.color.opacity(0.18) : .clear)
+                                    .tint(icon == selectedIcon ? (kind == .expense ? Color.red : .green).opacity(0.18) : .clear)
                                     .interactive(),
                                 in: .rect(cornerRadius: 14)
                             )
@@ -139,72 +134,23 @@ struct NewCategoryView: View {
         }
     }
 
-    private var descriptionField: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(L10n.NewCategory.descriptionLabel)
-                .font(.caption.weight(.semibold))
+    private func save() async {
+        guard canSave else { return }
+        isSaving = true
 
-            TextField(L10n.NewCategory.descriptionPlaceholder, text: $description, axis: .vertical)
-                .lineLimit(3, reservesSpace: true)
-                .focused($focusedField, equals: .description)
-                .padding(14)
-                .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 14))
+        let category = TransactionCategory(name: trimmedName, kind: kind, icon: selectedIcon)
+        do {
+            if let addCategory {
+                try await addCategory.execute(category)
+            }
+            onSaved(category)
+            dismiss()
+        } catch {
+            errorMessage = error.localizedDescription
+            isSaving = false
         }
     }
 }
-
-private enum Field {
-    case name
-    case description
-}
-
-private enum CategoryKind: CaseIterable {
-    case expense
-    case income
-
-    var title: String {
-        switch self {
-        case .expense: L10n.Common.expense
-        case .income: L10n.Common.income
-        }
-    }
-
-    var symbol: String {
-        switch self {
-        case .expense: "minus.circle.fill"
-        case .income: "plus.circle.fill"
-        }
-    }
-}
-
-private struct CategoryColorOption: Identifiable, Equatable {
-    let id: String
-    let title: String
-    let color: Color
-
-    static let options = [
-        CategoryColorOption(id: "red", title: L10n.NewCategory.color("red"), color: .red),
-        CategoryColorOption(id: "pink", title: L10n.NewCategory.color("pink"), color: .pink),
-        CategoryColorOption(id: "orange", title: L10n.NewCategory.color("orange"), color: .orange),
-        CategoryColorOption(id: "yellow", title: L10n.NewCategory.color("yellow"), color: .yellow),
-        CategoryColorOption(id: "green", title: L10n.NewCategory.color("green"), color: .green),
-        CategoryColorOption(id: "mint", title: L10n.NewCategory.color("mint"), color: .mint),
-        CategoryColorOption(id: "cyan", title: L10n.NewCategory.color("cyan"), color: .cyan),
-        CategoryColorOption(id: "blue", title: L10n.NewCategory.color("blue"), color: .blue),
-        CategoryColorOption(id: "purple", title: L10n.NewCategory.color("purple"), color: .purple)
-    ]
-
-    static func == (lhs: CategoryColorOption, rhs: CategoryColorOption) -> Bool {
-        lhs.id == rhs.id
-    }
-}
-
-private let categoryIcons = [
-    "cart", "bag", "car", "house", "heart",
-    "fork.knife", "figure.walk", "cup.and.saucer", "tshirt", "cross.case",
-    "gift", "airplane", "book", "gamecontroller", "pawprint",
-    "calendar", "phone", "graduationcap", "music.note", "ellipsis"
-]
 
 #Preview("Светлая тема") {
     NewCategoryView()

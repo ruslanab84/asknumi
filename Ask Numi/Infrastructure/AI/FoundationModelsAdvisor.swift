@@ -31,6 +31,9 @@ final class FoundationModelsAdvisor: FinancialAdvisor {
             The user's currency is Azerbaijani manat (AZN).
             All amounts are already calculated by the app. Do not recalculate them
             or invent numbers that are not present in the request.
+            The app has already filtered the data to the requested category and period.
+            The saved transactions below are the complete and exclusive dataset.
+            DO NOT mention, estimate, or give tips about categories absent from them.
             Answer briefly and concretely in simple English.
             """
         }

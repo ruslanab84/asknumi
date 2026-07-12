@@ -10,8 +10,7 @@ import Combine
 final class LocalizationManager: ObservableObject {
     static let shared = LocalizationManager()
 
-    /// Languages that actually ship an .lproj today. Extend when az/en translations land.
-    static let supportedLanguages = ["ru"]
+    static let supportedLanguages = ["ru", "en"]
 
     private let storageKey = "app.selected.language"
 

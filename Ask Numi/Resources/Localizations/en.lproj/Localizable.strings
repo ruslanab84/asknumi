@@ -1,0 +1,159 @@
+/* Tab Bar */
+"tab.home" = "Home";
+"tab.operations" = "Operations";
+"tab.assistant" = "Assistant";
+"tab.plan" = "Plan";
+
+/* Common */
+"common.button.cancel" = "Cancel";
+"common.button.save" = "Save";
+"common.button.saving" = "Saving…";
+"common.button.retry" = "Retry";
+"common.accessibility.back" = "Back";
+"common.kind.income" = "Income";
+"common.kind.expense" = "Expense";
+
+/* Dashboard */
+"dashboard.header.title" = "Home";
+"dashboard.header.accessibility.settings" = "Settings";
+"dashboard.greeting" = "Good evening, %@!";
+"dashboard.balance_card.label.total_balance" = "Total balance";
+"dashboard.balance_card.label.income" = "Income";
+"dashboard.balance_card.label.expenses" = "Expenses";
+"dashboard.budget_card.title" = "July budget";
+"dashboard.budget_card.label.spent" = "Spent";
+"dashboard.budget_card.label.plan" = "Plan";
+"dashboard.insight_card.title" = "AI insight";
+"dashboard.insight_card.cta.show_details" = "Show details  →";
+"dashboard.recent.title" = "Recent operations";
+"dashboard.recent.empty" = "No operations yet — add your first one in the Operations tab.";
+
+/* Operations */
+"operations.header.title" = "Operations";
+"operations.header.accessibility.add" = "Add operation";
+"operations.search.placeholder" = "Search by category";
+"operations.search.accessibility.clear" = "Clear search";
+"operations.filter.all" = "All";
+"operations.filter.expenses" = "Expenses";
+"operations.filter.income" = "Income";
+"operations.list.loading" = "Loading operations…";
+"operations.list.error.title" = "Couldn't load operations";
+"operations.list.empty.title" = "No operations";
+"operations.list.empty.message" = "Tap + to add your first expense or income.";
+"operations.list.empty.cta.add" = "Add operation";
+"operations.section.today" = "Today";
+"operations.section.yesterday" = "Yesterday";
+"operations.section.label.expenses" = "Expenses %@";
+"operations.section.label.income" = "Income %@";
+"operations.row.accessibility.delete" = "Delete operation";
+"operations.row.action.delete" = "Delete";
+"operations.delete_alert.title" = "Couldn't delete operation";
+"operations.delete_alert.button.ok" = "OK";
+
+/* Add Operation */
+"add_operation.title.new" = "New operation";
+"add_operation.title.edit" = "Edit operation";
+"add_operation.section.kind" = "Operation type";
+"add_operation.section.category" = "Category";
+"add_operation.section.amount" = "Amount";
+"add_operation.section.date" = "Operation date";
+"add_operation.field.category.placeholder" = "For example: Groceries, Bolt, or salary";
+"add_operation.field.category.too_long" = "The name must be 60 characters or fewer.";
+"add_operation.category.create" = "Create custom category";
+"add_operation.field.date.label" = "Date and time";
+"add_operation.category.default.groceries" = "Groceries";
+"add_operation.category.default.food" = "Food";
+"add_operation.category.default.transport" = "Transport";
+"add_operation.category.default.auto" = "Car";
+"add_operation.category.default.home" = "Home";
+"add_operation.category.default.health" = "Health";
+"add_operation.category.default.entertainment" = "Entertainment";
+"add_operation.category.default.clothes" = "Clothes";
+"add_operation.category.default.salary" = "Salary";
+"add_operation.category.default.freelance" = "Freelance";
+"add_operation.category.default.gift" = "Gift";
+"add_operation.category.default.interest" = "Interest";
+
+/* Assistant */
+"assistant.header.title" = "Assistant";
+"assistant.header.accessibility.history" = "History";
+"assistant.intro" = "Ask a question about your finances — I answer only from saved operations. Everything is analyzed on device.";
+"assistant.notice.downloading" = "The AI model is still downloading to your device. Try again later.";
+"assistant.notice.unavailable" = "The AI assistant is unavailable: Apple Intelligence must be enabled.";
+"assistant.suggestion.where_money_went" = "Where did my money go this month?";
+"assistant.suggestion.how_to_save" = "What can I save on?";
+"assistant.suggestion.enough_until_salary" = "Will I have enough money until payday?";
+"assistant.input.placeholder" = "Ask anything...";
+"assistant.input.accessibility.send" = "Send";
+"assistant.thinking" = "Numi is preparing an answer…";
+"assistant.error.invalid_question" = "Ask a complete question about income, expenses, a category, or a time period.";
+"assistant.error.no_data" = "You haven't recorded any operations for the selected period.";
+"assistant.error.generic" = "Couldn't prepare an answer. Try again.";
+"assistant.chart.category.other" = "Other";
+"assistant.chart.label.total" = "Total";
+"assistant.chart.accessibility.total_expenses" = "Total expenses %@";
+
+/* Plan */
+"plan.header.title" = "Plan";
+"plan.header.accessibility.calendar" = "Calendar";
+"plan.section_picker.label" = "Plan section";
+"plan.section.payments" = "Payments";
+"plan.section.budgets" = "Budgets";
+"plan.section.goals" = "Goals";
+"plan.payments.title" = "Upcoming payments";
+"plan.payments.cta.all" = "All payments";
+"plan.forecast.title" = "Forecast balance";
+"plan.budgets.title" = "Budgets";
+"plan.budgets.cta.all" = "All";
+"plan.budgets.label.remaining" = "%@ remaining";
+"plan.placeholder.title" = "%@ section";
+"plan.placeholder.message" = "Your data will appear here soon.";
+
+/* Settings */
+"settings.title" = "Settings";
+"settings.section.account" = "Account";
+"settings.section.appearance" = "Appearance";
+"settings.section.notifications" = "Notifications";
+"settings.section.security" = "Security";
+"settings.section.data" = "Data";
+"settings.section.about" = "About";
+"settings.row.profile" = "Profile";
+"settings.row.currency" = "Currency";
+"settings.row.currency.detail" = "AZN — Azerbaijani manat";
+"settings.row.language" = "Language";
+"settings.row.language.ru" = "Russian";
+"settings.row.language.en" = "English";
+"settings.row.theme" = "Theme";
+"settings.row.theme.value" = "System";
+"settings.row.accent" = "Accent color";
+"settings.row.accent.value" = "Purple";
+"settings.row.reminders" = "Reminders";
+"settings.row.weekly_summary" = "Weekly summary";
+"settings.row.face_id" = "Face ID";
+"settings.row.passcode" = "Passcode";
+"settings.row.export" = "Export data";
+"settings.row.backup" = "Backup";
+"settings.row.rate" = "Rate the app";
+"settings.row.feedback" = "Write a review";
+"settings.version" = "Version %@";
+"settings.placeholder.message" = "This setting will be available later.";
+
+/* New Category */
+"new_category.title" = "New category";
+"new_category.kind_picker.label" = "Category type";
+"new_category.field.name.label" = "Category name";
+"new_category.field.name.placeholder" = "For example: Groceries";
+"new_category.field.color.label" = "Color";
+"new_category.field.icon.label" = "Icon";
+"new_category.field.icon.accessibility.select" = "Select icon";
+"new_category.field.description.label" = "Description (optional)";
+"new_category.field.description.placeholder" = "Enter category description";
+"new_category.color.red" = "Red";
+"new_category.color.pink" = "Pink";
+"new_category.color.orange" = "Orange";
+"new_category.color.yellow" = "Yellow";
+"new_category.color.green" = "Green";
+"new_category.color.mint" = "Mint";
+"new_category.color.cyan" = "Cyan";
+"new_category.color.blue" = "Blue";
+"new_category.color.purple" = "Purple";

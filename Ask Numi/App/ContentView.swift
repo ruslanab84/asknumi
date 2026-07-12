@@ -21,6 +21,8 @@ struct ContentView: View {
             case .operations:
                 OperationsView(
                     fetchTransactions: container.makeFetchTransactionsUseCase(),
+                    fetchCategories: container.makeFetchTransactionCategoriesUseCase(),
+                    addCategory: container.makeAddTransactionCategoryUseCase(),
                     addTransaction: container.makeAddTransactionUseCase(),
                     updateTransaction: container.makeUpdateTransactionUseCase(),
                     deleteTransaction: container.makeDeleteTransactionUseCase(),
@@ -86,7 +88,8 @@ struct AppTabBar: View {
             selection = tab
         } label: {
             VStack(spacing: 4) {
-                Image(systemName: tab == selection ? "\(tab.symbol).fill" : tab.symbol)
+                Image(systemName: tab.symbol)
+                    .symbolVariant(tab == selection ? .fill : .none)
                     .font(.subheadline.weight(.semibold))
                 Text(tab.title)
                     .font(.caption2.weight(.medium))

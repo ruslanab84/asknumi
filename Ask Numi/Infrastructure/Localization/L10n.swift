@@ -91,6 +91,7 @@ enum L10n {
         static var sectionDate: String         { l("add_operation.section.date") }
         static var categoryPlaceholder: String { l("add_operation.field.category.placeholder") }
         static var categoryTooLong: String     { l("add_operation.field.category.too_long") }
+        static var createCategory: String      { l("add_operation.category.create") }
         static var dateLabel: String           { l("add_operation.field.date.label") }
 
         static var defaultExpenseCategories: [String] {
@@ -117,6 +118,7 @@ enum L10n {
         static var inputPlaceholder: String   { l("assistant.input.placeholder") }
         static var sendLabel: String          { l("assistant.input.accessibility.send") }
         static var thinking: String           { l("assistant.thinking") }
+        static var errorInvalidQuestion: String { l("assistant.error.invalid_question") }
         static var errorNoData: String        { l("assistant.error.no_data") }
         static var errorGeneric: String       { l("assistant.error.generic") }
         static var chartOther: String         { l("assistant.chart.category.other") }
@@ -163,7 +165,7 @@ enum L10n {
         static var currency: String         { l("settings.row.currency") }
         static var currencyDetail: String   { l("settings.row.currency.detail") }
         static var language: String         { l("settings.row.language") }
-        static var languageValue: String    { l("settings.row.language.value") }
+        static func languageName(_ code: String) -> String { l("settings.row.language.\(code)") }
         static var theme: String            { l("settings.row.theme") }
         static var themeValue: String       { l("settings.row.theme.value") }
         static var accent: String           { l("settings.row.accent") }

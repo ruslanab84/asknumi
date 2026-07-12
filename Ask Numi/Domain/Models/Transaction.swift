@@ -15,6 +15,7 @@ struct Transaction: Identifiable, Hashable, Sendable {
     var amount: Decimal        // always positive; `kind` defines direction
     var kind: TransactionKind
     var category: String
+    var categoryIcon: String
     var date: Date
     var note: String?
 
@@ -23,6 +24,7 @@ struct Transaction: Identifiable, Hashable, Sendable {
         amount: Decimal,
         kind: TransactionKind,
         category: String,
+        categoryIcon: String = CategoryIcon.fallback,
         date: Date = .now,
         note: String? = nil
     ) {
@@ -30,6 +32,7 @@ struct Transaction: Identifiable, Hashable, Sendable {
         self.amount = amount
         self.kind = kind
         self.category = category
+        self.categoryIcon = categoryIcon
         self.date = date
         self.note = note
     }

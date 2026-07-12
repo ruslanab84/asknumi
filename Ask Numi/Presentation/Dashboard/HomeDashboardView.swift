@@ -275,7 +275,7 @@ private struct TransactionRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: transaction.kind == .income ? "arrow.down.left" : "arrow.up.right")
+            Image(systemName: transaction.categoryIcon)
                 .font(.subheadline.weight(.semibold))
                 .foregroundStyle(transaction.kind == .income ? .green : .red)
                 .frame(width: 38, height: 38)
@@ -311,7 +311,7 @@ private struct TransactionRow: View {
             return transaction.date.formatted(.dateTime.hour().minute())
         }
         return transaction.date.formatted(
-            .dateTime.day().month().locale(Locale(identifier: "ru_RU"))
+            .dateTime.day().month().locale(Locale(identifier: LocalizationManager.shared.currentLanguage))
         )
     }
 }

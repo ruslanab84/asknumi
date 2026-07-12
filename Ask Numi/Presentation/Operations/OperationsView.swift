@@ -7,12 +7,15 @@ import SwiftUI
 
 struct OperationsView: View {
     let fetchTransactions: FetchTransactionsUseCase
+    let fetchCategories: FetchTransactionCategoriesUseCase
+    let addCategory: AddTransactionCategoryUseCase
     let addTransaction: AddTransactionUseCase
     let updateTransaction: UpdateTransactionUseCase
     let deleteTransaction: DeleteTransactionUseCase
     @Binding var selectedTab: AppTab
 
     @State private var transactions: [Transaction] = []
+    @State private var categories: [TransactionCategory] = []
     @State private var query = ""
     @State private var filter: OperationsFilter = .all
     @State private var isLoading = true
@@ -49,9 +52,6 @@ struct OperationsView: View {
 
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 18) {
-                        header
-                        searchField
-                        filters
                         content
                     }
                     .padding(.horizontal, 16)
@@ -60,6 +60,11 @@ struct OperationsView: View {
                 }
                 .scrollIndicators(.hidden)
                 .scrollDismissesKeyboard(.interactively)
+            }
+            .safeAreaBar(edge: .top) {
+                pinnedControls
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
             }
             .safeAreaInset(edge: .bottom) {
                 AppTabBar(selection: $selectedTab)
@@ -71,10 +76,14 @@ struct OperationsView: View {
                 AddOperationView(
                     addTransaction: addTransaction,
                     updateTransaction: updateTransaction,
-                    existingTransactions: transactions
+                    existingTransactions: transactions,
+                    categories: categories,
+                    addCategory: addCategory
                 ) { transaction in
                     transactions.append(transaction)
                     transactions.sort { $0.date > $1.date }
+                } onCategorySaved: { category in
+                    categories.append(category)
                 }
             }
             .sheet(item: $editingTransaction) { transaction in
@@ -82,12 +91,16 @@ struct OperationsView: View {
                     addTransaction: addTransaction,
                     updateTransaction: updateTransaction,
                     existingTransactions: transactions,
+                    categories: categories,
+                    addCategory: addCategory,
                     editing: transaction
                 ) { updated in
                     if let index = transactions.firstIndex(where: { $0.id == updated.id }) {
                         transactions[index] = updated
                         transactions.sort { $0.date > $1.date }
                     }
+                } onCategorySaved: { category in
+                    categories.append(category)
                 }
             }
             .alert(
@@ -102,9 +115,18 @@ struct OperationsView: View {
                 Text(deleteErrorMessage ?? "")
             }
             .task {
-                await loadTransactions()
+                await loadData()
             }
         }
+    }
+
+    private var pinnedControls: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            header
+            searchField
+            filters
+        }
+        .frame(maxWidth: .infinity)
     }
 
     private var header: some View {
@@ -168,6 +190,8 @@ struct OperationsView: View {
 
     @ViewBuilder
     private var content: some View {
+        let visibleSections = sections
+
         if isLoading && transactions.isEmpty {
             ProgressView(L10n.Operations.loading)
                 .frame(maxWidth: .infinity)
@@ -179,7 +203,7 @@ struct OperationsView: View {
                 Text(errorMessage)
             } actions: {
                 Button(L10n.Common.retry) {
-                    Task { await loadTransactions() }
+                    Task { await loadData() }
                 }
             }
             .padding(.top, 48)
@@ -195,11 +219,11 @@ struct OperationsView: View {
                 .buttonStyle(.borderedProminent)
             }
             .padding(.top, 48)
-        } else if sections.isEmpty {
+        } else if visibleSections.isEmpty {
             ContentUnavailableView.search(text: query)
                 .padding(.top, 48)
         } else {
-            ForEach(sections) { section in
+            ForEach(visibleSections) { section in
                 transactionSection(section)
             }
         }
@@ -264,12 +288,15 @@ struct OperationsView: View {
         }
     }
 
-    private func loadTransactions() async {
+    private func loadData() async {
         isLoading = true
         defer { isLoading = false }
 
         do {
-            transactions = try await fetchTransactions.execute()
+            async let loadedTransactions = fetchTransactions.execute()
+            async let loadedCategories = fetchCategories.execute()
+            transactions = try await loadedTransactions
+            categories = try await loadedCategories
             errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
@@ -282,7 +309,7 @@ private struct OperationsRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: transaction.kind == .income ? "arrow.down.left" : "arrow.up.right")
+            Image(systemName: transaction.categoryIcon)
                 .font(.body.weight(.semibold))
                 .foregroundStyle(transaction.kind == .income ? .green : .red)
                 .frame(width: 42, height: 42)
@@ -363,16 +390,22 @@ private struct SwipeToDeleteRow<Content: View>: View {
                     onTap()
                 }
             }
-            .gesture(
+            .simultaneousGesture(
                 DragGesture(minimumDistance: 20)
                     .onChanged { value in
-                        guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                        guard abs(value.translation.width) > abs(value.translation.height) * 1.2 else { return }
                         let base: CGFloat = isRevealed ? -deleteWidth : 0
                         offsetX = min(0, max(-deleteWidth, base + value.translation.width))
                     }
-                    .onEnded { _ in
+                    .onEnded { value in
+                        let restingOffset: CGFloat = isRevealed ? -deleteWidth : 0
+                        let isHorizontal = abs(value.translation.width) > abs(value.translation.height) * 1.2
+                        guard isHorizontal || offsetX != restingOffset else { return }
+
                         withAnimation(.spring(duration: 0.3)) {
-                            isRevealed = offsetX < -deleteWidth / 2
+                            if isHorizontal {
+                                isRevealed = offsetX < -deleteWidth / 2
+                            }
                             offsetX = isRevealed ? -deleteWidth : 0
                         }
                     }
@@ -397,25 +430,35 @@ private struct AddOperationView: View {
     let addTransaction: AddTransactionUseCase
     let updateTransaction: UpdateTransactionUseCase
     let existingTransactions: [Transaction]
+    let categories: [TransactionCategory]
+    let addCategory: AddTransactionCategoryUseCase
     let editing: Transaction?
     let onSaved: (Transaction) -> Void
+    let onCategorySaved: (TransactionCategory) -> Void
 
     init(
         addTransaction: AddTransactionUseCase,
         updateTransaction: UpdateTransactionUseCase,
         existingTransactions: [Transaction],
+        categories: [TransactionCategory],
+        addCategory: AddTransactionCategoryUseCase,
         editing: Transaction? = nil,
-        onSaved: @escaping (Transaction) -> Void
+        onSaved: @escaping (Transaction) -> Void,
+        onCategorySaved: @escaping (TransactionCategory) -> Void
     ) {
         self.addTransaction = addTransaction
         self.updateTransaction = updateTransaction
         self.existingTransactions = existingTransactions
+        self.categories = categories
+        self.addCategory = addCategory
         self.editing = editing
         self.onSaved = onSaved
+        self.onCategorySaved = onCategorySaved
 
         if let editing {
             _kind = State(initialValue: editing.kind)
             _category = State(initialValue: editing.category)
+            _categoryIcon = State(initialValue: editing.categoryIcon)
             _amountText = State(initialValue: "\(editing.amount)")
             _date = State(initialValue: editing.date)
         }
@@ -429,10 +472,12 @@ private struct AddOperationView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var kind: TransactionKind = .expense
     @State private var category = ""
+    @State private var categoryIcon = CategoryIcon.fallback
     @State private var amountText = ""
     @State private var date = Date.now
     @State private var isSaving = false
     @State private var errorMessage: String?
+    @State private var isPresentingNewCategory = false
     @FocusState private var focusedField: Field?
 
     private var trimmedCategory: String {
@@ -454,19 +499,25 @@ private struct AddOperationView: View {
     }
 
     // Saved categories for the selected kind, most recent first, then defaults; deduped case-insensitively.
-    private var suggestedCategories: [String] {
-        let saved = existingTransactions
+    private var suggestedCategories: [OperationCategorySuggestion] {
+        let savedCategories = categories
+            .filter { $0.kind == kind }
+            .map { OperationCategorySuggestion(name: $0.name, icon: $0.icon) }
+        let savedTransactions = existingTransactions
             .filter { $0.kind == kind }
             .sorted { $0.date > $1.date }
-            .map(\.category)
+            .map { OperationCategorySuggestion(name: $0.category, icon: $0.categoryIcon) }
+        let defaults = (Self.defaultCategories[kind] ?? []).map {
+            OperationCategorySuggestion(name: $0, icon: CategoryIcon.suggested(for: $0, kind: kind))
+        }
 
         var seen = Set<String>()
-        return (saved + (Self.defaultCategories[kind] ?? []))
-            .filter { seen.insert($0.lowercased()).inserted }
+        return (savedCategories + savedTransactions + defaults)
+            .filter { seen.insert($0.name.lowercased()).inserted }
             .filter {
                 trimmedCategory.isEmpty ||
-                    ($0.localizedCaseInsensitiveContains(trimmedCategory) &&
-                        $0.caseInsensitiveCompare(trimmedCategory) != .orderedSame)
+                    ($0.name.localizedCaseInsensitiveContains(trimmedCategory) &&
+                        $0.name.caseInsensitiveCompare(trimmedCategory) != .orderedSame)
             }
     }
 
@@ -488,6 +539,11 @@ private struct AddOperationView: View {
                         .focused($focusedField, equals: .category)
                         .submitLabel(.next)
                         .onSubmit { focusedField = .amount }
+                        .onChange(of: category) { _, value in
+                            categoryIcon = categories.first {
+                                $0.kind == kind && $0.name.caseInsensitiveCompare(value) == .orderedSame
+                            }?.icon ?? CategoryIcon.suggested(for: value, kind: kind)
+                        }
 
                     if category.count > 60 {
                         Text(L10n.AddOperation.categoryTooLong)
@@ -498,10 +554,13 @@ private struct AddOperationView: View {
                     if !suggestedCategories.isEmpty {
                         ScrollView(.horizontal) {
                             HStack(spacing: 8) {
-                                ForEach(suggestedCategories, id: \.self) { name in
-                                    Button(name) {
-                                        category = name
+                                ForEach(suggestedCategories) { suggestion in
+                                    Button {
+                                        category = suggestion.name
+                                        categoryIcon = suggestion.icon
                                         focusedField = .amount
+                                    } label: {
+                                        Label(suggestion.name, systemImage: suggestion.icon)
                                     }
                                     .font(.caption.weight(.semibold))
                                     .foregroundStyle(.primary)
@@ -514,6 +573,12 @@ private struct AddOperationView: View {
                             .padding(.vertical, 2)
                         }
                         .scrollIndicators(.hidden)
+                    }
+
+                    Button {
+                        isPresentingNewCategory = true
+                    } label: {
+                        Label(L10n.AddOperation.createCategory, systemImage: "plus.circle.fill")
                     }
                 }
 
@@ -560,6 +625,20 @@ private struct AddOperationView: View {
                     .disabled(!canSave)
                 }
             }
+            .sheet(isPresented: $isPresentingNewCategory) {
+                NewCategoryView(kind: kind, addCategory: addCategory) { newCategory in
+                    onCategorySaved(newCategory)
+                    kind = newCategory.kind
+                    category = newCategory.name
+                    categoryIcon = newCategory.icon
+                    focusedField = .amount
+                }
+            }
+            .onChange(of: kind) {
+                categoryIcon = categories.first {
+                    $0.kind == kind && $0.name.caseInsensitiveCompare(category) == .orderedSame
+                }?.icon ?? CategoryIcon.suggested(for: category, kind: kind)
+            }
             .onAppear { focusedField = .category }
         }
     }
@@ -574,6 +653,7 @@ private struct AddOperationView: View {
             amount: amount,
             kind: kind,
             category: trimmedCategory,
+            categoryIcon: categoryIcon,
             date: date,
             note: editing?.note
         )
@@ -591,6 +671,13 @@ private struct AddOperationView: View {
             isSaving = false
         }
     }
+}
+
+private struct OperationCategorySuggestion: Identifiable {
+    let name: String
+    let icon: String
+
+    var id: String { name.lowercased() }
 }
 
 private enum Field {
@@ -640,7 +727,7 @@ private struct OperationDaySection: Identifiable {
                 .day()
                 .month(.wide)
                 .year()
-                .locale(Locale(identifier: "ru_RU"))
+                .locale(Locale(identifier: LocalizationManager.shared.currentLanguage))
         )
     }
 }
@@ -652,15 +739,26 @@ enum OperationFormatting {
 
     /// Amount with currency and no forced sign, e.g. "4 280 AZN"; negative values keep the typographic minus.
     static func plain(_ amount: Decimal) -> String {
+        let number = amountFormatter(for: LocalizationManager.shared.currentLanguage)
+            .string(from: NSDecimalNumber(decimal: amount)) ?? amount.description
+        return "\(number) AZN"
+    }
+
+    private static let russianAmountFormatter = makeAmountFormatter(locale: "ru_RU")
+    private static let englishAmountFormatter = makeAmountFormatter(locale: "en_US")
+
+    private static func amountFormatter(for language: String) -> NumberFormatter {
+        language == "en" ? englishAmountFormatter : russianAmountFormatter
+    }
+
+    private static func makeAmountFormatter(locale: String) -> NumberFormatter {
         let formatter = NumberFormatter()
         formatter.numberStyle = .decimal
-        formatter.locale = Locale(identifier: "ru_RU")
+        formatter.locale = Locale(identifier: locale)
         formatter.minusSign = "−"
         formatter.minimumFractionDigits = 0
         formatter.maximumFractionDigits = 2
-
-        let number = formatter.string(from: NSDecimalNumber(decimal: amount)) ?? amount.description
-        return "\(number) AZN"
+        return formatter
     }
 }
 
@@ -677,6 +775,8 @@ extension TransactionKind {
     let container = AppContainer(isStoredInMemoryOnly: true)
     OperationsView(
         fetchTransactions: container.makeFetchTransactionsUseCase(),
+        fetchCategories: container.makeFetchTransactionCategoriesUseCase(),
+        addCategory: container.makeAddTransactionCategoryUseCase(),
         addTransaction: container.makeAddTransactionUseCase(),
         updateTransaction: container.makeUpdateTransactionUseCase(),
         deleteTransaction: container.makeDeleteTransactionUseCase(),

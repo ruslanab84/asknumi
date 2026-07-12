@@ -15,14 +15,24 @@ final class TransactionEntity {
     var amount: Decimal
     var kindRaw: String
     var categoryRaw: String
+    var categoryIconRaw: String?
     var date: Date
     var note: String?
 
-    init(id: UUID, amount: Decimal, kindRaw: String, categoryRaw: String, date: Date, note: String?) {
+    init(
+        id: UUID,
+        amount: Decimal,
+        kindRaw: String,
+        categoryRaw: String,
+        categoryIconRaw: String?,
+        date: Date,
+        note: String?
+    ) {
         self.id = id
         self.amount = amount
         self.kindRaw = kindRaw
         self.categoryRaw = categoryRaw
+        self.categoryIconRaw = categoryIconRaw
         self.date = date
         self.note = note
     }
@@ -35,6 +45,7 @@ extension TransactionEntity {
             amount: transaction.amount,
             kindRaw: transaction.kind.rawValue,
             categoryRaw: transaction.category,
+            categoryIconRaw: transaction.categoryIcon,
             date: transaction.date,
             note: transaction.note
         )
@@ -49,6 +60,7 @@ extension TransactionEntity {
             amount: amount,
             kind: kind,
             category: categoryRaw,
+            categoryIcon: categoryIconRaw ?? CategoryIcon.suggested(for: categoryRaw, kind: kind),
             date: date,
             note: note
         )

@@ -27,11 +27,21 @@ struct GetFinancialAdviceUseCase: Sendable {
     var advisorAvailability: AdvisorAvailability { advisor.availability }
 
     func execute(question: String? = nil) async throws -> FinancialAdviceReport {
+        if let question, !Self.isFinancialQuestion(question) {
+            throw DomainError.invalidQuestion
+        }
+
         let allItems = try await transactions.fetchAll()
         let period = question.flatMap(requestedPeriod)
-        let items = period.map { selected in
+        let periodItems = period.map { selected in
             allItems.filter { selected.contains($0.date) }
         } ?? allItems
+        let items: [Transaction]
+        if let question, let category = requestedCategory(in: question, candidates: allItems.map(\.category)) {
+            items = periodItems.filter { category.matches($0.category) }
+        } else {
+            items = periodItems
+        }
         guard !items.isEmpty else { throw DomainError.notEnoughData }
         let summary = FinancialSummary(
             transactions: items,
@@ -62,6 +72,108 @@ struct GetFinancialAdviceUseCase: Sendable {
         return DateInterval(start: start, end: end)
     }
 
+    private func requestedCategory(in question: String, candidates: [String]) -> CategoryQuery? {
+        let tokens = Self.tokens(in: question)
+        let tokenSet = Set(tokens)
+        guard Self.isAmountQuestion(tokens) else { return nil }
+
+        if let aliases = Self.categoryAliases.first(where: { !$0.isDisjoint(with: tokenSet) }) {
+            return CategoryQuery(terms: aliases)
+        }
+
+        if let category = candidates.first(where: { category in
+            let categoryTokens = Set(Self.tokens(in: category)).filter { $0.count > 2 }
+            return !categoryTokens.isEmpty && !categoryTokens.isDisjoint(with: tokenSet)
+        }) {
+            return CategoryQuery(terms: Set(Self.tokens(in: category)))
+        }
+
+        if let spendingIndex = tokens.firstIndex(where: { Self.spendingVerbs.contains($0) }) {
+            let term = tokens.dropFirst(spendingIndex + 1).first { !Self.categoryFillers.contains($0) }
+            return term.map { CategoryQuery(terms: [$0]) }
+        }
+
+        guard let markerIndex = tokens.firstIndex(where: { Self.categoryMarkers.contains($0) }) else {
+            let term = tokens.first {
+                $0.count > 1 &&
+                    !Self.genericQuestionTerms.contains($0) &&
+                    !Self.financialTerms.contains($0)
+            }
+            return term.map { CategoryQuery(terms: [$0]) }
+        }
+        let term = tokens.dropFirst(markerIndex + 1).first { !Self.categoryFillers.contains($0) }
+        return term.map { CategoryQuery(terms: [$0]) }
+    }
+
+    private static func isAmountQuestion(_ tokens: [String]) -> Bool {
+        let terms = Set(tokens)
+        return !terms.isDisjoint(with: financialTerms)
+    }
+
+    private static func isFinancialQuestion(_ question: String) -> Bool {
+        let tokens = tokens(in: question)
+        guard question.trimmingCharacters(in: .whitespacesAndNewlines).count >= 3 else { return false }
+
+        if tokens.contains("how"), tokens.contains("much") { return true }
+        return tokens.contains { token in
+            financialTopicRoots.contains { token.hasPrefix($0) }
+        }
+    }
+
+    private static let financialTopicRoots: Set<String> = [
+        "spend", "spent", "expense", "income", "earn", "balance", "budget", "money", "save", "saving",
+        "salary", "rent", "debt", "loan", "credit", "transaction", "cost", "afford",
+        "потрат", "расход", "доход", "заработ", "баланс", "бюджет", "деньг", "денег", "сэконом",
+        "зарплат", "аренд", "долг", "кредит", "операц", "стоим",
+        "potrat", "rasxod", "doxod", "zarabot", "balans", "byudjet", "dengi", "deneg", "sekonom",
+        "zarplat", "arend", "dolg", "kredit", "operac", "stoim", "skolko"
+    ]
+
+    private static let financialTerms: Set<String> = [
+            "spend", "spent", "spending", "expense", "expenses", "income", "earned", "earn",
+            "how", "much", "потрат", "трата", "расход", "доход", "сколько"
+    ]
+
+    private static func tokens(in value: String) -> [String] {
+        value
+            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+            .lowercased()
+            .components(separatedBy: CharacterSet.letters.inverted)
+            .filter { !$0.isEmpty }
+            .map(stem)
+    }
+
+    nonisolated private static func stem(_ token: String) -> String {
+        if token.hasSuffix("ies") { return String(token.dropLast(3)) + "y" }
+        if token.hasSuffix("s"), token.count > 3 { return String(token.dropLast()) }
+        return token
+    }
+
+    private static let spendingVerbs: Set<String> = ["spend", "spent", "spending", "потрат", "трата", "расход"]
+    private static let categoryMarkers: Set<String> = ["on", "for", "to", "на", "по"]
+    private static let periodWords: Set<String> = ["this", "current", "month", "year", "today", "текущий", "месяц", "год", "сегодня"]
+    private static let categoryFillers = categoryMarkers.union(periodWords).union([
+        "did", "do", "i", "my", "the", "a", "an", "in", "at", "from"
+    ])
+    private static let genericQuestionTerms = categoryFillers.union([
+        "what", "when", "where", "why", "who", "tell", "show", "give", "me", "you", "your", "we", "our",
+        "total", "overall", "all", "any", "most", "least", "more", "less", "biggest", "smallest",
+        "category", "categories", "type", "types", "money", "budget", "analysis", "analyze", "advice", "tip", "tips",
+        "can", "could", "should", "will", "would", "have", "has", "had", "am", "are", "is", "was", "were",
+        "does", "of", "by", "with", "about", "and", "or", "than", "per", "every", "please",
+        "какой", "какая", "какие", "покажи", "скажи", "почему", "когда", "где", "все", "общий", "итого",
+        "больше", "меньше", "самый", "самая", "категория", "деньги", "бюджет", "анализ", "совет", "можно",
+        "ли", "я", "ты", "вы", "мне", "мой", "моя", "мои", "это", "что", "за", "в", "с", "и", "или"
+    ])
+    private static let categoryAliases: [Set<String>] = [
+        ["grocery", "product", "продукт", "продукты", "produkty", "produkt"],
+        ["food", "еда", "кафе", "restaurant"],
+        ["transport", "bolt", "taxi", "авто", "транспорт"],
+        ["salary", "зарплата", "zarplata"],
+        ["rent", "аренда", "arenda"],
+        ["interest", "процент", "procent"]
+    ]
+
     private static let monthAliases: [Int: Set<String>] = [
         1: ["january", "jan", "январь", "января", "yanvar", "yanvarya"],
         2: ["february", "feb", "февраль", "февраля", "fevral", "fevralya"],
@@ -76,4 +188,26 @@ struct GetFinancialAdviceUseCase: Sendable {
         11: ["november", "nov", "ноябрь", "ноября", "noyabr", "noyabrya"],
         12: ["december", "dec", "декабрь", "декабря", "dekabr", "dekabrya"],
     ]
+}
+
+private struct CategoryQuery {
+    let terms: Set<String>
+
+    func matches(_ category: String) -> Bool {
+        let categoryTerms = Set(tokens(in: category))
+        return !terms.isDisjoint(with: categoryTerms)
+    }
+
+    private func tokens(in value: String) -> [String] {
+        value
+            .folding(options: [.diacriticInsensitive, .caseInsensitive], locale: .current)
+            .lowercased()
+            .components(separatedBy: CharacterSet.letters.inverted)
+            .filter { !$0.isEmpty }
+            .map { token in
+                if token.hasSuffix("ies") { return String(token.dropLast(3)) + "y" }
+                if token.hasSuffix("s"), token.count > 3 { return String(token.dropLast()) }
+                return token
+            }
+    }
 }

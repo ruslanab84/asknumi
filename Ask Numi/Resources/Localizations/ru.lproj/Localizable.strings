@@ -75,6 +75,7 @@
 "add_operation.section.date" = "Дата операции";
 "add_operation.field.category.placeholder" = "Например: Продукты, Bolt или зарплата";
 "add_operation.field.category.too_long" = "Название должно быть не длиннее 60 символов.";
+"add_operation.category.create" = "Создать свою категорию";
 "add_operation.field.date.label" = "Дата и время";
 
 /* Add Operation — Default category suggestions */
@@ -103,6 +104,7 @@
 "assistant.input.placeholder" = "Спросите что-нибудь...";
 "assistant.input.accessibility.send" = "Отправить";
 "assistant.thinking" = "Нуми готовит ответ…";
+"assistant.error.invalid_question" = "Задайте полный вопрос о доходах, расходах, категории или периоде.";
 "assistant.error.no_data" = "За указанный период вы не записали ни одной операции.";
 "assistant.error.generic" = "Не получилось составить ответ. Попробуйте ещё раз.";
 "assistant.chart.category.other" = "Другое";
@@ -137,7 +139,8 @@
 "settings.row.currency" = "Валюта";
 "settings.row.currency.detail" = "AZN — Азербайджанский манат";
 "settings.row.language" = "Язык";
-"settings.row.language.value" = "Русский";
+"settings.row.language.ru" = "Русский";
+"settings.row.language.en" = "Английский";
 "settings.row.theme" = "Тема";
 "settings.row.theme.value" = "Системная";
 "settings.row.accent" = "Цвет акцента";
