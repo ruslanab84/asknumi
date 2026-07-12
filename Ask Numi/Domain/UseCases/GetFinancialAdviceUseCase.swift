@@ -8,6 +8,13 @@
 
 import Foundation
 
+/// The deterministic numbers and the model's phrasing, together, so the UI
+/// can chart the summary next to the advice without a second fetch.
+struct FinancialAdviceReport: Sendable {
+    let summary: FinancialSummary
+    let advice: FinancialAdvice
+}
+
 struct GetFinancialAdviceUseCase: Sendable {
     private let transactions: TransactionRepository
     private let advisor: FinancialAdvisor
@@ -19,10 +26,11 @@ struct GetFinancialAdviceUseCase: Sendable {
 
     var advisorAvailability: AdvisorAvailability { advisor.availability }
 
-    func execute(for period: DateInterval) async throws -> FinancialAdvice {
+    func execute(question: String? = nil, for period: DateInterval) async throws -> FinancialAdviceReport {
         let items = try await transactions.fetch(in: period)
         guard !items.isEmpty else { throw DomainError.notEnoughData }
         let summary = FinancialSummary(transactions: items, period: period)
-        return try await advisor.advise(on: summary)
+        let advice = try await advisor.advise(on: summary, question: question)
+        return FinancialAdviceReport(summary: summary, advice: advice)
     }
 }

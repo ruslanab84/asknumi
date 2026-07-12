@@ -27,7 +27,10 @@ struct ContentView: View {
                     selectedTab: $selectedTab
                 )
             case .assistant:
-                AssistantView(snapshot: .preview, selectedTab: $selectedTab)
+                AssistantView(
+                    getAdvice: container.makeAdviceUseCase(),
+                    selectedTab: $selectedTab
+                )
             case .plan:
                 PlanView(snapshot: .preview, selectedTab: $selectedTab)
             }

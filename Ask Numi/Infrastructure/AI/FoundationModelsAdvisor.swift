@@ -22,7 +22,7 @@ final class FoundationModelsAdvisor: FinancialAdvisor {
         }
     }
 
-    func advise(on summary: FinancialSummary) async throws -> FinancialAdvice {
+    func advise(on summary: FinancialSummary, question: String?) async throws -> FinancialAdvice {
         // ponytail: session per request — advice is stateless; switch to one
         // shared session + isResponding checks when a chat screen appears.
         let session = LanguageModelSession {
@@ -35,13 +35,13 @@ final class FoundationModelsAdvisor: FinancialAdvisor {
             """
         }
         let response = try await session.respond(
-            to: prompt(for: summary),
+            to: prompt(for: summary, question: question),
             generating: AdviceOutput.self
         )
         return FinancialAdvice(headline: response.content.headline, tips: response.content.tips)
     }
 
-    private func prompt(for summary: FinancialSummary) -> String {
+    private func prompt(for summary: FinancialSummary, question: String?) -> String {
         var lines = [
             "Финансовая сводка пользователя за период:",
             "Доход: \(plain(summary.totalIncome)) AZN",
@@ -57,7 +57,12 @@ final class FoundationModelsAdvisor: FinancialAdvisor {
                 lines.append("- \(item.category): \(plain(item.amount)) AZN")
             }
         }
-        lines.append("Дай заголовок и три практичных совета, как улучшить финансы.")
+        if let question, !question.isEmpty {
+            lines.append("Вопрос пользователя: «\(question)»")
+            lines.append("Заголовок — краткий ответ на вопрос по числам выше, затем три практичных совета.")
+        } else {
+            lines.append("Дай заголовок и три практичных совета, как улучшить финансы.")
+        }
         return lines.joined(separator: "\n")
     }
 
