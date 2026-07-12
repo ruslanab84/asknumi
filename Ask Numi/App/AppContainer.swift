@@ -30,6 +30,14 @@ final class AppContainer {
         AddTransactionUseCase(repository: transactionRepository)
     }
 
+    func makeUpdateTransactionUseCase() -> UpdateTransactionUseCase {
+        UpdateTransactionUseCase(repository: transactionRepository)
+    }
+
+    func makeDeleteTransactionUseCase() -> DeleteTransactionUseCase {
+        DeleteTransactionUseCase(repository: transactionRepository)
+    }
+
     func makeFetchTransactionsUseCase() -> FetchTransactionsUseCase {
         FetchTransactionsUseCase(repository: transactionRepository)
     }

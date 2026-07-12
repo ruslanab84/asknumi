@@ -22,6 +22,8 @@ struct ContentView: View {
                 OperationsView(
                     fetchTransactions: container.makeFetchTransactionsUseCase(),
                     addTransaction: container.makeAddTransactionUseCase(),
+                    updateTransaction: container.makeUpdateTransactionUseCase(),
+                    deleteTransaction: container.makeDeleteTransactionUseCase(),
                     selectedTab: $selectedTab
                 )
             case .assistant:

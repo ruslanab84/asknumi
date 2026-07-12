@@ -33,6 +33,12 @@ actor SwiftDataTransactionRepository: TransactionRepository {
         try modelContext.save()
     }
 
+    func update(_ transaction: Transaction) async throws {
+        // `id` is @Attribute(.unique), so insert performs an upsert on the existing row.
+        modelContext.insert(TransactionEntity(transaction))
+        try modelContext.save()
+    }
+
     func delete(id: UUID) async throws {
         try modelContext.delete(model: TransactionEntity.self, where: #Predicate { $0.id == id })
         try modelContext.save()

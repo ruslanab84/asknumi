@@ -8,6 +8,8 @@ import SwiftUI
 struct OperationsView: View {
     let fetchTransactions: FetchTransactionsUseCase
     let addTransaction: AddTransactionUseCase
+    let updateTransaction: UpdateTransactionUseCase
+    let deleteTransaction: DeleteTransactionUseCase
     @Binding var selectedTab: AppTab
 
     @State private var transactions: [Transaction] = []
@@ -16,6 +18,8 @@ struct OperationsView: View {
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var isPresentingAddOperation = false
+    @State private var editingTransaction: Transaction?
+    @State private var deleteErrorMessage: String?
 
     private var sections: [OperationDaySection] {
         let calendar = Calendar.current
@@ -66,11 +70,36 @@ struct OperationsView: View {
             .sheet(isPresented: $isPresentingAddOperation) {
                 AddOperationView(
                     addTransaction: addTransaction,
+                    updateTransaction: updateTransaction,
                     existingTransactions: transactions
                 ) { transaction in
                     transactions.append(transaction)
                     transactions.sort { $0.date > $1.date }
                 }
+            }
+            .sheet(item: $editingTransaction) { transaction in
+                AddOperationView(
+                    addTransaction: addTransaction,
+                    updateTransaction: updateTransaction,
+                    existingTransactions: transactions,
+                    editing: transaction
+                ) { updated in
+                    if let index = transactions.firstIndex(where: { $0.id == updated.id }) {
+                        transactions[index] = updated
+                        transactions.sort { $0.date > $1.date }
+                    }
+                }
+            }
+            .alert(
+                "Не удалось удалить операцию",
+                isPresented: Binding(
+                    get: { deleteErrorMessage != nil },
+                    set: { if !$0 { deleteErrorMessage = nil } }
+                )
+            ) {
+                Button("Понятно", role: .cancel) {}
+            } message: {
+                Text(deleteErrorMessage ?? "")
             }
             .task {
                 await loadTransactions()
@@ -199,7 +228,12 @@ struct OperationsView: View {
 
             VStack(spacing: 0) {
                 ForEach(section.transactions) { transaction in
-                    OperationsRow(transaction: transaction)
+                    SwipeToDeleteRow(
+                        onTap: { editingTransaction = transaction },
+                        onDelete: { delete(transaction) }
+                    ) {
+                        OperationsRow(transaction: transaction)
+                    }
 
                     if transaction.id != section.transactions.last?.id {
                         Divider().padding(.leading, 54)
@@ -215,6 +249,19 @@ struct OperationsView: View {
         transactions.lazy
             .filter { $0.kind == kind }
             .reduce(Decimal.zero) { $0 + $1.amount }
+    }
+
+    private func delete(_ transaction: Transaction) {
+        Task {
+            do {
+                try await deleteTransaction.execute(id: transaction.id)
+                withAnimation(.spring(duration: 0.3)) {
+                    transactions.removeAll { $0.id == transaction.id }
+                }
+            } catch {
+                deleteErrorMessage = error.localizedDescription
+            }
+        }
     }
 
     private func loadTransactions() async {
@@ -269,10 +316,110 @@ private struct OperationsRow: View {
     }
 }
 
+/// Swipe-to-delete for rows outside a `List` (native `.swipeActions` needs `List`).
+private struct SwipeToDeleteRow<Content: View>: View {
+    let onTap: () -> Void
+    let onDelete: () -> Void
+    let content: Content
+
+    @State private var offsetX: CGFloat = 0
+    @State private var isRevealed = false
+
+    private let deleteWidth: CGFloat = 72
+
+    init(
+        onTap: @escaping () -> Void,
+        onDelete: @escaping () -> Void,
+        @ViewBuilder content: () -> Content
+    ) {
+        self.onTap = onTap
+        self.onDelete = onDelete
+        self.content = content()
+    }
+
+    var body: some View {
+        content
+            .offset(x: offsetX)
+            .background(alignment: .trailing) {
+                Button {
+                    close()
+                    onDelete()
+                } label: {
+                    Image(systemName: "trash.fill")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: deleteWidth - 12, height: 42)
+                        .background(.red, in: .rect(cornerRadius: 13))
+                }
+                .buttonStyle(.plain)
+                .opacity(offsetX < -8 ? 1 : 0)
+                .accessibilityLabel("Удалить операцию")
+            }
+            .contentShape(.rect)
+            .onTapGesture {
+                if isRevealed {
+                    close()
+                } else {
+                    onTap()
+                }
+            }
+            .gesture(
+                DragGesture(minimumDistance: 20)
+                    .onChanged { value in
+                        guard abs(value.translation.width) > abs(value.translation.height) else { return }
+                        let base: CGFloat = isRevealed ? -deleteWidth : 0
+                        offsetX = min(0, max(-deleteWidth, base + value.translation.width))
+                    }
+                    .onEnded { _ in
+                        withAnimation(.spring(duration: 0.3)) {
+                            isRevealed = offsetX < -deleteWidth / 2
+                            offsetX = isRevealed ? -deleteWidth : 0
+                        }
+                    }
+            )
+            .contextMenu {
+                Button("Удалить", systemImage: "trash", role: .destructive) {
+                    onDelete()
+                }
+            }
+            .accessibilityAction(named: "Удалить") { onDelete() }
+    }
+
+    private func close() {
+        withAnimation(.spring(duration: 0.3)) {
+            isRevealed = false
+            offsetX = 0
+        }
+    }
+}
+
 private struct AddOperationView: View {
     let addTransaction: AddTransactionUseCase
+    let updateTransaction: UpdateTransactionUseCase
     let existingTransactions: [Transaction]
+    let editing: Transaction?
     let onSaved: (Transaction) -> Void
+
+    init(
+        addTransaction: AddTransactionUseCase,
+        updateTransaction: UpdateTransactionUseCase,
+        existingTransactions: [Transaction],
+        editing: Transaction? = nil,
+        onSaved: @escaping (Transaction) -> Void
+    ) {
+        self.addTransaction = addTransaction
+        self.updateTransaction = updateTransaction
+        self.existingTransactions = existingTransactions
+        self.editing = editing
+        self.onSaved = onSaved
+
+        if let editing {
+            _kind = State(initialValue: editing.kind)
+            _category = State(initialValue: editing.category)
+            _amountText = State(initialValue: "\(editing.amount)")
+            _date = State(initialValue: editing.date)
+        }
+    }
 
     private static let defaultCategories: [TransactionKind: [String]] = [
         .expense: ["Продукты", "Еда", "Транспорт", "Авто", "Дом", "Здоровье", "Развлечения", "Одежда"],
@@ -399,7 +546,7 @@ private struct AddOperationView: View {
             .scrollContentBackground(.hidden)
             .background { DashboardBackground() }
             .scrollDismissesKeyboard(.interactively)
-            .navigationTitle("Новая операция")
+            .navigationTitle(editing == nil ? "Новая операция" : "Изменить операцию")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -423,14 +570,20 @@ private struct AddOperationView: View {
         errorMessage = nil
 
         let transaction = Transaction(
+            id: editing?.id ?? UUID(),
             amount: amount,
             kind: kind,
             category: trimmedCategory,
-            date: date
+            date: date,
+            note: editing?.note
         )
 
         do {
-            try await addTransaction.execute(transaction)
+            if editing == nil {
+                try await addTransaction.execute(transaction)
+            } else {
+                try await updateTransaction.execute(transaction)
+            }
             onSaved(transaction)
             dismiss()
         } catch {
@@ -525,6 +678,8 @@ extension TransactionKind {
     OperationsView(
         fetchTransactions: container.makeFetchTransactionsUseCase(),
         addTransaction: container.makeAddTransactionUseCase(),
+        updateTransaction: container.makeUpdateTransactionUseCase(),
+        deleteTransaction: container.makeDeleteTransactionUseCase(),
         selectedTab: .constant(.operations)
     )
 }
