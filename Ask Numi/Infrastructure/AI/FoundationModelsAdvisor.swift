@@ -1,0 +1,98 @@
+//
+//  FoundationModelsAdvisor.swift
+//  Ask Numi
+//
+//  Adapter over Apple's on-device Foundation Model. All numbers arrive
+//  pre-computed in `FinancialSummary`; the model only phrases advice.
+//
+
+import Foundation
+import FoundationModels
+
+final class FoundationModelsAdvisor: FinancialAdvisor {
+
+    var availability: AdvisorAvailability {
+        switch SystemLanguageModel.default.availability {
+        case .available:
+            return .available
+        case .unavailable(.modelNotReady):
+            return .downloading
+        case .unavailable:
+            return .unavailable
+        }
+    }
+
+    func advise(on summary: FinancialSummary) async throws -> FinancialAdvice {
+        // ponytail: session per request — advice is stateless; switch to one
+        // shared session + isResponding checks when a chat screen appears.
+        let session = LanguageModelSession {
+            """
+            Ты — дружелюбный финансовый помощник в приложении для личных финансов.
+            Валюта пользователя — азербайджанский манат (AZN).
+            Все суммы в запросе уже посчитаны приложением. DO NOT пересчитывать их
+            и DO NOT придумывать числа, которых нет в запросе.
+            Отвечай на русском языке, коротко и конкретно.
+            """
+        }
+        let response = try await session.respond(
+            to: prompt(for: summary),
+            generating: AdviceOutput.self
+        )
+        return FinancialAdvice(headline: response.content.headline, tips: response.content.tips)
+    }
+
+    private func prompt(for summary: FinancialSummary) -> String {
+        var lines = [
+            "Финансовая сводка пользователя за период:",
+            "Доход: \(plain(summary.totalIncome)) AZN",
+            "Расходы: \(plain(summary.totalExpenses)) AZN",
+            "Баланс: \(plain(summary.balance)) AZN",
+        ]
+        if let rate = summary.savingsRate {
+            lines.append("Доля сбережений: \(Int(rate * 100))%")
+        }
+        if !summary.expensesByCategory.isEmpty {
+            lines.append("Расходы по категориям (по убыванию):")
+            for item in summary.expensesByCategory.prefix(8) {
+                lines.append("- \(item.category.promptLabel): \(plain(item.amount)) AZN")
+            }
+        }
+        lines.append("Дай заголовок и три практичных совета, как улучшить финансы.")
+        return lines.joined(separator: "\n")
+    }
+
+    private func plain(_ value: Decimal) -> String {
+        NSDecimalNumber(decimal: value).stringValue
+    }
+}
+
+@Generable
+private struct AdviceOutput {
+    @Guide(description: "Короткий заголовок совета, до восьми слов")
+    var headline: String
+
+    @Guide(description: "Конкретные практичные советы по личным финансам", .count(3))
+    var tips: [String]
+}
+
+/// Russian labels for the prompt only — user-facing category names
+/// go through L10n in the Presentation layer, not here.
+private extension TransactionCategory {
+    var promptLabel: String {
+        switch self {
+        case .salary: "зарплата"
+        case .business: "бизнес"
+        case .gifts: "подарки"
+        case .groceries: "продукты"
+        case .restaurants: "рестораны и кафе"
+        case .transport: "транспорт"
+        case .housing: "жильё"
+        case .utilities: "коммунальные услуги"
+        case .health: "здоровье"
+        case .entertainment: "развлечения"
+        case .shopping: "покупки"
+        case .education: "образование"
+        case .other: "прочее"
+        }
+    }
+}

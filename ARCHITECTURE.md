@@ -68,45 +68,29 @@ Ask Numi/
 ├── Domain/
 │   ├── Models/
 │   │   ├── Transaction.swift       # Pure value types, no UI imports
-│   │   ├── Budget.swift
-│   │   ├── Account.swift
-│   │   └── AIInsight.swift
+│   │   ├── FinancialSummary.swift  # Deterministic aggregation handed to the AI
+│   │   ├── FinancialAdvice.swift   # AI output + AdvisorAvailability
+│   │   └── DomainError.swift
 │   ├── Repositories/
 │   │   ├── TransactionRepository.swift   # protocol
-│   │   ├── BudgetRepository.swift        # protocol
-│   │   └── InsightRepository.swift       # protocol
+│   │   └── FinancialAdvisor.swift        # protocol — port for the on-device AI
 │   └── UseCases/
-│       ├── FetchDashboardUseCase.swift
 │       ├── AddTransactionUseCase.swift
-│       ├── FetchInsightUseCase.swift
-│       └── GetBudgetProgressUseCase.swift
+│       ├── FetchTransactionsUseCase.swift
+│       └── GetFinancialAdviceUseCase.swift
 │
 ├── Data/
 │   ├── Repositories/
-│   │   ├── DefaultTransactionRepository.swift
-│   │   ├── DefaultBudgetRepository.swift
-│   │   └── DefaultInsightRepository.swift
-│   ├── Remote/
-│   │   ├── DTOs/
-│   │   │   ├── TransactionDTO.swift
-│   │   │   └── InsightDTO.swift
-│   │   └── Endpoints/
-│   │       ├── TransactionEndpoint.swift
-│   │       └── InsightEndpoint.swift
+│   │   └── SwiftDataTransactionRepository.swift  # @ModelActor implementation
 │   └── Local/
-│       ├── TransactionStore.swift   # SwiftData / SQLite wrapper
-│       └── CachePolicy.swift
+│       └── TransactionEntity.swift  # SwiftData @Model, never leaves Data
 │
 └── Infrastructure/
-    ├── Network/
-    │   ├── NetworkClient.swift      # URLSession wrapper
-    │   ├── APIError.swift
-    │   └── RequestBuilder.swift
-    ├── Persistence/
-    │   └── PersistenceController.swift
-    └── Keychain/
-        └── KeychainService.swift
+    └── AI/
+        └── FoundationModelsAdvisor.swift  # FoundationModels adapter
 ```
+
+The app is **local-first**: transactions live in SwiftData on device and the AI runs on device. `Data/Remote/`, `Infrastructure/Network/`, and `Keychain/` are added only when a backend appears — do not scaffold them ahead of time.
 
 ---
 
@@ -134,8 +118,24 @@ Ask Numi/
 
 ### Infrastructure
 
-- **NetworkClient** — thin `URLSession` wrapper. Takes a `RequestBuilder`, returns `Data`. Knows nothing about the domain.
-- **PersistenceController** — SwiftData / Core Data stack setup.
+- **FoundationModelsAdvisor** — adapter over Apple's on-device Foundation Model; the only file in the app that imports `FoundationModels`.
+- Future: `NetworkClient` (URLSession wrapper), `KeychainService` — only when a backend appears.
+
+---
+
+## On-Device AI (Foundation Models)
+
+The assistant runs entirely on device via Apple's `FoundationModels` framework (iOS 26+). Rules:
+
+1. **The model never does math.** Small on-device LLMs are unreliable at arithmetic. All aggregation (totals, per-category sums, savings rate) happens deterministically in Swift inside `FinancialSummary.init(transactions:period:)`. The model receives finished numbers and only *phrases* advice.
+2. **Domain owns the port.** `FinancialAdvisor` protocol lives in `Domain/Repositories/`; `FoundationModelsAdvisor` (Infrastructure) is the only type that imports `FoundationModels`. Presentation sees only domain types (`FinancialAdvice`, `AdvisorAvailability`).
+3. **Structured output only.** Responses are generated into a `@Generable` struct (`AdviceOutput`) — never parsed from free text.
+4. **Availability is a first-class state.** `SystemLanguageModel.default.availability` maps to the domain enum `AdvisorAvailability` (`available` / `downloading` / `unavailable`). Every screen that shows AI content must render all three states — Apple Intelligence may be disabled or the device ineligible.
+5. **Context budget.** The prompt is a compact summary (top 8 expense categories max). Raw transaction lists are never sent to the model.
+6. **One request at a time per session.** Advice generation uses a fresh session per request. A future chat screen must serialize requests (`session.isResponding`) and call `session.prewarm()` before user interaction.
+7. **Privacy.** Financial data never leaves the device — there is no remote AI fallback by design.
+
+Pipeline: `GetFinancialAdviceUseCase` → `TransactionRepository.fetch(in:)` → `FinancialSummary(transactions:period:)` → `FinancialAdvisor.advise(on:)` → `FinancialAdvice` → ViewModel maps to UI model.
 
 ---
 

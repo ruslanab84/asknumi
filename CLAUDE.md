@@ -10,13 +10,13 @@ Ask Numi is a personal finance iOS app with AI-powered insights. Primary audienc
 
 ```bash
 # Build for simulator
-xcodebuild -project "Ask Numi.xcodeproj" -scheme "Ask Numi" -destination "platform=iOS Simulator,name=iPhone 16" build
+xcodebuild -project "Ask Numi.xcodeproj" -scheme "Ask Numi" -destination "platform=iOS Simulator,name=iPhone 17" build
 
 # Run tests (once a test target exists)
-xcodebuild -project "Ask Numi.xcodeproj" -scheme "Ask Numi" -destination "platform=iOS Simulator,name=iPhone 16" test
+xcodebuild -project "Ask Numi.xcodeproj" -scheme "Ask Numi" -destination "platform=iOS Simulator,name=iPhone 17" test
 
 # Run a single test class
-xcodebuild -project "Ask Numi.xcodeproj" -scheme "Ask Numi" -destination "platform=iOS Simulator,name=iPhone 16" test -only-testing:"Ask NumiTests/ClassName"
+xcodebuild -project "Ask Numi.xcodeproj" -scheme "Ask Numi" -destination "platform=iOS Simulator,name=iPhone 17" test -only-testing:"Ask NumiTests/ClassName"
 ```
 
 Prefer the `BuildProject` MCP tool (xcode-tools) for faster incremental builds during development, and `XcodeRefreshCodeIssuesInFile` for quick per-file type checking.
