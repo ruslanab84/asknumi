@@ -14,12 +14,17 @@ struct PlanView: View {
     let fetchBudgets: FetchBudgetsUseCase
     let saveBudget: SaveBudgetUseCase
     let deleteBudget: DeleteBudgetUseCase
+    let fetchGoals: FetchSavingsGoalsUseCase
+    let saveGoal: SaveSavingsGoalUseCase
+    let deleteGoal: DeleteSavingsGoalUseCase
     @Binding var selectedTab: AppTab
     @State private var section: PlanSection = .payments
     @State private var transactions: [Transaction] = []
     @State private var subscriptions: [Subscription] = []
     @State private var budgets: [Budget] = []
     @State private var budgetOverview = BudgetOverview(budgets: [], transactions: [])
+    @State private var goals: [SavingsGoal] = []
+    @State private var goalsOverview = SavingsGoalsOverview(goals: [], transactions: [])
     @State private var editorItem: PlanEditorItem?
     @State private var errorMessage: String?
 
@@ -46,7 +51,7 @@ struct PlanView: View {
                             case .budgets:
                                 budgetsContent
                             case .goals:
-                                PlanPlaceholder(title: L10n.Plan.sectionGoals, symbol: "target")
+                                goalsContent
                             }
                         }
                         .padding(.horizontal, 16)
@@ -92,6 +97,19 @@ struct PlanView: View {
                         budgets.sort { $0.category.localizedStandardCompare($1.category) == .orderedAscending }
                         refreshBudgetOverview()
                     }
+
+                case .goal(let goal):
+                    SavingsGoalEditorView(
+                        goal: goal,
+                        saveGoal: saveGoal,
+                        onDelete: deleteGoalItem,
+                        onSaved: updateGoal
+                    )
+
+                case .goalContribution(let goal):
+                    SavingsGoalContributionView(goal: goal, saveGoal: saveGoal) { saved in
+                        updateGoal(saved)
+                    }
                 }
             }
             .task { await loadPlan() }
@@ -103,25 +121,31 @@ struct PlanView: View {
             Text(L10n.Plan.title)
                 .font(.title3.weight(.bold))
             Spacer()
-            if section != .goals {
-                Button {
-                    switch section {
-                    case .payments:
-                        editorItem = PlanEditorItem(kind: .subscription(nil))
-                    case .budgets:
-                        editorItem = PlanEditorItem(kind: .budget(nil))
-                    case .goals:
-                        break
-                    }
-                } label: {
-                    Image(systemName: "plus")
-                        .font(.headline.weight(.bold))
-                        .foregroundStyle(.white)
-                        .frame(width: 42, height: 42)
-                        .glassEffect(.regular.tint(.indigo).interactive(), in: .circle)
+            Button {
+                switch section {
+                case .payments:
+                    editorItem = PlanEditorItem(kind: .subscription(nil))
+                case .budgets:
+                    editorItem = PlanEditorItem(kind: .budget(nil))
+                case .goals:
+                    editorItem = PlanEditorItem(kind: .goal(nil))
                 }
-                .accessibilityLabel(section == .payments ? L10n.Plan.addSubscription : L10n.Plan.addBudget)
+            } label: {
+                Image(systemName: "plus")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 42, height: 42)
+                    .glassEffect(.regular.tint(.indigo).interactive(), in: .circle)
             }
+            .accessibilityLabel(addButtonLabel)
+        }
+    }
+
+    private var addButtonLabel: String {
+        switch section {
+        case .payments: L10n.Plan.addSubscription
+        case .budgets: L10n.Plan.addBudget
+        case .goals: L10n.Plan.addGoal
         }
     }
 
@@ -196,6 +220,16 @@ struct PlanView: View {
         }
     }
 
+    private var goalsContent: some View {
+        SavingsGoalsContent(
+            overview: goalsOverview,
+            onCreate: { editorItem = PlanEditorItem(kind: .goal(nil)) },
+            onEdit: { editorItem = PlanEditorItem(kind: .goal($0)) },
+            onContribute: { editorItem = PlanEditorItem(kind: .goalContribution($0)) },
+            onDelete: deleteGoalItem
+        )
+    }
+
     private var budgetCategoryOptions: [BudgetCategoryOption] {
         let used = transactions
             .filter { $0.kind == .expense }
@@ -214,14 +248,17 @@ struct PlanView: View {
 
     private func loadPlan() async {
         do {
-            let loadedTransactions = try await fetchTransactions.execute()
+            async let loadedTransactions = fetchTransactions.execute()
             async let loadedSubscriptions = fetchSubscriptions.execute()
             async let loadedBudgets = fetchBudgets.execute()
+            async let loadedGoals = fetchGoals.execute()
 
-            transactions = loadedTransactions
+            transactions = try await loadedTransactions
             subscriptions = try await loadedSubscriptions
             budgets = try await loadedBudgets
+            goals = try await loadedGoals
             refreshBudgetOverview()
+            refreshGoalsOverview()
             errorMessage = nil
         } catch {
             errorMessage = L10n.Plan.loadError
@@ -230,6 +267,19 @@ struct PlanView: View {
 
     private func refreshBudgetOverview() {
         budgetOverview = BudgetOverview(budgets: budgets, transactions: transactions)
+    }
+
+    private func refreshGoalsOverview() {
+        goalsOverview = SavingsGoalsOverview(goals: goals, transactions: transactions)
+    }
+
+    private func updateGoal(_ goal: SavingsGoal) {
+        if let index = goals.firstIndex(where: { $0.id == goal.id }) {
+            goals[index] = goal
+        } else {
+            goals.append(goal)
+        }
+        refreshGoalsOverview()
     }
 
     private func deleteSubscription(_ subscription: Subscription) {
@@ -251,6 +301,18 @@ struct PlanView: View {
                 refreshBudgetOverview()
             } catch {
                 errorMessage = L10n.Plan.budgetDeleteError
+            }
+        }
+    }
+
+    private func deleteGoalItem(_ goal: SavingsGoal) {
+        Task {
+            do {
+                try await deleteGoal.execute(id: goal.id)
+                goals.removeAll { $0.id == goal.id }
+                refreshGoalsOverview()
+            } catch {
+                errorMessage = L10n.Plan.goalDeleteError
             }
         }
     }
@@ -440,6 +502,8 @@ private struct PlanEditorItem: Identifiable {
     enum Kind {
         case subscription(Subscription?)
         case budget(Budget?)
+        case goal(SavingsGoal?)
+        case goalContribution(SavingsGoal)
     }
 
     let id = UUID()
@@ -848,22 +912,6 @@ private struct BudgetRow: View {
     }
 }
 
-private struct PlanPlaceholder: View {
-    let title: String
-    let symbol: String
-
-    var body: some View {
-        ContentUnavailableView(
-            L10n.Plan.placeholderTitle(title),
-            systemImage: symbol,
-            description: Text(L10n.Plan.placeholderMessage)
-        )
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 60)
-        .glassEffect(.regular, in: .rect(cornerRadius: 22))
-    }
-}
-
 private enum PlanSection: CaseIterable {
     case payments
     case budgets
@@ -897,6 +945,9 @@ struct PlanSnapshot {
         fetchBudgets: container.makeFetchBudgetsUseCase(),
         saveBudget: container.makeSaveBudgetUseCase(),
         deleteBudget: container.makeDeleteBudgetUseCase(),
+        fetchGoals: container.makeFetchSavingsGoalsUseCase(),
+        saveGoal: container.makeSaveSavingsGoalUseCase(),
+        deleteGoal: container.makeDeleteSavingsGoalUseCase(),
         selectedTab: .constant(.plan)
     )
 }
@@ -912,6 +963,9 @@ struct PlanSnapshot {
         fetchBudgets: container.makeFetchBudgetsUseCase(),
         saveBudget: container.makeSaveBudgetUseCase(),
         deleteBudget: container.makeDeleteBudgetUseCase(),
+        fetchGoals: container.makeFetchSavingsGoalsUseCase(),
+        saveGoal: container.makeSaveSavingsGoalUseCase(),
+        deleteGoal: container.makeDeleteSavingsGoalUseCase(),
         selectedTab: .constant(.plan)
     )
         .preferredColorScheme(.dark)

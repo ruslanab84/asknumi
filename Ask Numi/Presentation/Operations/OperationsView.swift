@@ -51,12 +51,14 @@ struct OperationsView: View {
                 DashboardBackground()
 
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 18) {
-                        content
+                    GlassEffectContainer(spacing: 18) {
+                        LazyVStack(alignment: .leading, spacing: 18) {
+                            content
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 12)
+                        .padding(.bottom, 104)
                     }
-                    .padding(.horizontal, 16)
-                    .padding(.top, 12)
-                    .padding(.bottom, 104)
                 }
                 .scrollIndicators(.hidden)
                 .scrollDismissesKeyboard(.interactively)
@@ -252,12 +254,19 @@ struct OperationsView: View {
 
             VStack(spacing: 0) {
                 ForEach(section.transactions) { transaction in
-                    SwipeToDeleteRow(
-                        onTap: { editingTransaction = transaction },
-                        onDelete: { delete(transaction) }
-                    ) {
-                        OperationsRow(transaction: transaction)
-                    }
+                    OperationsRow(transaction: transaction)
+                        .contentShape(.rect)
+                        .onTapGesture {
+                            editingTransaction = transaction
+                        }
+                        .contextMenu {
+                            Button(L10n.Operations.deleteAction, systemImage: "trash", role: .destructive) {
+                                delete(transaction)
+                            }
+                        }
+                        .accessibilityAction(named: L10n.Operations.deleteAction) {
+                            delete(transaction)
+                        }
 
                     if transaction.id != section.transactions.last?.id {
                         Divider().padding(.leading, 54)
@@ -340,89 +349,6 @@ private struct OperationsRow: View {
         .padding(.vertical, 9)
         .contentShape(.rect)
         .accessibilityElement(children: .combine)
-    }
-}
-
-/// Swipe-to-delete for rows outside a `List` (native `.swipeActions` needs `List`).
-private struct SwipeToDeleteRow<Content: View>: View {
-    let onTap: () -> Void
-    let onDelete: () -> Void
-    let content: Content
-
-    @State private var offsetX: CGFloat = 0
-    @State private var isRevealed = false
-
-    private let deleteWidth: CGFloat = 72
-
-    init(
-        onTap: @escaping () -> Void,
-        onDelete: @escaping () -> Void,
-        @ViewBuilder content: () -> Content
-    ) {
-        self.onTap = onTap
-        self.onDelete = onDelete
-        self.content = content()
-    }
-
-    var body: some View {
-        content
-            .offset(x: offsetX)
-            .background(alignment: .trailing) {
-                Button {
-                    close()
-                    onDelete()
-                } label: {
-                    Image(systemName: "trash.fill")
-                        .font(.body.weight(.semibold))
-                        .foregroundStyle(.white)
-                        .frame(width: deleteWidth - 12, height: 42)
-                        .background(.red, in: .rect(cornerRadius: 13))
-                }
-                .buttonStyle(.plain)
-                .opacity(offsetX < -8 ? 1 : 0)
-                .accessibilityLabel(L10n.Operations.deleteLabel)
-            }
-            .contentShape(.rect)
-            .onTapGesture {
-                if isRevealed {
-                    close()
-                } else {
-                    onTap()
-                }
-            }
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 20)
-                    .onChanged { value in
-                        guard abs(value.translation.width) > abs(value.translation.height) * 1.2 else { return }
-                        let base: CGFloat = isRevealed ? -deleteWidth : 0
-                        offsetX = min(0, max(-deleteWidth, base + value.translation.width))
-                    }
-                    .onEnded { value in
-                        let restingOffset: CGFloat = isRevealed ? -deleteWidth : 0
-                        let isHorizontal = abs(value.translation.width) > abs(value.translation.height) * 1.2
-                        guard isHorizontal || offsetX != restingOffset else { return }
-
-                        withAnimation(.spring(duration: 0.3)) {
-                            if isHorizontal {
-                                isRevealed = offsetX < -deleteWidth / 2
-                            }
-                            offsetX = isRevealed ? -deleteWidth : 0
-                        }
-                    }
-            )
-            .contextMenu {
-                Button(L10n.Operations.deleteAction, systemImage: "trash", role: .destructive) {
-                    onDelete()
-                }
-            }
-            .accessibilityAction(named: L10n.Operations.deleteAction) { onDelete() }
-    }
-
-    private func close() {
-        withAnimation(.spring(duration: 0.3)) {
-            isRevealed = false
-            offsetX = 0
-        }
     }
 }
 

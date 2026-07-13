@@ -197,6 +197,66 @@ enum L10n {
         static func unbudgetedSpending(_ amount: String) -> String {
             String(format: l("plan.budget.summary.unbudgeted"), amount)
         }
+        static var addGoal: String { l("plan.goal.accessibility.add") }
+        static var goalEmptyTitle: String { l("plan.goal.empty.title") }
+        static var goalEmptyMessage: String { l("plan.goal.empty.message") }
+        static var goalCreate: String { l("plan.goal.empty.cta.create") }
+        static var goalsTitle: String { l("plan.goal.summary.title") }
+        static func goalSavedOf(_ saved: String, _ target: String) -> String {
+            String(format: l("plan.goal.summary.saved_of"), saved, target)
+        }
+        static func goalMonthlyPlan(_ amount: String) -> String {
+            String(format: l("plan.goal.summary.monthly_plan"), amount)
+        }
+        static func goalHistoricalSurplus(_ amount: String) -> String {
+            String(format: l("plan.goal.summary.historical_surplus"), amount)
+        }
+        static var goalPlanComplete: String { l("plan.goal.summary.health.complete") }
+        static var goalPlanFeasible: String { l("plan.goal.summary.health.feasible") }
+        static var goalPlanNoHistory: String { l("plan.goal.summary.health.no_history") }
+        static var goalPlanOverdue: String { l("plan.goal.summary.health.overdue") }
+        static func goalPlanGap(_ amount: String) -> String {
+            String(format: l("plan.goal.summary.health.gap"), amount)
+        }
+        static func goalPerMonth(_ amount: String) -> String {
+            String(format: l("plan.goal.card.per_month"), amount)
+        }
+        static func editGoal(_ name: String) -> String {
+            String(format: l("plan.goal.accessibility.edit"), name)
+        }
+        static var goalUpdateProgress: String { l("plan.goal.action.update_progress") }
+        static var deleteGoal: String { l("plan.goal.action.delete") }
+        static var goalStateActive: String { l("plan.goal.state.active") }
+        static var goalStateOverdue: String { l("plan.goal.state.overdue") }
+        static var goalStateComplete: String { l("plan.goal.state.complete") }
+        static var goalTitleNew: String { l("plan.goal.title.new") }
+        static var goalTitleEdit: String { l("plan.goal.title.edit") }
+        static var goalSectionDetails: String { l("plan.goal.section.details") }
+        static var goalSectionAmounts: String { l("plan.goal.section.amounts") }
+        static var goalSectionDeadline: String { l("plan.goal.section.deadline") }
+        static var goalNamePlaceholder: String { l("plan.goal.field.name.placeholder") }
+        static var goalNameTooLong: String { l("plan.goal.field.name.too_long") }
+        static var goalTargetAmount: String { l("plan.goal.field.target_amount") }
+        static var goalSavedAmount: String { l("plan.goal.field.saved_amount") }
+        static var goalTargetDate: String { l("plan.goal.field.target_date") }
+        static func goalEditorMonthly(_ amount: String) -> String {
+            String(format: l("plan.goal.editor.monthly_hint"), amount)
+        }
+        static var goalContributionTitle: String { l("plan.goal.contribution.title") }
+        static var goalContributionCurrent: String { l("plan.goal.contribution.section.current") }
+        static var goalContributionAction: String { l("plan.goal.contribution.section.action") }
+        static var goalContributionAdd: String { l("plan.goal.contribution.action.add") }
+        static var goalContributionWithdraw: String { l("plan.goal.contribution.action.withdraw") }
+        static var goalContributionAmount: String { l("plan.goal.contribution.field.amount") }
+        static var goalContributionInsufficient: String { l("plan.goal.contribution.error.insufficient") }
+        static var goalSaveError: String { l("plan.goal.error.save") }
+        static var goalDeleteError: String { l("plan.goal.error.delete") }
+        static var goalIconEmergency: String { l("plan.goal.icon.emergency") }
+        static var goalIconTravel: String { l("plan.goal.icon.travel") }
+        static var goalIconHome: String { l("plan.goal.icon.home") }
+        static var goalIconCar: String { l("plan.goal.icon.car") }
+        static var goalIconEducation: String { l("plan.goal.icon.education") }
+        static var goalIconOther: String { l("plan.goal.icon.other") }
     }
 
     // MARK: - Settings

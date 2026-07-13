@@ -43,6 +43,9 @@ struct ContentView: View {
                     fetchBudgets: container.makeFetchBudgetsUseCase(),
                     saveBudget: container.makeSaveBudgetUseCase(),
                     deleteBudget: container.makeDeleteBudgetUseCase(),
+                    fetchGoals: container.makeFetchSavingsGoalsUseCase(),
+                    saveGoal: container.makeSaveSavingsGoalUseCase(),
+                    deleteGoal: container.makeDeleteSavingsGoalUseCase(),
                     selectedTab: $selectedTab
                 )
             }
