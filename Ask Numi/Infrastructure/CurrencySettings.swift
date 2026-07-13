@@ -24,4 +24,47 @@ enum CurrencySettings {
         let locale = Locale(identifier: LocalizationManager.shared.currentLanguage)
         return locale.localizedString(forCurrencyCode: code) ?? code
     }
+
+    static func flag(for code: String) -> String {
+        switch code {
+        case "AED": return "🇦🇪"
+        case "AMD": return "🇦🇲"
+        case "AUD": return "🇦🇺"
+        case "AZN": return "🇦🇿"
+        case "BGN": return "🇧🇬"
+        case "BRL": return "🇧🇷"
+        case "BYN": return "🇧🇾"
+        case "CAD": return "🇨🇦"
+        case "CHF": return "🇨🇭"
+        case "CNY": return "🇨🇳"
+        case "CZK": return "🇨🇿"
+        case "DKK": return "🇩🇰"
+        case "EGP": return "🇪🇬"
+        case "EUR": return "🇪🇺"
+        case "GBP": return "🇬🇧"
+        case "GEL": return "🇬🇪"
+        case "HKD": return "🇭🇰"
+        case "HUF": return "🇭🇺"
+        case "ILS": return "🇮🇱"
+        case "INR": return "🇮🇳"
+        case "JPY": return "🇯🇵"
+        case "KZT": return "🇰🇿"
+        case "KRW": return "🇰🇷"
+        case "MDL": return "🇲🇩"
+        case "MXN": return "🇲🇽"
+        case "NOK": return "🇳🇴"
+        case "PLN": return "🇵🇱"
+        case "RON": return "🇷🇴"
+        case "RUB": return "🇷🇺"
+        case "SAR": return "🇸🇦"
+        case "SEK": return "🇸🇪"
+        case "TRY": return "🇹🇷"
+        case "TMT": return "🇹🇲"
+        case "UAH": return "🇺🇦"
+        case "USD": return "🇺🇸"
+        case "UZS": return "🇺🇿"
+        case "ZAR": return "🇿🇦"
+        default: return "🌐"
+        }
+    }
 }

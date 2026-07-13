@@ -22,9 +22,16 @@ struct SettingsView: View {
                 Form {
                     Section(L10n.Settings.sectionAccount) {
                         destinationRow(title: L10n.Settings.profile, symbol: "person.crop.circle")
-                        Picker(L10n.Settings.currency, selection: $currencyCode) {
+                        Picker(selection: $currencyCode) {
                             ForEach(CurrencySettings.supportedCodes, id: \.self) { code in
-                                Text("\(code) — \(CurrencySettings.displayName(for: code))").tag(code)
+                                currencyOption(code)
+                            }
+                        } label: {
+                            HStack {
+                                Label(L10n.Settings.currency, systemImage: "dollarsign.circle")
+                                    .labelStyle(SettingsLabelStyle())
+                                Spacer()
+                                currencyValue(currencyCode)
                             }
                         }
                         .pickerStyle(.navigationLink)
@@ -135,6 +142,29 @@ struct SettingsView: View {
         Toggle(isOn: isOn) {
             Label(title, systemImage: symbol)
                 .labelStyle(SettingsLabelStyle())
+        }
+    }
+
+    private func currencyOption(_ code: String) -> some View {
+        HStack(spacing: 10) {
+            Text(CurrencySettings.flag(for: code))
+                .font(.title3)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(CurrencySettings.displayName(for: code))
+                Text(code)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .tag(code)
+    }
+
+    private func currencyValue(_ code: String) -> some View {
+        HStack(spacing: 6) {
+            Text(CurrencySettings.flag(for: code))
+            Text(code)
+                .font(.caption)
+                .foregroundStyle(.secondary)
         }
     }
 
