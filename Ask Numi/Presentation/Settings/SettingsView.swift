@@ -12,6 +12,7 @@ struct SettingsView: View {
     @AppStorage("weeklySummaryEnabled") private var weeklySummaryEnabled = true
     @AppStorage("faceIDEnabled") private var faceIDEnabled = true
     @AppStorage(CurrencySettings.storageKey) private var currencyCode = CurrencySettings.defaultCode
+    @AppStorage(AppearanceSettings.darkModeStorageKey) private var isDarkModeEnabled = false
 
     var body: some View {
         NavigationStack {
@@ -38,7 +39,11 @@ struct SettingsView: View {
                     }
 
                     Section(L10n.Settings.sectionAppearance) {
-                        destinationRow(title: L10n.Settings.theme, symbol: "circle.lefthalf.filled", value: L10n.Settings.themeValue)
+                        Picker(L10n.Settings.theme, selection: $isDarkModeEnabled) {
+                            Text(L10n.Settings.themeLight).tag(false)
+                            Text(L10n.Settings.themeDark).tag(true)
+                        }
+                        .pickerStyle(.segmented)
                         destinationRow(title: L10n.Settings.accent, symbol: "paintpalette", value: L10n.Settings.accentValue)
                     }
 
@@ -85,6 +90,7 @@ struct SettingsView: View {
             }
             .tint(.indigo)
         }
+        .preferredColorScheme(isDarkModeEnabled ? .dark : .light)
     }
 
     private func destinationRow(

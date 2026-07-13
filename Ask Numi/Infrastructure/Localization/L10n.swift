@@ -274,7 +274,8 @@ enum L10n {
         static var language: String         { l("settings.row.language") }
         static func languageName(_ code: String) -> String { l("settings.row.language.\(code)") }
         static var theme: String            { l("settings.row.theme") }
-        static var themeValue: String       { l("settings.row.theme.value") }
+        static var themeLight: String       { l("settings.row.theme.light") }
+        static var themeDark: String        { l("settings.row.theme.dark") }
         static var accent: String           { l("settings.row.accent") }
         static var accentValue: String      { l("settings.row.accent.value") }
         static var reminders: String        { l("settings.row.reminders") }

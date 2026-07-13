@@ -224,7 +224,8 @@
 "settings.row.language.ru" = "Русский";
 "settings.row.language.en" = "Английский";
 "settings.row.theme" = "Тема";
-"settings.row.theme.value" = "Системная";
+"settings.row.theme.light" = "Светлая";
+"settings.row.theme.dark" = "Тёмная";
 "settings.row.accent" = "Цвет акцента";
 "settings.row.accent.value" = "Фиолетовый";
 "settings.row.reminders" = "Напоминания";

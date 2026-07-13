@@ -206,7 +206,8 @@
 "settings.row.language.ru" = "Russian";
 "settings.row.language.en" = "English";
 "settings.row.theme" = "Theme";
-"settings.row.theme.value" = "System";
+"settings.row.theme.light" = "Light";
+"settings.row.theme.dark" = "Dark";
 "settings.row.accent" = "Accent color";
 "settings.row.accent.value" = "Purple";
 "settings.row.reminders" = "Reminders";
