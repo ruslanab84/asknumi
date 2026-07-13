@@ -161,9 +161,42 @@ enum L10n {
         static var subscriptionNamePlaceholder: String { l("plan.subscription.field.name.placeholder") }
         static var subscriptionNameTooLong: String { l("plan.subscription.field.name.too_long") }
         static var subscriptionDateLabel: String { l("plan.subscription.field.date.label") }
-        static var loadError: String { l("plan.subscription.error.load") }
+        static var loadError: String { l("plan.error.load") }
         static var saveError: String { l("plan.subscription.error.save") }
         static var deleteError: String { l("plan.subscription.error.delete") }
+        static var addBudget: String { l("plan.budget.accessibility.add") }
+        static var budgetEmptyTitle: String { l("plan.budget.empty.title") }
+        static var budgetEmptyMessage: String { l("plan.budget.empty.message") }
+        static var deleteBudget: String { l("plan.budget.action.delete") }
+        static var budgetTitleNew: String { l("plan.budget.title.new") }
+        static var budgetTitleEdit: String { l("plan.budget.title.edit") }
+        static var budgetSectionCategory: String { l("plan.budget.section.category") }
+        static var budgetSectionLimit: String { l("plan.budget.section.limit") }
+        static var budgetMonthlyHint: String { l("plan.budget.field.limit.hint") }
+        static var budgetDuplicateCategory: String { l("plan.budget.error.duplicate_category") }
+        static var budgetSaveError: String { l("plan.budget.error.save") }
+        static var budgetDeleteError: String { l("plan.budget.error.delete") }
+        static var budgetPaceOnTrack: String { l("plan.budget.pace.on_track") }
+        static var budgetPaceAtRisk: String { l("plan.budget.pace.at_risk") }
+        static var budgetPaceOver: String { l("plan.budget.pace.over") }
+        static func budgetMonthTitle(_ month: String) -> String {
+            String(format: l("plan.budget.summary.month"), month)
+        }
+        static func budgetSpentOf(_ spent: String, _ limit: String) -> String {
+            String(format: l("plan.budget.summary.spent_of"), spent, limit)
+        }
+        static func budgetPerDay(_ amount: String) -> String {
+            String(format: l("plan.budget.summary.per_day"), amount)
+        }
+        static func budgetProjected(_ amount: String) -> String {
+            String(format: l("plan.budget.summary.projected"), amount)
+        }
+        static func budgetOverBy(_ amount: String) -> String {
+            String(format: l("plan.budget.summary.over_by"), amount)
+        }
+        static func unbudgetedSpending(_ amount: String) -> String {
+            String(format: l("plan.budget.summary.unbudgeted"), amount)
+        }
     }
 
     // MARK: - Settings

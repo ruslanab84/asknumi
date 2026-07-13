@@ -141,6 +141,28 @@
 "plan.subscription.error.load" = "Не удалось загрузить подписки.";
 "plan.subscription.error.save" = "Не удалось сохранить подписку.";
 "plan.subscription.error.delete" = "Не удалось удалить подписку.";
+"plan.error.load" = "Не удалось загрузить данные плана.";
+"plan.budget.accessibility.add" = "Добавить бюджет";
+"plan.budget.empty.title" = "Нет бюджетов";
+"plan.budget.empty.message" = "Задайте месячный лимит для категории, чтобы видеть остаток и безопасный темп трат.";
+"plan.budget.action.delete" = "Удалить бюджет";
+"plan.budget.title.new" = "Новый бюджет";
+"plan.budget.title.edit" = "Изменить бюджет";
+"plan.budget.section.category" = "Категория расходов";
+"plan.budget.section.limit" = "Месячный лимит";
+"plan.budget.field.limit.hint" = "Лимит автоматически применяется к каждому календарному месяцу.";
+"plan.budget.error.duplicate_category" = "Для этой категории уже есть бюджет.";
+"plan.budget.error.save" = "Не удалось сохранить бюджет.";
+"plan.budget.error.delete" = "Не удалось удалить бюджет.";
+"plan.budget.pace.on_track" = "По плану";
+"plan.budget.pace.at_risk" = "Темп выше плана";
+"plan.budget.pace.over" = "Лимит превышен";
+"plan.budget.summary.month" = "Бюджет за %@";
+"plan.budget.summary.spent_of" = "%@ из %@";
+"plan.budget.summary.per_day" = "%@ в день";
+"plan.budget.summary.projected" = "Прогноз: %@";
+"plan.budget.summary.over_by" = "Превышение на %@";
+"plan.budget.summary.unbudgeted" = "Вне бюджетов потрачено %@";
 
 /* Settings */
 "settings.title" = "Настройки";

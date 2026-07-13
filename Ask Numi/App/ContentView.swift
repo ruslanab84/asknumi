@@ -40,6 +40,9 @@ struct ContentView: View {
                     fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
                     saveSubscription: container.makeSaveSubscriptionUseCase(),
                     deleteSubscription: container.makeDeleteSubscriptionUseCase(),
+                    fetchBudgets: container.makeFetchBudgetsUseCase(),
+                    saveBudget: container.makeSaveBudgetUseCase(),
+                    deleteBudget: container.makeDeleteBudgetUseCase(),
                     selectedTab: $selectedTab
                 )
             }

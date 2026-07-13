@@ -11,10 +11,16 @@ struct PlanView: View {
     let fetchSubscriptions: FetchSubscriptionsUseCase
     let saveSubscription: SaveSubscriptionUseCase
     let deleteSubscription: DeleteSubscriptionUseCase
+    let fetchBudgets: FetchBudgetsUseCase
+    let saveBudget: SaveBudgetUseCase
+    let deleteBudget: DeleteBudgetUseCase
     @Binding var selectedTab: AppTab
     @State private var section: PlanSection = .payments
+    @State private var transactions: [Transaction] = []
     @State private var subscriptions: [Subscription] = []
-    @State private var editorItem: SubscriptionEditorItem?
+    @State private var budgets: [Budget] = []
+    @State private var budgetOverview = BudgetOverview(budgets: [], transactions: [])
+    @State private var editorItem: PlanEditorItem?
     @State private var errorMessage: String?
 
     var body: some View {
@@ -28,11 +34,17 @@ struct PlanView: View {
                             header
                             sectionPicker
 
+                            if let errorMessage {
+                                Text(errorMessage)
+                                    .font(.caption)
+                                    .foregroundStyle(.red)
+                            }
+
                             switch section {
                             case .payments:
                                 paymentsContent
                             case .budgets:
-                                PlanPlaceholder(title: L10n.Plan.sectionBudgets, symbol: "chart.bar.fill")
+                                budgetsContent
                             case .goals:
                                 PlanPlaceholder(title: L10n.Plan.sectionGoals, symbol: "target")
                             }
@@ -51,19 +63,38 @@ struct PlanView: View {
             }
             .toolbar(.hidden, for: .navigationBar)
             .sheet(item: $editorItem) { item in
-                SubscriptionEditorView(
-                    subscription: item.subscription,
-                    saveSubscription: saveSubscription
-                ) { saved in
-                    if let index = subscriptions.firstIndex(where: { $0.id == saved.id }) {
-                        subscriptions[index] = saved
-                    } else {
-                        subscriptions.append(saved)
+                switch item.kind {
+                case .subscription(let subscription):
+                    SubscriptionEditorView(
+                        subscription: subscription,
+                        saveSubscription: saveSubscription
+                    ) { saved in
+                        if let index = subscriptions.firstIndex(where: { $0.id == saved.id }) {
+                            subscriptions[index] = saved
+                        } else {
+                            subscriptions.append(saved)
+                        }
+                        subscriptions.sort { $0.nextChargeDate < $1.nextChargeDate }
                     }
-                    subscriptions.sort { $0.nextChargeDate < $1.nextChargeDate }
+
+                case .budget(let budget):
+                    BudgetEditorView(
+                        budget: budget,
+                        categoryOptions: budgetCategoryOptions,
+                        existingBudgets: budgets,
+                        saveBudget: saveBudget
+                    ) { saved in
+                        if let index = budgets.firstIndex(where: { $0.id == saved.id }) {
+                            budgets[index] = saved
+                        } else {
+                            budgets.append(saved)
+                        }
+                        budgets.sort { $0.category.localizedStandardCompare($1.category) == .orderedAscending }
+                        refreshBudgetOverview()
+                    }
                 }
             }
-            .task { await loadSubscriptions() }
+            .task { await loadPlan() }
         }
     }
 
@@ -72,9 +103,16 @@ struct PlanView: View {
             Text(L10n.Plan.title)
                 .font(.title3.weight(.bold))
             Spacer()
-            if section == .payments {
+            if section != .goals {
                 Button {
-                    editorItem = SubscriptionEditorItem(subscription: nil)
+                    switch section {
+                    case .payments:
+                        editorItem = PlanEditorItem(kind: .subscription(nil))
+                    case .budgets:
+                        editorItem = PlanEditorItem(kind: .budget(nil))
+                    case .goals:
+                        break
+                    }
                 } label: {
                     Image(systemName: "plus")
                         .font(.headline.weight(.bold))
@@ -82,7 +120,7 @@ struct PlanView: View {
                         .frame(width: 42, height: 42)
                         .glassEffect(.regular.tint(.indigo).interactive(), in: .circle)
                 }
-                .accessibilityLabel(L10n.Plan.addSubscription)
+                .accessibilityLabel(section == .payments ? L10n.Plan.addSubscription : L10n.Plan.addBudget)
             }
         }
     }
@@ -100,38 +138,119 @@ struct PlanView: View {
         VStack(alignment: .leading, spacing: 20) {
             UpcomingPayments(
                 subscriptions: subscriptions,
-                onEdit: { editorItem = SubscriptionEditorItem(subscription: $0) },
-                onDelete: delete
+                onEdit: { editorItem = PlanEditorItem(kind: .subscription($0)) },
+                onDelete: deleteSubscription
             )
 
-            if let errorMessage {
-                Text(errorMessage)
-                    .font(.caption)
-                    .foregroundStyle(.red)
-            }
-
             BalanceForecast(balance: snapshot.forecastBalance)
-            BudgetProgress(budget: snapshot.budget)
+            if !budgetOverview.items.isEmpty {
+                BudgetPreviewCard(overview: budgetOverview) {
+                    section = .budgets
+                }
+            }
         }
     }
 
-    private func loadSubscriptions() async {
+    private var budgetsContent: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            if budgets.isEmpty {
+                ContentUnavailableView(
+                    L10n.Plan.budgetEmptyTitle,
+                    systemImage: "chart.bar.fill",
+                    description: Text(L10n.Plan.budgetEmptyMessage)
+                )
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 44)
+                .glassEffect(.regular, in: .rect(cornerRadius: 22))
+            } else {
+                BudgetSummaryCard(overview: budgetOverview)
+
+                ForEach(budgetOverview.items) { item in
+                    Button {
+                        editorItem = PlanEditorItem(kind: .budget(item.budget))
+                    } label: {
+                        BudgetRow(progress: item)
+                            .contentShape(.rect)
+                    }
+                    .buttonStyle(.plain)
+                    .contextMenu {
+                        Button(L10n.Plan.deleteBudget, systemImage: "trash", role: .destructive) {
+                            deleteBudgetItem(item.budget)
+                        }
+                    }
+                    .accessibilityAction(named: L10n.Plan.deleteBudget) {
+                        deleteBudgetItem(item.budget)
+                    }
+                }
+
+                if budgetOverview.unbudgetedSpent > 0 {
+                    Label(
+                        L10n.Plan.unbudgetedSpending(OperationFormatting.plain(budgetOverview.unbudgetedSpent)),
+                        systemImage: "exclamationmark.circle"
+                    )
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .accessibilityElement(children: .combine)
+                }
+            }
+        }
+    }
+
+    private var budgetCategoryOptions: [BudgetCategoryOption] {
+        let used = transactions
+            .filter { $0.kind == .expense }
+            .sorted { $0.date > $1.date }
+            .map { BudgetCategoryOption(name: $0.category, icon: $0.categoryIcon) }
+        let saved = budgets.map { BudgetCategoryOption(name: $0.category, icon: $0.categoryIcon) }
+        let defaults = L10n.AddOperation.defaultExpenseCategories.map {
+            BudgetCategoryOption(name: $0, icon: CategoryIcon.suggested(for: $0, kind: .expense))
+        }
+
+        var seen = Set<String>()
+        return (used + saved + defaults).filter {
+            seen.insert(Budget.categoryKey(for: $0.name)).inserted
+        }
+    }
+
+    private func loadPlan() async {
         do {
-            _ = try await fetchTransactions.execute()
-            subscriptions = try await fetchSubscriptions.execute()
+            let loadedTransactions = try await fetchTransactions.execute()
+            async let loadedSubscriptions = fetchSubscriptions.execute()
+            async let loadedBudgets = fetchBudgets.execute()
+
+            transactions = loadedTransactions
+            subscriptions = try await loadedSubscriptions
+            budgets = try await loadedBudgets
+            refreshBudgetOverview()
             errorMessage = nil
         } catch {
             errorMessage = L10n.Plan.loadError
         }
     }
 
-    private func delete(_ subscription: Subscription) {
+    private func refreshBudgetOverview() {
+        budgetOverview = BudgetOverview(budgets: budgets, transactions: transactions)
+    }
+
+    private func deleteSubscription(_ subscription: Subscription) {
         Task {
             do {
                 try await deleteSubscription.execute(id: subscription.id)
                 subscriptions.removeAll { $0.id == subscription.id }
             } catch {
                 errorMessage = L10n.Plan.deleteError
+            }
+        }
+    }
+
+    private func deleteBudgetItem(_ budget: Budget) {
+        Task {
+            do {
+                try await deleteBudget.execute(id: budget.id)
+                budgets.removeAll { $0.id == budget.id }
+                refreshBudgetOverview()
+            } catch {
+                errorMessage = L10n.Plan.budgetDeleteError
             }
         }
     }
@@ -317,9 +436,205 @@ private struct SubscriptionEditorView: View {
     }
 }
 
-private struct SubscriptionEditorItem: Identifiable {
+private struct PlanEditorItem: Identifiable {
+    enum Kind {
+        case subscription(Subscription?)
+        case budget(Budget?)
+    }
+
     let id = UUID()
-    let subscription: Subscription?
+    let kind: Kind
+}
+
+private struct BudgetEditorView: View {
+    let budget: Budget?
+    let categoryOptions: [BudgetCategoryOption]
+    let existingBudgets: [Budget]
+    let saveBudget: SaveBudgetUseCase
+    let onSaved: (Budget) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var category: String
+    @State private var categoryIcon: String
+    @State private var limitText: String
+    @State private var isSaving = false
+    @State private var errorMessage: String?
+    @FocusState private var focusedField: BudgetField?
+
+    init(
+        budget: Budget?,
+        categoryOptions: [BudgetCategoryOption],
+        existingBudgets: [Budget],
+        saveBudget: SaveBudgetUseCase,
+        onSaved: @escaping (Budget) -> Void
+    ) {
+        self.budget = budget
+        self.categoryOptions = categoryOptions
+        self.existingBudgets = existingBudgets
+        self.saveBudget = saveBudget
+        self.onSaved = onSaved
+        _category = State(initialValue: budget?.category ?? "")
+        _categoryIcon = State(initialValue: budget?.categoryIcon ?? CategoryIcon.fallback)
+        _limitText = State(initialValue: budget.map { "\($0.monthlyLimit)" } ?? "")
+    }
+
+    private var trimmedCategory: String {
+        category.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private var monthlyLimit: Decimal? {
+        let normalized = limitText
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: ",", with: ".")
+        guard let value = Decimal(string: normalized, locale: Locale(identifier: "en_US_POSIX")), value > 0 else {
+            return nil
+        }
+        return value
+    }
+
+    private var hasDuplicateCategory: Bool {
+        let key = Budget.categoryKey(for: trimmedCategory)
+        return existingBudgets.contains { $0.id != budget?.id && $0.categoryKey == key }
+    }
+
+    private var canSave: Bool {
+        !trimmedCategory.isEmpty &&
+            trimmedCategory.count <= 60 &&
+            monthlyLimit != nil &&
+            !hasDuplicateCategory &&
+            !isSaving
+    }
+
+    private var filteredCategoryOptions: [BudgetCategoryOption] {
+        guard !trimmedCategory.isEmpty else { return categoryOptions }
+        return categoryOptions.filter {
+            $0.name.localizedCaseInsensitiveContains(trimmedCategory) &&
+                $0.name.caseInsensitiveCompare(trimmedCategory) != .orderedSame
+        }
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section(L10n.Plan.budgetSectionCategory) {
+                    TextField(L10n.AddOperation.categoryPlaceholder, text: $category)
+                        .focused($focusedField, equals: .category)
+                        .submitLabel(.next)
+                        .onSubmit { focusedField = .limit }
+                        .onChange(of: category) { _, value in
+                            categoryIcon = categoryOptions.first {
+                                $0.name.caseInsensitiveCompare(value) == .orderedSame
+                            }?.icon ?? CategoryIcon.suggested(for: value, kind: .expense)
+                        }
+
+                    if category.count > 60 {
+                        Text(L10n.AddOperation.categoryTooLong)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    } else if hasDuplicateCategory {
+                        Text(L10n.Plan.budgetDuplicateCategory)
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+
+                    if !filteredCategoryOptions.isEmpty {
+                        ScrollView(.horizontal) {
+                            GlassEffectContainer(spacing: 8) {
+                                LazyHStack(spacing: 8) {
+                                    ForEach(filteredCategoryOptions) { option in
+                                        Button {
+                                            category = option.name
+                                            categoryIcon = option.icon
+                                            focusedField = .limit
+                                        } label: {
+                                            Label(option.name, systemImage: option.icon)
+                                        }
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.primary)
+                                        .padding(.horizontal, 14)
+                                        .frame(height: 32)
+                                        .glassEffect(.regular.interactive(), in: .capsule)
+                                        .buttonStyle(.plain)
+                                    }
+                                }
+                                .padding(.vertical, 2)
+                            }
+                        }
+                        .scrollIndicators(.hidden)
+                    }
+                }
+
+                Section(L10n.Plan.budgetSectionLimit) {
+                    HStack {
+                        TextField("0", text: $limitText)
+                            .keyboardType(.decimalPad)
+                            .focused($focusedField, equals: .limit)
+                        Text(CurrencySettings.selectedCode)
+                            .foregroundStyle(.secondary)
+                    }
+                    Text(L10n.Plan.budgetMonthlyHint)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
+                if let errorMessage {
+                    Text(errorMessage)
+                        .foregroundStyle(.red)
+                }
+            }
+            .formStyle(.grouped)
+            .scrollContentBackground(.hidden)
+            .background { DashboardBackground() }
+            .navigationTitle(budget == nil ? L10n.Plan.budgetTitleNew : L10n.Plan.budgetTitleEdit)
+            .navigationBarTitleDisplayMode(.inline)
+            .scrollDismissesKeyboard(.interactively)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(L10n.Common.cancel) { dismiss() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(isSaving ? L10n.Common.saving : L10n.Common.save) {
+                        Task { await save() }
+                    }
+                    .disabled(!canSave)
+                }
+            }
+            .onAppear { focusedField = .category }
+        }
+    }
+
+    private func save() async {
+        guard let monthlyLimit, canSave else { return }
+        isSaving = true
+        errorMessage = nil
+
+        let saved = Budget(
+            id: budget?.id ?? UUID(),
+            category: trimmedCategory,
+            categoryIcon: categoryIcon,
+            monthlyLimit: monthlyLimit
+        )
+        do {
+            try await saveBudget.execute(saved)
+            onSaved(saved)
+            dismiss()
+        } catch {
+            errorMessage = L10n.Plan.budgetSaveError
+            isSaving = false
+        }
+    }
+}
+
+private struct BudgetCategoryOption: Identifiable {
+    let name: String
+    let icon: String
+
+    var id: String { Budget.categoryKey(for: name) }
+}
+
+private enum BudgetField {
+    case category
+    case limit
 }
 
 private struct BalanceForecast: View {
@@ -359,8 +674,9 @@ private struct ForecastLine: Shape {
     }
 }
 
-private struct BudgetProgress: View {
-    let budget: PlannedBudget
+private struct BudgetPreviewCard: View {
+    let overview: BudgetOverview
+    let onShowAll: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -368,38 +684,167 @@ private struct BudgetProgress: View {
                 Text(L10n.Plan.budgetsTitle)
                     .font(.subheadline.weight(.bold))
                 Spacer()
-                Button(L10n.Plan.budgetsAll) { }
+                Button(L10n.Plan.budgetsAll, action: onShowAll)
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(.indigo)
             }
 
-            HStack(alignment: .top, spacing: 10) {
-                RoundedRectangle(cornerRadius: 3)
-                    .fill(.orange)
-                    .frame(width: 4, height: 52)
+            Text(L10n.Plan.budgetSpentOf(
+                OperationFormatting.plain(overview.totalSpent),
+                OperationFormatting.plain(overview.totalLimit)
+            ))
+            .font(.subheadline.weight(.semibold))
 
-                VStack(alignment: .leading, spacing: 5) {
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(budget.title)
-                                .font(.subheadline.weight(.semibold))
-                            Text("\(budget.spent) / \(budget.limit)")
-                                .font(.caption)
-                        }
-                        Spacer()
-                        Text(budget.progress.formatted(.percent.precision(.fractionLength(0))))
-                            .font(.subheadline.weight(.bold))
-                    }
+            ProgressView(value: min(max(budgetProgress, 0), 1))
+                .tint(overview.remaining < 0 ? .red : .indigo)
 
-                    ProgressView(value: budget.progress)
-                        .tint(.orange)
-                }
-            }
-
-            Text(L10n.Plan.remaining(budget.remaining))
+            Text(remainingText)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+        .padding(16)
+        .glassEffect(.regular, in: .rect(cornerRadius: 22))
+    }
+
+    private var budgetProgress: Double {
+        guard overview.totalLimit > 0 else { return 0 }
+        return NSDecimalNumber(decimal: overview.totalSpent / overview.totalLimit).doubleValue
+    }
+
+    private var remainingText: String {
+        if overview.remaining < 0 {
+            return L10n.Plan.budgetOverBy(OperationFormatting.plain(-overview.remaining))
+        }
+        return L10n.Plan.remaining(OperationFormatting.plain(overview.remaining))
+    }
+}
+
+private struct BudgetSummaryCard: View {
+    let overview: BudgetOverview
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(monthTitle)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.indigo)
+
+            Text(L10n.Plan.budgetSpentOf(
+                OperationFormatting.plain(overview.totalSpent),
+                OperationFormatting.plain(overview.totalLimit)
+            ))
+            .font(.title3.weight(.bold))
+
+            ProgressView(value: min(max(progress, 0), 1))
+                .tint(overview.remaining < 0 ? .red : .indigo)
+
+            if overview.remaining < 0 {
+                Text(L10n.Plan.budgetOverBy(OperationFormatting.plain(-overview.remaining)))
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            } else {
+                HStack {
+                    Text(L10n.Plan.remaining(OperationFormatting.plain(overview.remaining)))
+                    Spacer()
+                    Text(L10n.Plan.budgetPerDay(OperationFormatting.plain(overview.dailyAllowance)))
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+        }
+        .padding(16)
+        .glassEffect(.regular.tint(.indigo.opacity(0.14)), in: .rect(cornerRadius: 22))
+        .accessibilityElement(children: .combine)
+    }
+
+    private var progress: Double {
+        guard overview.totalLimit > 0 else { return 0 }
+        return NSDecimalNumber(decimal: overview.totalSpent / overview.totalLimit).doubleValue
+    }
+
+    private var monthTitle: String {
+        let month = overview.period.start.formatted(
+            .dateTime
+                .month(.wide)
+                .year()
+                .locale(Locale(identifier: LocalizationManager.shared.currentLanguage))
+        )
+        return L10n.Plan.budgetMonthTitle(month)
+    }
+}
+
+private struct BudgetRow: View {
+    let progress: BudgetProgress
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
+                Image(systemName: progress.budget.categoryIcon)
+                    .font(.headline)
+                    .foregroundStyle(paceColor)
+                    .frame(width: 38, height: 38)
+                    .background(paceColor.opacity(0.14), in: .circle)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(progress.budget.category)
+                        .font(.subheadline.weight(.semibold))
+                    Text(paceTitle)
+                        .font(.caption2.weight(.medium))
+                        .foregroundStyle(paceColor)
+                }
+
+                Spacer()
+
+                Text(progress.progress.formatted(.percent.precision(.fractionLength(0))))
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(paceColor)
+            }
+
+            Text(L10n.Plan.budgetSpentOf(
+                OperationFormatting.plain(progress.spent),
+                OperationFormatting.plain(progress.budget.monthlyLimit)
+            ))
+            .font(.caption)
+
+            ProgressView(value: min(max(progress.progress, 0), 1))
+                .tint(paceColor)
+
+            HStack {
+                Text(remainingText)
+                Spacer()
+                if progress.pace == .atRisk {
+                    Text(L10n.Plan.budgetProjected(OperationFormatting.plain(progress.projectedSpend)))
+                } else if progress.remaining >= 0 {
+                    Text(L10n.Plan.budgetPerDay(OperationFormatting.plain(progress.dailyAllowance)))
+                }
+            }
+            .font(.caption2)
+            .foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .glassEffect(.regular.tint(paceColor.opacity(0.1)).interactive(), in: .rect(cornerRadius: 20))
+    }
+
+    private var paceColor: Color {
+        switch progress.pace {
+        case .onTrack: .green
+        case .atRisk: .orange
+        case .over: .red
+        }
+    }
+
+    private var paceTitle: String {
+        switch progress.pace {
+        case .onTrack: L10n.Plan.budgetPaceOnTrack
+        case .atRisk: L10n.Plan.budgetPaceAtRisk
+        case .over: L10n.Plan.budgetPaceOver
+        }
+    }
+
+    private var remainingText: String {
+        if progress.remaining < 0 {
+            return L10n.Plan.budgetOverBy(OperationFormatting.plain(-progress.remaining))
+        }
+        return L10n.Plan.remaining(OperationFormatting.plain(progress.remaining))
     }
 }
 
@@ -435,20 +880,10 @@ private enum PlanSection: CaseIterable {
 
 struct PlanSnapshot {
     let forecastBalance: String
-    let budget: PlannedBudget
 
     static let preview = PlanSnapshot(
-        forecastBalance: "3 890 AZN",
-        budget: PlannedBudget(title: "Кафе и рестораны", spent: "186 AZN", limit: "250 AZN", remaining: "64 AZN", progress: 0.74)
+        forecastBalance: "3 890 AZN"
     )
-}
-
-struct PlannedBudget {
-    let title: String
-    let spent: String
-    let limit: String
-    let remaining: String
-    let progress: Double
 }
 
 #Preview("Светлая тема") {
@@ -459,6 +894,9 @@ struct PlannedBudget {
         fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
         saveSubscription: container.makeSaveSubscriptionUseCase(),
         deleteSubscription: container.makeDeleteSubscriptionUseCase(),
+        fetchBudgets: container.makeFetchBudgetsUseCase(),
+        saveBudget: container.makeSaveBudgetUseCase(),
+        deleteBudget: container.makeDeleteBudgetUseCase(),
         selectedTab: .constant(.plan)
     )
 }
@@ -471,6 +909,9 @@ struct PlannedBudget {
         fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
         saveSubscription: container.makeSaveSubscriptionUseCase(),
         deleteSubscription: container.makeDeleteSubscriptionUseCase(),
+        fetchBudgets: container.makeFetchBudgetsUseCase(),
+        saveBudget: container.makeSaveBudgetUseCase(),
+        deleteBudget: container.makeDeleteBudgetUseCase(),
         selectedTab: .constant(.plan)
     )
         .preferredColorScheme(.dark)

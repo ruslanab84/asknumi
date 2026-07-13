@@ -20,16 +20,16 @@ struct TransactionCategory: Identifiable, Hashable, Sendable {
 }
 
 enum CategoryIcon {
-    static let fallback = "tag.fill"
+    nonisolated static let fallback = "tag.fill"
 
-    static let options = [
+    nonisolated static let options = [
         "cart", "bag", "car", "house", "heart",
         "fork.knife", "figure.walk", "cup.and.saucer", "tshirt", "cross.case",
         "gift", "airplane", "book", "gamecontroller", "pawprint",
         "calendar", "phone", "graduationcap", "music.note", "ellipsis"
     ]
 
-    static func suggested(for category: String, kind: TransactionKind) -> String {
+    nonisolated static func suggested(for category: String, kind: TransactionKind) -> String {
         let name = category.folding(options: .diacriticInsensitive, locale: .current).lowercased()
         if name.contains("bolt") || name.contains("transport") || name.contains("авто") { return "car" }
         if name.contains("продукт") || name.contains("grocery") { return "cart" }

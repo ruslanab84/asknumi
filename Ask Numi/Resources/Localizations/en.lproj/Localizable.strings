@@ -123,6 +123,28 @@
 "plan.subscription.error.load" = "Couldn't load subscriptions.";
 "plan.subscription.error.save" = "Couldn't save the subscription.";
 "plan.subscription.error.delete" = "Couldn't delete the subscription.";
+"plan.error.load" = "Couldn't load plan data.";
+"plan.budget.accessibility.add" = "Add budget";
+"plan.budget.empty.title" = "No budgets";
+"plan.budget.empty.message" = "Set a monthly category limit to see what's left and a safe spending pace.";
+"plan.budget.action.delete" = "Delete budget";
+"plan.budget.title.new" = "New budget";
+"plan.budget.title.edit" = "Edit budget";
+"plan.budget.section.category" = "Expense category";
+"plan.budget.section.limit" = "Monthly limit";
+"plan.budget.field.limit.hint" = "The limit automatically applies to each calendar month.";
+"plan.budget.error.duplicate_category" = "A budget already exists for this category.";
+"plan.budget.error.save" = "Couldn't save the budget.";
+"plan.budget.error.delete" = "Couldn't delete the budget.";
+"plan.budget.pace.on_track" = "On track";
+"plan.budget.pace.at_risk" = "Spending above pace";
+"plan.budget.pace.over" = "Limit exceeded";
+"plan.budget.summary.month" = "Budget for %@";
+"plan.budget.summary.spent_of" = "%@ of %@";
+"plan.budget.summary.per_day" = "%@ per day";
+"plan.budget.summary.projected" = "Forecast: %@";
+"plan.budget.summary.over_by" = "Over by %@";
+"plan.budget.summary.unbudgeted" = "%@ spent outside budgets";
 
 /* Settings */
 "settings.title" = "Settings";

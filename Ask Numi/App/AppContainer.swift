@@ -14,6 +14,7 @@ final class AppContainer {
     let transactionRepository: TransactionRepository
     let transactionCategoryRepository: TransactionCategoryRepository
     let subscriptionRepository: SubscriptionRepository
+    let budgetRepository: BudgetRepository
     let advisor: FinancialAdvisor
 
     init(isStoredInMemoryOnly: Bool = false) {
@@ -23,6 +24,7 @@ final class AppContainer {
                 for: TransactionEntity.self,
                 TransactionCategoryEntity.self,
                 SubscriptionEntity.self,
+                BudgetEntity.self,
                 configurations: configuration
             )
         } catch {
@@ -32,7 +34,12 @@ final class AppContainer {
         transactionRepository = SwiftDataTransactionRepository(modelContainer: modelContainer)
         transactionCategoryRepository = SwiftDataTransactionCategoryRepository(modelContainer: modelContainer)
         subscriptionRepository = SwiftDataSubscriptionRepository(modelContainer: modelContainer)
+        budgetRepository = SwiftDataBudgetRepository(modelContainer: modelContainer)
         advisor = FoundationModelsAdvisor()
+
+        #if DEBUG
+        BudgetOverview.assertSelfCheck()
+        #endif
     }
 
     func makeFetchTransactionCategoriesUseCase() -> FetchTransactionCategoriesUseCase {
@@ -69,6 +76,18 @@ final class AppContainer {
 
     func makeDeleteSubscriptionUseCase() -> DeleteSubscriptionUseCase {
         DeleteSubscriptionUseCase(repository: subscriptionRepository)
+    }
+
+    func makeFetchBudgetsUseCase() -> FetchBudgetsUseCase {
+        FetchBudgetsUseCase(repository: budgetRepository)
+    }
+
+    func makeSaveBudgetUseCase() -> SaveBudgetUseCase {
+        SaveBudgetUseCase(repository: budgetRepository)
+    }
+
+    func makeDeleteBudgetUseCase() -> DeleteBudgetUseCase {
+        DeleteBudgetUseCase(repository: budgetRepository)
     }
 
     func makeAdviceUseCase() -> GetFinancialAdviceUseCase {
