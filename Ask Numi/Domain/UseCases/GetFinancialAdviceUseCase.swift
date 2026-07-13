@@ -37,7 +37,7 @@ struct GetFinancialAdviceUseCase: Sendable {
             allItems.filter { selected.contains($0.date) }
         } ?? allItems
         let items: [Transaction]
-        if let question, let category = requestedCategory(in: question, candidates: allItems.map(\.category)) {
+        if let question, let category = Self.requestedCategory(in: question, candidates: allItems.map(\.category)) {
             items = periodItems.filter { category.matches($0.category) }
         } else {
             items = periodItems
@@ -72,7 +72,7 @@ struct GetFinancialAdviceUseCase: Sendable {
         return DateInterval(start: start, end: end)
     }
 
-    private func requestedCategory(in question: String, candidates: [String]) -> CategoryQuery? {
+    private static func requestedCategory(in question: String, candidates: [String]) -> CategoryQuery? {
         let tokens = Self.tokens(in: question)
         let tokenSet = Set(tokens)
         guard Self.isAmountQuestion(tokens) else { return nil }
@@ -88,21 +88,7 @@ struct GetFinancialAdviceUseCase: Sendable {
             return CategoryQuery(terms: Set(Self.tokens(in: category)))
         }
 
-        if let spendingIndex = tokens.firstIndex(where: { Self.spendingVerbs.contains($0) }) {
-            let term = tokens.dropFirst(spendingIndex + 1).first { !Self.categoryFillers.contains($0) }
-            return term.map { CategoryQuery(terms: [$0]) }
-        }
-
-        guard let markerIndex = tokens.firstIndex(where: { Self.categoryMarkers.contains($0) }) else {
-            let term = tokens.first {
-                $0.count > 1 &&
-                    !Self.genericQuestionTerms.contains($0) &&
-                    !Self.financialTerms.contains($0)
-            }
-            return term.map { CategoryQuery(terms: [$0]) }
-        }
-        let term = tokens.dropFirst(markerIndex + 1).first { !Self.categoryFillers.contains($0) }
-        return term.map { CategoryQuery(terms: [$0]) }
+        return nil
     }
 
     private static func isAmountQuestion(_ tokens: [String]) -> Bool {
@@ -114,7 +100,6 @@ struct GetFinancialAdviceUseCase: Sendable {
         let tokens = tokens(in: question)
         guard question.trimmingCharacters(in: .whitespacesAndNewlines).count >= 3 else { return false }
 
-        if tokens.contains("how"), tokens.contains("much") { return true }
         return tokens.contains { token in
             financialTopicRoots.contains { token.hasPrefix($0) }
         }
@@ -122,16 +107,16 @@ struct GetFinancialAdviceUseCase: Sendable {
 
     private static let financialTopicRoots: Set<String> = [
         "spend", "spent", "expense", "income", "earn", "balance", "budget", "money", "save", "saving",
-        "salary", "rent", "debt", "loan", "credit", "transaction", "cost", "afford",
+        "salary", "rent", "debt", "loan", "credit", "transaction", "cost", "afford", "financ", "subscript",
         "потрат", "расход", "доход", "заработ", "баланс", "бюджет", "деньг", "денег", "сэконом",
-        "зарплат", "аренд", "долг", "кредит", "операц", "стоим",
+        "зарплат", "аренд", "долг", "кредит", "операц", "стоим", "финанс", "подпис",
         "potrat", "rasxod", "doxod", "zarabot", "balans", "byudjet", "dengi", "deneg", "sekonom",
-        "zarplat", "arend", "dolg", "kredit", "operac", "stoim", "skolko"
+        "zarplat", "arend", "dolg", "kredit", "operac", "stoim", "finans", "podpisk"
     ]
 
     private static let financialTerms: Set<String> = [
             "spend", "spent", "spending", "expense", "expenses", "income", "earned", "earn",
-            "how", "much", "потрат", "трата", "расход", "доход", "сколько"
+            "потрат", "трата", "расход", "доход", "сколько"
     ]
 
     private static func tokens(in value: String) -> [String] {
@@ -149,22 +134,6 @@ struct GetFinancialAdviceUseCase: Sendable {
         return token
     }
 
-    private static let spendingVerbs: Set<String> = ["spend", "spent", "spending", "потрат", "трата", "расход"]
-    private static let categoryMarkers: Set<String> = ["on", "for", "to", "на", "по"]
-    private static let periodWords: Set<String> = ["this", "current", "month", "year", "today", "текущий", "месяц", "год", "сегодня"]
-    private static let categoryFillers = categoryMarkers.union(periodWords).union([
-        "did", "do", "i", "my", "the", "a", "an", "in", "at", "from"
-    ])
-    private static let genericQuestionTerms = categoryFillers.union([
-        "what", "when", "where", "why", "who", "tell", "show", "give", "me", "you", "your", "we", "our",
-        "total", "overall", "all", "any", "most", "least", "more", "less", "biggest", "smallest",
-        "category", "categories", "type", "types", "money", "budget", "analysis", "analyze", "advice", "tip", "tips",
-        "can", "could", "should", "will", "would", "have", "has", "had", "am", "are", "is", "was", "were",
-        "does", "of", "by", "with", "about", "and", "or", "than", "per", "every", "please",
-        "какой", "какая", "какие", "покажи", "скажи", "почему", "когда", "где", "все", "общий", "итого",
-        "больше", "меньше", "самый", "самая", "категория", "деньги", "бюджет", "анализ", "совет", "можно",
-        "ли", "я", "ты", "вы", "мне", "мой", "моя", "мои", "это", "что", "за", "в", "с", "и", "или"
-    ])
     private static let categoryAliases: [Set<String>] = [
         ["grocery", "product", "продукт", "продукты", "produkty", "produkt"],
         ["food", "еда", "кафе", "restaurant"],
@@ -188,6 +157,23 @@ struct GetFinancialAdviceUseCase: Sendable {
         11: ["november", "nov", "ноябрь", "ноября", "noyabr", "noyabrya"],
         12: ["december", "dec", "декабрь", "декабря", "dekabr", "dekabrya"],
     ]
+
+    #if DEBUG
+    static func assertSelfCheck() {
+        assert(isFinancialQuestion("What should I do to save 1000 USD?"))
+        assert(isFinancialQuestion("How should I plan my finances?"))
+        assert(!isFinancialQuestion("How much does an elephant weigh?"))
+        assert(!isFinancialQuestion("Skolko vesit slon?"))
+        assert(requestedCategory(
+            in: "What should I do to save 1000 USD?",
+            candidates: ["Groceries"]
+        ) == nil)
+        assert(requestedCategory(
+            in: "How much did I spend on groceries?",
+            candidates: ["Groceries"]
+        ) != nil)
+    }
+    #endif
 }
 
 private struct CategoryQuery {

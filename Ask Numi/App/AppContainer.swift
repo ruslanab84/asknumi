@@ -43,6 +43,7 @@ final class AppContainer {
         #if DEBUG
         BudgetOverview.assertSelfCheck()
         SavingsGoalsOverview.assertSelfCheck()
+        GetFinancialAdviceUseCase.assertSelfCheck()
         #endif
     }
 
