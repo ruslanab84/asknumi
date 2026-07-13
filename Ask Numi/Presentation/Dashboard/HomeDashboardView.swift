@@ -6,11 +6,14 @@
 import SwiftUI
 
 struct HomeDashboardView: View {
-    let snapshot: DashboardSnapshot // ponytail: budget & insight cards still mock, wire when those features land
+    let snapshot: DashboardSnapshot // ponytail: insight card still mock, wire when that feature lands
     let fetchTransactions: FetchTransactionsUseCase
+    let fetchBudgets: FetchBudgetsUseCase
+    let showBudgets: () -> Void
     @Binding var selectedTab: AppTab
     @State private var isShowingSettings = false
     @State private var transactions: [Transaction] = []
+    @State private var budgets: [Budget] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
 
@@ -23,6 +26,10 @@ struct HomeDashboardView: View {
 
     private var recentTransactions: [Transaction] {
         Array(transactions.sorted { $0.date > $1.date }.prefix(5))
+    }
+
+    private var budgetOverview: BudgetOverview {
+        BudgetOverview(budgets: budgets, transactions: transactions)
     }
 
     var body: some View {
@@ -45,7 +52,11 @@ struct HomeDashboardView: View {
                                     .foregroundStyle(.red)
                             }
 
-                            BudgetCard(snapshot: snapshot)
+                            BudgetCard(
+                                overview: budgetOverview,
+                                isLoading: isLoading,
+                                onTap: showBudgets
+                            )
                             InsightCard(insight: snapshot.insight)
                             RecentTransactions(transactions: recentTransactions)
                         }
@@ -68,17 +79,20 @@ struct HomeDashboardView: View {
                 SettingsView()
             }
             .task {
-                await loadTransactions()
+                await loadDashboard()
             }
         }
     }
 
-    private func loadTransactions() async {
+    private func loadDashboard() async {
         isLoading = true
         defer { isLoading = false }
 
         do {
-            transactions = try await fetchTransactions.execute()
+            async let loadedTransactions = fetchTransactions.execute()
+            async let loadedBudgets = fetchBudgets.execute()
+            transactions = try await loadedTransactions
+            budgets = try await loadedBudgets
             errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription
@@ -170,30 +184,114 @@ private struct BalanceCard: View {
 }
 
 private struct BudgetCard: View {
-    let snapshot: DashboardSnapshot
+    let overview: BudgetOverview
+    let isLoading: Bool
+    let onTap: () -> Void
 
     var body: some View {
-        GlassCard(tint: .mint.opacity(0.12)) {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Text(L10n.Dashboard.budgetTitle)
-                        .font(.subheadline.weight(.semibold))
-                    Spacer()
-                    Text(snapshot.budgetProgress.formatted(.percent.precision(.fractionLength(0))))
-                        .font(.caption.weight(.bold))
-                        .foregroundStyle(.secondary)
-                }
-
-                ProgressView(value: snapshot.budgetProgress)
-                    .tint(.mint)
-
-                HStack {
-                    AmountCaption(title: L10n.Dashboard.spent, value: snapshot.spent)
-                    Spacer()
-                    AmountCaption(title: L10n.Dashboard.budgetPlan, value: snapshot.budget, alignment: .trailing)
+        Button(action: onTap) {
+            GlassCard(tint: cardColor.opacity(0.12)) {
+                if isLoading || !overview.items.isEmpty {
+                    budgetSummary
+                        .redacted(reason: isLoading ? .placeholder : [])
+                } else {
+                    budgetEmptyState
                 }
             }
+            .contentShape(.rect)
         }
+        .buttonStyle(.plain)
+    }
+
+    private var budgetSummary: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Text(monthTitle)
+                    .font(.subheadline.weight(.semibold))
+                Spacer()
+                Text(progress.formatted(.percent.precision(.fractionLength(0))))
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(cardColor)
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.secondary)
+            }
+
+            ProgressView(value: min(max(progress, 0), 1))
+                .tint(cardColor)
+
+            HStack {
+                AmountCaption(
+                    title: L10n.Dashboard.spent,
+                    value: OperationFormatting.plain(overview.totalSpent)
+                )
+                Spacer()
+                AmountCaption(
+                    title: L10n.Dashboard.budgetPlan,
+                    value: OperationFormatting.plain(overview.totalLimit),
+                    alignment: .trailing
+                )
+            }
+
+            HStack {
+                Text(remainingText)
+                Spacer()
+                if overview.remaining >= 0 {
+                    Text(L10n.Dashboard.budgetPerDay(OperationFormatting.plain(overview.dailyAllowance)))
+                }
+            }
+            .font(.caption.weight(.medium))
+            .foregroundStyle(overview.remaining < 0 ? .red : .secondary)
+        }
+    }
+
+    private var budgetEmptyState: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(monthTitle)
+                    .font(.subheadline.weight(.semibold))
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.secondary)
+            }
+
+            Label(L10n.Dashboard.budgetEmptyTitle, systemImage: "chart.bar.fill")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.mint)
+            Text(L10n.Dashboard.budgetEmptyMessage)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(L10n.Dashboard.budgetSetup)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.mint)
+        }
+    }
+
+    private var monthTitle: String {
+        let month = overview.period.start.formatted(
+            .dateTime
+                .month(.wide)
+                .year()
+                .locale(Locale(identifier: LocalizationManager.shared.currentLanguage))
+        )
+        return L10n.Dashboard.budgetTitle(month)
+    }
+
+    private var progress: Double {
+        guard overview.totalLimit > 0 else { return 0 }
+        return NSDecimalNumber(decimal: overview.totalSpent / overview.totalLimit).doubleValue
+    }
+
+    private var remainingText: String {
+        if overview.remaining < 0 {
+            return L10n.Dashboard.budgetOverBy(OperationFormatting.plain(-overview.remaining))
+        }
+        return L10n.Dashboard.budgetRemaining(OperationFormatting.plain(overview.remaining))
+    }
+
+    private var cardColor: Color {
+        overview.remaining < 0 ? .red : .mint
     }
 }
 
@@ -345,16 +443,10 @@ struct DashboardBackground: View {
 
 struct DashboardSnapshot {
     let userName: String
-    let budgetProgress: Double
-    let spent: String
-    let budget: String
     let insight: String
 
     static let preview = DashboardSnapshot(
         userName: "Руслан",
-        budgetProgress: 0.68,
-        spent: "2 904 AZN",
-        budget: "4 280 AZN",
         insight: "Расходы на кафе выросли на 24% за последние 2 недели."
     )
 }
@@ -363,6 +455,8 @@ struct DashboardSnapshot {
     HomeDashboardView(
         snapshot: .preview,
         fetchTransactions: AppContainer(isStoredInMemoryOnly: true).makeFetchTransactionsUseCase(),
+        fetchBudgets: AppContainer(isStoredInMemoryOnly: true).makeFetchBudgetsUseCase(),
+        showBudgets: {},
         selectedTab: .constant(.home)
     )
 }
@@ -371,6 +465,8 @@ struct DashboardSnapshot {
     HomeDashboardView(
         snapshot: .preview,
         fetchTransactions: AppContainer(isStoredInMemoryOnly: true).makeFetchTransactionsUseCase(),
+        fetchBudgets: AppContainer(isStoredInMemoryOnly: true).makeFetchBudgetsUseCase(),
+        showBudgets: {},
         selectedTab: .constant(.home)
     )
     .preferredColorScheme(.dark)

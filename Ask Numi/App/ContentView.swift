@@ -8,6 +8,7 @@ import SwiftUI
 struct ContentView: View {
     let container: AppContainer
     @State private var selectedTab: AppTab = .home
+    @State private var planSection: PlanSection = .payments
 
     var body: some View {
         Group {
@@ -16,6 +17,11 @@ struct ContentView: View {
                 HomeDashboardView(
                     snapshot: .preview,
                     fetchTransactions: container.makeFetchTransactionsUseCase(),
+                    fetchBudgets: container.makeFetchBudgetsUseCase(),
+                    showBudgets: {
+                        planSection = .budgets
+                        selectedTab = .plan
+                    },
                     selectedTab: $selectedTab
                 )
             case .operations:
@@ -46,7 +52,8 @@ struct ContentView: View {
                     fetchGoals: container.makeFetchSavingsGoalsUseCase(),
                     saveGoal: container.makeSaveSavingsGoalUseCase(),
                     deleteGoal: container.makeDeleteSavingsGoalUseCase(),
-                    selectedTab: $selectedTab
+                    selectedTab: $selectedTab,
+                    section: $planSection
                 )
             }
         }

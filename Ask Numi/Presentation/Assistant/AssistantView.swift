@@ -151,9 +151,8 @@ struct AssistantView: View {
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(.white)
                     .frame(width: 38, height: 38)
-                    .glassEffect(.regular.tint(.indigo).interactive(), in: .circle)
             }
-            .buttonStyle(.plain)
+            .buttonStyle(.glass(.regular.tint(.indigo)))
             .disabled(
                 draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                     || availability != .available

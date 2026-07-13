@@ -42,9 +42,23 @@ enum L10n {
         static var totalBalance: String     { l("dashboard.balance_card.label.total_balance") }
         static var income: String           { l("dashboard.balance_card.label.income") }
         static var expenses: String         { l("dashboard.balance_card.label.expenses") }
-        static var budgetTitle: String      { l("dashboard.budget_card.title") }
+        static func budgetTitle(_ month: String) -> String {
+            String(format: l("dashboard.budget_card.title"), month)
+        }
         static var spent: String            { l("dashboard.budget_card.label.spent") }
         static var budgetPlan: String       { l("dashboard.budget_card.label.plan") }
+        static func budgetRemaining(_ amount: String) -> String {
+            String(format: l("dashboard.budget_card.label.remaining"), amount)
+        }
+        static func budgetPerDay(_ amount: String) -> String {
+            String(format: l("dashboard.budget_card.label.per_day"), amount)
+        }
+        static func budgetOverBy(_ amount: String) -> String {
+            String(format: l("dashboard.budget_card.label.over_by"), amount)
+        }
+        static var budgetEmptyTitle: String { l("dashboard.budget_card.empty.title") }
+        static var budgetEmptyMessage: String { l("dashboard.budget_card.empty.message") }
+        static var budgetSetup: String { l("dashboard.budget_card.cta.setup") }
         static var insightTitle: String     { l("dashboard.insight_card.title") }
         static var insightShowDetails: String { l("dashboard.insight_card.cta.show_details") }
         static var recentTitle: String      { l("dashboard.recent.title") }

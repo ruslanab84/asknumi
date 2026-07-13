@@ -24,9 +24,15 @@
 "dashboard.balance_card.label.expenses" = "Расходы";
 
 /* Dashboard — Budget Card */
-"dashboard.budget_card.title" = "Бюджет июля";
+"dashboard.budget_card.title" = "Бюджет за %@";
 "dashboard.budget_card.label.spent" = "Потрачено";
 "dashboard.budget_card.label.plan" = "План";
+"dashboard.budget_card.label.remaining" = "Осталось %@";
+"dashboard.budget_card.label.per_day" = "%@ в день";
+"dashboard.budget_card.label.over_by" = "Превышение на %@";
+"dashboard.budget_card.empty.title" = "Бюджет пока не настроен";
+"dashboard.budget_card.empty.message" = "Задайте лимиты по категориям, чтобы видеть остаток и безопасный темп трат.";
+"dashboard.budget_card.cta.setup" = "Настроить бюджет";
 
 /* Dashboard — Insight Card */
 "dashboard.insight_card.title" = "AI-инсайт";

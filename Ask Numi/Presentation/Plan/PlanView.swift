@@ -18,7 +18,7 @@ struct PlanView: View {
     let saveGoal: SaveSavingsGoalUseCase
     let deleteGoal: DeleteSavingsGoalUseCase
     @Binding var selectedTab: AppTab
-    @State private var section: PlanSection = .payments
+    @Binding var section: PlanSection
     @State private var transactions: [Transaction] = []
     @State private var subscriptions: [Subscription] = []
     @State private var budgets: [Budget] = []
@@ -912,7 +912,7 @@ private struct BudgetRow: View {
     }
 }
 
-private enum PlanSection: CaseIterable {
+enum PlanSection: CaseIterable {
     case payments
     case budgets
     case goals
@@ -948,7 +948,8 @@ struct PlanSnapshot {
         fetchGoals: container.makeFetchSavingsGoalsUseCase(),
         saveGoal: container.makeSaveSavingsGoalUseCase(),
         deleteGoal: container.makeDeleteSavingsGoalUseCase(),
-        selectedTab: .constant(.plan)
+        selectedTab: .constant(.plan),
+        section: .constant(.payments)
     )
 }
 
@@ -966,7 +967,8 @@ struct PlanSnapshot {
         fetchGoals: container.makeFetchSavingsGoalsUseCase(),
         saveGoal: container.makeSaveSavingsGoalUseCase(),
         deleteGoal: container.makeDeleteSavingsGoalUseCase(),
-        selectedTab: .constant(.plan)
+        selectedTab: .constant(.plan),
+        section: .constant(.payments)
     )
         .preferredColorScheme(.dark)
 }

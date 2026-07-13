@@ -20,9 +20,15 @@
 "dashboard.balance_card.label.total_balance" = "Total balance";
 "dashboard.balance_card.label.income" = "Income";
 "dashboard.balance_card.label.expenses" = "Expenses";
-"dashboard.budget_card.title" = "July budget";
+"dashboard.budget_card.title" = "Budget for %@";
 "dashboard.budget_card.label.spent" = "Spent";
 "dashboard.budget_card.label.plan" = "Plan";
+"dashboard.budget_card.label.remaining" = "%@ remaining";
+"dashboard.budget_card.label.per_day" = "%@ per day";
+"dashboard.budget_card.label.over_by" = "Over by %@";
+"dashboard.budget_card.empty.title" = "No budget yet";
+"dashboard.budget_card.empty.message" = "Set category limits to see what's left and a safe spending pace.";
+"dashboard.budget_card.cta.setup" = "Set up budget";
 "dashboard.insight_card.title" = "AI insight";
 "dashboard.insight_card.cta.show_details" = "Show details  →";
 "dashboard.recent.title" = "Recent operations";
