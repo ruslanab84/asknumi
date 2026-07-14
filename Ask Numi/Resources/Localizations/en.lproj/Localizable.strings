@@ -67,6 +67,10 @@
 "add_operation.field.category.too_long" = "The name must be 60 characters or fewer.";
 "add_operation.category.create" = "Create custom category";
 "add_operation.field.date.label" = "Date and time";
+"add_operation.magic.section" = "Quick add";
+"add_operation.magic.placeholder" = "Describe it, e.g. “Spent 350 on coffee at Surf”";
+"add_operation.magic.accessibility.parse" = "Fill the form from the description";
+"add_operation.magic.error.failed" = "Couldn't read that. Try rephrasing, or fill the fields below.";
 "add_operation.category.default.groceries" = "Groceries";
 "add_operation.category.default.food" = "Food";
 "add_operation.category.default.transport" = "Transport";
@@ -94,7 +98,14 @@
 "assistant.thinking" = "Numi is preparing an answer…";
 "assistant.error.invalid_question" = "Ask a complete question about income, expenses, a category, or a time period.";
 "assistant.error.no_data" = "You haven't recorded any operations for the selected period.";
+"assistant.error.category_not_found" = "You haven't recorded any expenses in that category for the selected period.";
 "assistant.error.generic" = "Couldn't prepare an answer. Try again.";
+"assistant.savings.needs_details" = "More verified inputs are needed for an exact savings plan.";
+"assistant.savings.currency_mismatch" = "The target uses %@, but your recorded data uses %@. Currency conversion is unavailable.";
+"assistant.savings.missing_deadline" = "Add a deadline for the savings target.";
+"assistant.savings.missing_deadline_and_income" = "Add a deadline and record income in %@ so available cash flow can be confirmed.";
+"assistant.savings.missing_income" = "No income is recorded in %@, so available cash flow cannot be confirmed.";
+"assistant.savings.review_category" = "Review %@: recorded expenses are %@ %@. This total is not guaranteed savings.";
 "assistant.chart.category.other" = "Other";
 "assistant.chart.label.total" = "Total";
 "assistant.chart.accessibility.total_expenses" = "Total expenses %@";

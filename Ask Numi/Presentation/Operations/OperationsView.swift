@@ -12,6 +12,7 @@ struct OperationsView: View {
     let addTransaction: AddTransactionUseCase
     let updateTransaction: UpdateTransactionUseCase
     let deleteTransaction: DeleteTransactionUseCase
+    let parseNaturalInput: ParseNaturalInputUseCase
     @Binding var selectedTab: AppTab
 
     @State private var transactions: [Transaction] = []
@@ -80,7 +81,8 @@ struct OperationsView: View {
                     updateTransaction: updateTransaction,
                     existingTransactions: transactions,
                     categories: categories,
-                    addCategory: addCategory
+                    addCategory: addCategory,
+                    parseNaturalInput: parseNaturalInput
                 ) { transaction in
                     transactions.append(transaction)
                     transactions.sort { $0.date > $1.date }
@@ -358,6 +360,10 @@ private struct AddOperationView: View {
     let existingTransactions: [Transaction]
     let categories: [TransactionCategory]
     let addCategory: AddTransactionCategoryUseCase
+    /// Optional on-device parser. When present and available, a quick-add
+    /// field lets the user describe the operation in words. Omitted (nil)
+    /// when editing an existing operation.
+    let parseNaturalInput: ParseNaturalInputUseCase?
     let editing: Transaction?
     let onSaved: (Transaction) -> Void
     let onCategorySaved: (TransactionCategory) -> Void
@@ -368,6 +374,7 @@ private struct AddOperationView: View {
         existingTransactions: [Transaction],
         categories: [TransactionCategory],
         addCategory: AddTransactionCategoryUseCase,
+        parseNaturalInput: ParseNaturalInputUseCase? = nil,
         editing: Transaction? = nil,
         onSaved: @escaping (Transaction) -> Void,
         onCategorySaved: @escaping (TransactionCategory) -> Void
@@ -377,6 +384,7 @@ private struct AddOperationView: View {
         self.existingTransactions = existingTransactions
         self.categories = categories
         self.addCategory = addCategory
+        self.parseNaturalInput = parseNaturalInput
         self.editing = editing
         self.onSaved = onSaved
         self.onCategorySaved = onCategorySaved
@@ -387,6 +395,7 @@ private struct AddOperationView: View {
             _categoryIcon = State(initialValue: editing.categoryIcon)
             _amountText = State(initialValue: "\(editing.amount)")
             _date = State(initialValue: editing.date)
+            _note = State(initialValue: editing.note)
         }
     }
 
@@ -401,10 +410,22 @@ private struct AddOperationView: View {
     @State private var categoryIcon = CategoryIcon.fallback
     @State private var amountText = ""
     @State private var date = Date.now
+    @State private var note: String?
     @State private var isSaving = false
     @State private var errorMessage: String?
     @State private var isPresentingNewCategory = false
+    @State private var magicText = ""
+    @State private var isParsing = false
+    @State private var magicError: String?
     @FocusState private var focusedField: Field?
+
+    private var showsQuickAdd: Bool {
+        editing == nil && (parseNaturalInput?.isAvailable ?? false)
+    }
+
+    private var trimmedMagicText: String {
+        magicText.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
 
     private var trimmedCategory: String {
         category.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -450,6 +471,10 @@ private struct AddOperationView: View {
     var body: some View {
         NavigationStack {
             Form {
+                if showsQuickAdd {
+                    quickAddSection
+                }
+
                 Section(L10n.AddOperation.sectionKind) {
                     Picker(L10n.AddOperation.sectionKind, selection: $kind) {
                         ForEach(TransactionKind.allCases, id: \.self) { kind in
@@ -569,6 +594,65 @@ private struct AddOperationView: View {
         }
     }
 
+    private var quickAddSection: some View {
+        Section(L10n.AddOperation.magicSection) {
+            HStack(alignment: .top, spacing: 10) {
+                TextField(L10n.AddOperation.magicPlaceholder, text: $magicText, axis: .vertical)
+                    .lineLimit(1...3)
+                    .focused($focusedField, equals: .magic)
+                    .submitLabel(.go)
+                    .onSubmit { Task { await parseMagicText() } }
+
+                Button {
+                    Task { await parseMagicText() }
+                } label: {
+                    if isParsing {
+                        ProgressView()
+                    } else {
+                        Image(systemName: "sparkles")
+                            .font(.headline)
+                    }
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(.indigo)
+                .disabled(trimmedMagicText.isEmpty || isParsing)
+                .accessibilityLabel(L10n.AddOperation.magicButton)
+            }
+
+            if let magicError {
+                Text(magicError)
+                    .font(.caption)
+                    .foregroundStyle(.red)
+            }
+        }
+    }
+
+    private func parseMagicText() async {
+        guard let parseNaturalInput, !trimmedMagicText.isEmpty, !isParsing else { return }
+        isParsing = true
+        magicError = nil
+        focusedField = nil
+        defer { isParsing = false }
+
+        do {
+            apply(try await parseNaturalInput.execute(trimmedMagicText))
+        } catch {
+            magicError = L10n.AddOperation.magicFailed
+        }
+    }
+
+    /// Fill the form from a parsed draft so the user can review before saving.
+    private func apply(_ draft: ParsedTransactionDraft) {
+        kind = draft.kind
+        category = draft.category
+        amountText = "\(draft.amount)"
+        note = draft.note
+        categoryIcon = categories.first {
+            $0.kind == draft.kind && $0.name.caseInsensitiveCompare(draft.category) == .orderedSame
+        }?.icon ?? CategoryIcon.suggested(for: draft.category, kind: draft.kind)
+        focusedField = draft.category.isEmpty ? .category : .amount
+    }
+
     private func save() async {
         guard let amount, canSave else { return }
         isSaving = true
@@ -581,7 +665,7 @@ private struct AddOperationView: View {
             category: trimmedCategory,
             categoryIcon: categoryIcon,
             date: date,
-            note: editing?.note
+            note: note
         )
 
         do {
@@ -607,6 +691,7 @@ private struct OperationCategorySuggestion: Identifiable {
 }
 
 private enum Field {
+    case magic
     case category
     case amount
 }
@@ -706,6 +791,7 @@ extension TransactionKind {
         addTransaction: container.makeAddTransactionUseCase(),
         updateTransaction: container.makeUpdateTransactionUseCase(),
         deleteTransaction: container.makeDeleteTransactionUseCase(),
+        parseNaturalInput: container.makeParseNaturalInputUseCase(),
         selectedTab: .constant(.operations)
     )
 }

@@ -8,8 +8,8 @@ import SwiftUI
 struct AssistantView: View {
     let getAdvice: GetFinancialAdviceUseCase
     @Binding var selectedTab: AppTab
+    @Binding var exchanges: [AssistantExchange]
     @State private var draft = ""
-    @State private var exchanges: [AssistantExchange] = []
     @FocusState private var isInputFocused: Bool
 
     private var availability: AdvisorAvailability { getAdvice.advisorAvailability }
@@ -184,6 +184,8 @@ struct AssistantView: View {
                 phase = .failed(L10n.Assistant.errorInvalidQuestion)
             } catch DomainError.notEnoughData {
                 phase = .failed(L10n.Assistant.errorNoData)
+            } catch DomainError.categoryNotFound {
+                phase = .failed(L10n.Assistant.errorCategoryNotFound)
             } catch {
                 phase = .failed(L10n.Assistant.errorGeneric)
             }
@@ -199,7 +201,7 @@ struct AssistantView: View {
     }
 }
 
-private struct AssistantExchange: Identifiable {
+struct AssistantExchange: Identifiable {
     enum Phase {
         case loading
         case answered(FinancialAdviceReport)
@@ -261,6 +263,7 @@ private struct AnswerCard: View {
     private static let palette: [Color] = [.blue, .green, .orange, .yellow]
 
     private var categories: [SpendingCategory] {
+        guard report.showsSpendingChart else { return [] }
         let total = report.summary.totalExpenses
         guard total > 0 else { return [] }
 
@@ -375,14 +378,16 @@ private struct SpendingCategory: Identifiable {
 #Preview("Светлая тема") {
     AssistantView(
         getAdvice: AppContainer(isStoredInMemoryOnly: true).makeAdviceUseCase(),
-        selectedTab: .constant(.assistant)
+        selectedTab: .constant(.assistant),
+        exchanges: .constant([])
     )
 }
 
 #Preview("Тёмная тема") {
     AssistantView(
         getAdvice: AppContainer(isStoredInMemoryOnly: true).makeAdviceUseCase(),
-        selectedTab: .constant(.assistant)
+        selectedTab: .constant(.assistant),
+        exchanges: .constant([])
     )
     .preferredColorScheme(.dark)
 }

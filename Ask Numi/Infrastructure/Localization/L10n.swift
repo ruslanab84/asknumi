@@ -107,6 +107,10 @@ enum L10n {
         static var categoryTooLong: String     { l("add_operation.field.category.too_long") }
         static var createCategory: String      { l("add_operation.category.create") }
         static var dateLabel: String           { l("add_operation.field.date.label") }
+        static var magicSection: String        { l("add_operation.magic.section") }
+        static var magicPlaceholder: String    { l("add_operation.magic.placeholder") }
+        static var magicButton: String         { l("add_operation.magic.accessibility.parse") }
+        static var magicFailed: String         { l("add_operation.magic.error.failed") }
 
         static var defaultExpenseCategories: [String] {
             ["groceries", "food", "transport", "auto", "home", "health", "entertainment", "clothes"]
@@ -134,7 +138,22 @@ enum L10n {
         static var thinking: String           { l("assistant.thinking") }
         static var errorInvalidQuestion: String { l("assistant.error.invalid_question") }
         static var errorNoData: String        { l("assistant.error.no_data") }
+        static var errorCategoryNotFound: String { l("assistant.error.category_not_found") }
         static var errorGeneric: String       { l("assistant.error.generic") }
+        static var savingsNeedsDetails: String { l("assistant.savings.needs_details") }
+        static var savingsMissingDeadline: String { l("assistant.savings.missing_deadline") }
+        static func savingsMissingDeadlineAndIncome(_ currency: String) -> String {
+            String(format: l("assistant.savings.missing_deadline_and_income"), currency)
+        }
+        static func savingsCurrencyMismatch(_ target: String, _ data: String) -> String {
+            String(format: l("assistant.savings.currency_mismatch"), target, data)
+        }
+        static func savingsMissingIncome(_ currency: String) -> String {
+            String(format: l("assistant.savings.missing_income"), currency)
+        }
+        static func savingsReviewCategory(_ category: String, _ amount: String, _ currency: String) -> String {
+            String(format: l("assistant.savings.review_category"), category, amount, currency)
+        }
         static var chartOther: String         { l("assistant.chart.category.other") }
         static var chartTotal: String         { l("assistant.chart.label.total") }
         static func chartTotalExpenses(_ amount: String) -> String {

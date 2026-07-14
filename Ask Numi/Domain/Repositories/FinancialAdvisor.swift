@@ -12,5 +12,5 @@ import Foundation
 protocol FinancialAdvisor: Sendable {
     var availability: AdvisorAvailability { get }
     /// `question` is the user's free-form question; `nil` asks for generic advice.
-    func advise(on summary: FinancialSummary, transactions: [Transaction], question: String?) async throws -> FinancialAdvice
+    func advise(on summary: FinancialSummary, question: String?, task: FinancialAdviceTask) async throws -> FinancialAdvice
 }

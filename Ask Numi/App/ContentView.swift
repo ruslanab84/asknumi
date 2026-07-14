@@ -9,6 +9,7 @@ struct ContentView: View {
     let container: AppContainer
     @State private var selectedTab: AppTab = .home
     @State private var planSection: PlanSection = .payments
+    @State private var assistantExchanges: [AssistantExchange] = []
 
     var body: some View {
         Group {
@@ -32,12 +33,14 @@ struct ContentView: View {
                     addTransaction: container.makeAddTransactionUseCase(),
                     updateTransaction: container.makeUpdateTransactionUseCase(),
                     deleteTransaction: container.makeDeleteTransactionUseCase(),
+                    parseNaturalInput: container.makeParseNaturalInputUseCase(),
                     selectedTab: $selectedTab
                 )
             case .assistant:
                 AssistantView(
                     getAdvice: container.makeAdviceUseCase(),
-                    selectedTab: $selectedTab
+                    selectedTab: $selectedTab,
+                    exchanges: $assistantExchanges
                 )
             case .plan:
                 PlanView(

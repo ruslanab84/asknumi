@@ -17,6 +17,7 @@ final class AppContainer {
     let budgetRepository: BudgetRepository
     let savingsGoalRepository: SavingsGoalRepository
     let advisor: FinancialAdvisor
+    let transactionParser: TransactionParser
 
     init(isStoredInMemoryOnly: Bool = false) {
         do {
@@ -39,11 +40,15 @@ final class AppContainer {
         budgetRepository = SwiftDataBudgetRepository(modelContainer: modelContainer)
         savingsGoalRepository = SwiftDataSavingsGoalRepository(modelContainer: modelContainer)
         advisor = FoundationModelsAdvisor()
+        transactionParser = FoundationModelsTransactionParser()
 
         #if DEBUG
         BudgetOverview.assertSelfCheck()
         SavingsGoalsOverview.assertSelfCheck()
         GetFinancialAdviceUseCase.assertSelfCheck()
+        FoundationModelsAdvisor.assertSelfCheck()
+        Task { await GetFinancialAdviceUseCase.assertAsyncSelfCheck() }
+        Task { await ParseNaturalInputUseCase.assertSelfCheck() }
         #endif
     }
 
@@ -57,6 +62,10 @@ final class AppContainer {
 
     func makeAddTransactionUseCase() -> AddTransactionUseCase {
         AddTransactionUseCase(repository: transactionRepository)
+    }
+
+    func makeParseNaturalInputUseCase() -> ParseNaturalInputUseCase {
+        ParseNaturalInputUseCase(parser: transactionParser)
     }
 
     func makeUpdateTransactionUseCase() -> UpdateTransactionUseCase {

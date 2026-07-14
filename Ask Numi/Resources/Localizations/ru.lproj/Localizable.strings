@@ -83,6 +83,10 @@
 "add_operation.field.category.too_long" = "Название должно быть не длиннее 60 символов.";
 "add_operation.category.create" = "Создать свою категорию";
 "add_operation.field.date.label" = "Дата и время";
+"add_operation.magic.section" = "Быстрый ввод";
+"add_operation.magic.placeholder" = "Опишите словами, напр. «Потратил 350 на кофе в Surf»";
+"add_operation.magic.accessibility.parse" = "Заполнить форму из описания";
+"add_operation.magic.error.failed" = "Не удалось разобрать. Переформулируйте или заполните поля ниже.";
 
 /* Add Operation — Default category suggestions */
 "add_operation.category.default.groceries" = "Продукты";
@@ -112,7 +116,14 @@
 "assistant.thinking" = "Нуми готовит ответ…";
 "assistant.error.invalid_question" = "Задайте полный вопрос о доходах, расходах, категории или периоде.";
 "assistant.error.no_data" = "За указанный период вы не записали ни одной операции.";
+"assistant.error.category_not_found" = "За указанный период в этой категории нет записанных расходов.";
 "assistant.error.generic" = "Не получилось составить ответ. Попробуйте ещё раз.";
+"assistant.savings.needs_details" = "Для точного плана накопления не хватает проверенных данных.";
+"assistant.savings.currency_mismatch" = "Цель указана в %@, а записанные данные — в %@. Конвертация валют недоступна.";
+"assistant.savings.missing_deadline" = "Укажите срок для цели накопления.";
+"assistant.savings.missing_deadline_and_income" = "Укажите срок и запишите доход в %@, чтобы подтвердить доступный денежный поток.";
+"assistant.savings.missing_income" = "Доходы в %@ не записаны, поэтому доступный денежный поток нельзя подтвердить.";
+"assistant.savings.review_category" = "Проверьте %@: записанные расходы составляют %@ %@. Эта сумма не является гарантированной экономией.";
 "assistant.chart.category.other" = "Другое";
 "assistant.chart.label.total" = "Всего";
 "assistant.chart.accessibility.total_expenses" = "Всего расходов %@";

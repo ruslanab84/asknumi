@@ -10,4 +10,5 @@ enum DomainError: Error, Equatable {
     case invalidName
     case invalidQuestion
     case notEnoughData
+    case categoryNotFound
 }
