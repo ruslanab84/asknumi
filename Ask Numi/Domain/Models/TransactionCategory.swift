@@ -10,12 +10,33 @@ struct TransactionCategory: Identifiable, Hashable, Sendable {
     var name: String
     var kind: TransactionKind
     var icon: String
+    var color: CategoryColor
 
-    init(id: UUID = UUID(), name: String, kind: TransactionKind, icon: String) {
+    init(
+        id: UUID = UUID(),
+        name: String,
+        kind: TransactionKind,
+        icon: String,
+        color: CategoryColor? = nil
+    ) {
         self.id = id
         self.name = name
         self.kind = kind
         self.icon = icon
+        self.color = color ?? CategoryColor.defaultColor(for: kind)
+    }
+}
+
+enum CategoryColor: String, CaseIterable, Sendable {
+    case red, pink, orange, yellow, green, mint, cyan, blue, purple
+
+    nonisolated static func defaultColor(for kind: TransactionKind) -> Self {
+        kind == .income ? .green : .red
+    }
+
+    nonisolated static func assertSelfCheck() {
+        assert(defaultColor(for: .expense) == .red)
+        assert(defaultColor(for: .income) == .green)
     }
 }
 

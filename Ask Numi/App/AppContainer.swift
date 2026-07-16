@@ -45,6 +45,7 @@ final class AppContainer {
         transactionClassifier = MLClassificationService()
 
         #if DEBUG
+        CategoryColor.assertSelfCheck()
         BudgetOverview.assertSelfCheck()
         SavingsGoalsOverview.assertSelfCheck()
         GetFinancialAdviceUseCase.assertSelfCheck()

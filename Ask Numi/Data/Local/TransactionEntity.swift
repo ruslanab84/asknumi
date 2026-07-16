@@ -16,6 +16,7 @@ final class TransactionEntity {
     var kindRaw: String
     var categoryRaw: String
     var categoryIconRaw: String?
+    var categoryColorRaw: String?
     var date: Date
     var note: String?
 
@@ -25,6 +26,7 @@ final class TransactionEntity {
         kindRaw: String,
         categoryRaw: String,
         categoryIconRaw: String?,
+        categoryColorRaw: String?,
         date: Date,
         note: String?
     ) {
@@ -33,6 +35,7 @@ final class TransactionEntity {
         self.kindRaw = kindRaw
         self.categoryRaw = categoryRaw
         self.categoryIconRaw = categoryIconRaw
+        self.categoryColorRaw = categoryColorRaw
         self.date = date
         self.note = note
     }
@@ -46,6 +49,7 @@ extension TransactionEntity {
             kindRaw: transaction.kind.rawValue,
             categoryRaw: transaction.category,
             categoryIconRaw: transaction.categoryIcon,
+            categoryColorRaw: transaction.categoryColor.rawValue,
             date: transaction.date,
             note: transaction.note
         )
@@ -61,6 +65,7 @@ extension TransactionEntity {
             kind: kind,
             category: categoryRaw,
             categoryIcon: categoryIconRaw ?? CategoryIcon.suggested(for: categoryRaw, kind: kind),
+            categoryColor: categoryColorRaw.flatMap(CategoryColor.init(rawValue:)),
             date: date,
             note: note
         )

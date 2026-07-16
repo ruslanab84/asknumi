@@ -13,6 +13,7 @@ struct NewCategoryView: View {
     @State private var kind: TransactionKind
     @State private var name = ""
     @State private var selectedIcon = CategoryIcon.options[0]
+    @State private var selectedColor: CategoryColor
     @State private var isSaving = false
     @State private var errorMessage: String?
     @FocusState private var isNameFocused: Bool
@@ -27,6 +28,7 @@ struct NewCategoryView: View {
         self.addCategory = addCategory
         self.onSaved = onSaved
         _kind = State(initialValue: kind)
+        _selectedColor = State(initialValue: .defaultColor(for: kind))
     }
 
     private var trimmedName: String {
@@ -47,6 +49,7 @@ struct NewCategoryView: View {
                         VStack(alignment: .leading, spacing: 24) {
                             kindPicker
                             nameField
+                            colorPicker
                             iconPicker
 
                             if let errorMessage {
@@ -76,6 +79,7 @@ struct NewCategoryView: View {
                 }
             }
             .onAppear { isNameFocused = true }
+            .tint(selectedColor.displayColor)
         }
     }
 
@@ -116,12 +120,12 @@ struct NewCategoryView: View {
                     } label: {
                         Image(systemName: icon)
                             .font(.body.weight(.medium))
-                            .foregroundStyle(icon == selectedIcon ? (kind == .expense ? .red : .green) : .primary)
+                            .foregroundStyle(icon == selectedIcon ? selectedColor.displayColor : .primary)
                             .frame(maxWidth: .infinity)
                             .frame(height: 48)
                             .glassEffect(
                                 .regular
-                                    .tint(icon == selectedIcon ? (kind == .expense ? Color.red : .green).opacity(0.18) : .clear)
+                                    .tint(icon == selectedIcon ? selectedColor.displayColor.opacity(0.18) : .clear)
                                     .interactive(),
                                 in: .rect(cornerRadius: 14)
                             )
@@ -134,11 +138,44 @@ struct NewCategoryView: View {
         }
     }
 
+    private var colorPicker: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(L10n.NewCategory.colorLabel)
+                .font(.caption.weight(.semibold))
+
+            LazyVGrid(columns: columns, spacing: 10) {
+                ForEach(CategoryColor.allCases, id: \.self) { color in
+                    Button {
+                        selectedColor = color
+                    } label: {
+                        Circle()
+                            .fill(color.displayColor)
+                            .frame(width: 38, height: 38)
+                            .overlay {
+                                if color == selectedColor {
+                                    Image(systemName: "checkmark")
+                                        .font(.caption.weight(.bold))
+                                        .foregroundStyle(.white)
+                                }
+                            }
+                            .overlay {
+                                Circle()
+                                    .stroke(color == selectedColor ? .white.opacity(0.9) : .clear, lineWidth: 3)
+                            }
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(L10n.NewCategory.color(color.rawValue))
+                    .accessibilityAddTraits(color == selectedColor ? .isSelected : [])
+                }
+            }
+        }
+    }
+
     private func save() async {
         guard canSave else { return }
         isSaving = true
 
-        let category = TransactionCategory(name: trimmedName, kind: kind, icon: selectedIcon)
+        let category = TransactionCategory(name: trimmedName, kind: kind, icon: selectedIcon, color: selectedColor)
         do {
             if let addCategory {
                 try await addCategory.execute(category)

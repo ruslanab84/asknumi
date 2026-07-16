@@ -325,10 +325,10 @@ private struct OperationsRow: View {
         HStack(spacing: 12) {
             Image(systemName: transaction.categoryIcon)
                 .font(.body.weight(.semibold))
-                .foregroundStyle(transaction.kind == .income ? .green : .red)
+                .foregroundStyle(transaction.categoryColor.displayColor)
                 .frame(width: 42, height: 42)
                 .background(
-                    (transaction.kind == .income ? Color.green : .red).opacity(0.14),
+                    transaction.categoryColor.displayColor.opacity(0.14),
                     in: .rect(cornerRadius: 13)
                 )
 
@@ -397,6 +397,7 @@ private struct AddOperationView: View {
             _kind = State(initialValue: editing.kind)
             _category = State(initialValue: editing.category)
             _categoryIcon = State(initialValue: editing.categoryIcon)
+            _categoryColor = State(initialValue: editing.categoryColor)
             _amountText = State(initialValue: "\(editing.amount)")
             _date = State(initialValue: editing.date)
         }
@@ -416,6 +417,7 @@ private struct AddOperationView: View {
     @State private var kind: TransactionKind = .expense
     @State private var category = ""
     @State private var categoryIcon = CategoryIcon.fallback
+    @State private var categoryColor = CategoryColor.defaultColor(for: .expense)
     @State private var amountText = ""
     @State private var date = Date.now
     @State private var isSaving = false
@@ -457,13 +459,17 @@ private struct AddOperationView: View {
     private var availableCategories: [OperationCategorySuggestion] {
         let savedCategories = categories
             .filter { $0.kind == kind }
-            .map { OperationCategorySuggestion(name: $0.name, icon: $0.icon) }
+            .map { OperationCategorySuggestion(name: $0.name, icon: $0.icon, color: $0.color) }
         let savedTransactions = existingTransactions
             .filter { $0.kind == kind }
             .sorted { $0.date > $1.date }
-            .map { OperationCategorySuggestion(name: $0.category, icon: $0.categoryIcon) }
+            .map { OperationCategorySuggestion(name: $0.category, icon: $0.categoryIcon, color: $0.categoryColor) }
         let defaults = (Self.defaultCategories[kind] ?? []).map {
-            OperationCategorySuggestion(name: $0, icon: CategoryIcon.suggested(for: $0, kind: kind))
+            OperationCategorySuggestion(
+                name: $0,
+                icon: CategoryIcon.suggested(for: $0, kind: kind),
+                color: CategoryColor.defaultColor(for: kind)
+            )
         }
 
         var seen = Set<String>()
@@ -525,6 +531,7 @@ private struct AddOperationView: View {
                                 kind = selected.kind
                                 category = selected.name
                                 categoryIcon = selected.icon
+                                categoryColor = selected.color
                                 hasUserSelectedCategory = true
                                 focusedField = .amount
                             },
@@ -585,6 +592,9 @@ private struct AddOperationView: View {
                 categoryIcon = categories.first {
                     $0.kind == kind && $0.name.caseInsensitiveCompare(category) == .orderedSame
                 }?.icon ?? CategoryIcon.suggested(for: category, kind: kind)
+                categoryColor = categories.first {
+                    $0.kind == kind && $0.name.caseInsensitiveCompare(category) == .orderedSame
+                }?.color ?? CategoryColor.defaultColor(for: kind)
             }
             .task(id: classification.merchantText) {
                 let previousSuggestion = classification.suggestion
@@ -594,9 +604,11 @@ private struct AddOperationView: View {
                     kind = suggestion.category.kind
                     category = suggestion.category.localized
                     categoryIcon = suggestion.category.icon
+                    categoryColor = CategoryColor.defaultColor(for: suggestion.category.kind)
                 } else if let previousSuggestion, category == previousSuggestion.category.localized {
                     category = ""
                     categoryIcon = CategoryIcon.fallback
+                    categoryColor = CategoryColor.defaultColor(for: kind)
                 }
             }
         }
@@ -659,6 +671,9 @@ private struct AddOperationView: View {
         categoryIcon = categories.first {
             $0.kind == draft.kind && $0.name.caseInsensitiveCompare(draft.category) == .orderedSame
         }?.icon ?? CategoryIcon.suggested(for: draft.category, kind: draft.kind)
+        categoryColor = categories.first {
+            $0.kind == draft.kind && $0.name.caseInsensitiveCompare(draft.category) == .orderedSame
+        }?.color ?? CategoryColor.defaultColor(for: draft.kind)
         focusedField = draft.category.isEmpty ? nil : .amount
     }
 
@@ -675,6 +690,7 @@ private struct AddOperationView: View {
             kind: kind,
             category: trimmedCategory,
             categoryIcon: categoryIcon,
+            categoryColor: categoryColor,
             date: date,
             note: merchant.isEmpty ? nil : merchant
         )
@@ -697,6 +713,7 @@ private struct AddOperationView: View {
 private struct OperationCategorySuggestion: Identifiable {
     let name: String
     let icon: String
+    let color: CategoryColor
 
     var id: String { name.lowercased() }
 }
@@ -718,11 +735,11 @@ private struct CategorySelectionView: View {
             Section {
                 ForEach(categories) { category in
                     Button {
-                        select(TransactionCategory(name: category.name, kind: kind, icon: category.icon))
+                        select(TransactionCategory(name: category.name, kind: kind, icon: category.icon, color: category.color))
                     } label: {
                         HStack(spacing: 12) {
                             Image(systemName: category.icon)
-                                .foregroundStyle(kind == .expense ? .red : .green)
+                                .foregroundStyle(category.color.displayColor)
                                 .frame(width: 28)
                             Text(category.name)
                                 .foregroundStyle(.primary)

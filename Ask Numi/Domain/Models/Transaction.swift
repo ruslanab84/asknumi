@@ -16,6 +16,7 @@ struct Transaction: Identifiable, Hashable, Sendable {
     var kind: TransactionKind
     var category: String
     var categoryIcon: String
+    var categoryColor: CategoryColor
     var date: Date
     var note: String?
 
@@ -25,6 +26,7 @@ struct Transaction: Identifiable, Hashable, Sendable {
         kind: TransactionKind,
         category: String,
         categoryIcon: String = CategoryIcon.fallback,
+        categoryColor: CategoryColor? = nil,
         date: Date = .now,
         note: String? = nil
     ) {
@@ -33,6 +35,7 @@ struct Transaction: Identifiable, Hashable, Sendable {
         self.kind = kind
         self.category = category
         self.categoryIcon = categoryIcon
+        self.categoryColor = categoryColor ?? CategoryColor.defaultColor(for: kind)
         self.date = date
         self.note = note
     }

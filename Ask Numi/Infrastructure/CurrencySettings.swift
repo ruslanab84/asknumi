@@ -11,60 +11,40 @@ enum CurrencySettings {
 
     static var selectedCode: String {
         let code = UserDefaults.standard.string(forKey: storageKey) ?? defaultCode
-        return Locale.commonISOCurrencyCodes.contains(code) ? code : defaultCode
+        return supportedCodes.contains(code) ? code : defaultCode
     }
 
-    static var supportedCodes: [String] {
-        Locale.commonISOCurrencyCodes.sorted {
-            displayName(for: $0).localizedStandardCompare(displayName(for: $1)) == .orderedAscending
-        }
-    }
-
-    static func displayName(for code: String) -> String {
-        let locale = Locale(identifier: LocalizationManager.shared.currentLanguage)
-        return locale.localizedString(forCurrencyCode: code) ?? code
-    }
+    static let supportedCodes = flags.keys.sorted()
 
     static func flag(for code: String) -> String {
-        switch code {
-        case "AED": return "🇦🇪"
-        case "AMD": return "🇦🇲"
-        case "AUD": return "🇦🇺"
-        case "AZN": return "🇦🇿"
-        case "BGN": return "🇧🇬"
-        case "BRL": return "🇧🇷"
-        case "BYN": return "🇧🇾"
-        case "CAD": return "🇨🇦"
-        case "CHF": return "🇨🇭"
-        case "CNY": return "🇨🇳"
-        case "CZK": return "🇨🇿"
-        case "DKK": return "🇩🇰"
-        case "EGP": return "🇪🇬"
-        case "EUR": return "🇪🇺"
-        case "GBP": return "🇬🇧"
-        case "GEL": return "🇬🇪"
-        case "HKD": return "🇭🇰"
-        case "HUF": return "🇭🇺"
-        case "ILS": return "🇮🇱"
-        case "INR": return "🇮🇳"
-        case "JPY": return "🇯🇵"
-        case "KZT": return "🇰🇿"
-        case "KRW": return "🇰🇷"
-        case "MDL": return "🇲🇩"
-        case "MXN": return "🇲🇽"
-        case "NOK": return "🇳🇴"
-        case "PLN": return "🇵🇱"
-        case "RON": return "🇷🇴"
-        case "RUB": return "🇷🇺"
-        case "SAR": return "🇸🇦"
-        case "SEK": return "🇸🇪"
-        case "TRY": return "🇹🇷"
-        case "TMT": return "🇹🇲"
-        case "UAH": return "🇺🇦"
-        case "USD": return "🇺🇸"
-        case "UZS": return "🇺🇿"
-        case "ZAR": return "🇿🇦"
-        default: return "🌐"
-        }
+        flags[code] ?? "🌐"
     }
+
+    private static let flags: [String: String] = [
+        "AED": "🇦🇪", "AFN": "🇦🇫", "ALL": "🇦🇱", "AMD": "🇦🇲",
+        "ARS": "🇦🇷", "AUD": "🇦🇺", "AWG": "🇦🇼", "AZN": "🇦🇿",
+        "BAM": "🇧🇦", "BBD": "🇧🇧", "BDT": "🇧🇩", "BGN": "🇧🇬",
+        "BHD": "🇧🇭", "BMD": "🇧🇲", "BOB": "🇧🇴", "BRL": "🇧🇷",
+        "BZD": "🇧🇿", "CAD": "🇨🇦", "CHF": "🇨🇭", "CLP": "🇨🇱",
+        "CNY": "🇨🇳", "COP": "🇨🇴", "CRC": "🇨🇷", "CZK": "🇨🇿",
+        "DKK": "🇩🇰", "DOP": "🇩🇴", "DZD": "🇩🇿", "EGP": "🇪🇬",
+        "ETB": "🇪🇹", "EUR": "🇪🇺", "GBP": "🇬🇧", "GEL": "🇬🇪",
+        "GHS": "🇬🇭", "GNF": "🇬🇳", "GTQ": "🇬🇹", "HKD": "🇭🇰",
+        "HNL": "🇭🇳", "HUF": "🇭🇺", "IDR": "🇮🇩", "ILS": "🇮🇱",
+        "INR": "🇮🇳", "IQD": "🇮🇶", "IRR": "🇮🇷", "ISK": "🇮🇸",
+        "JMD": "🇯🇲", "JOD": "🇯🇴", "JPY": "🇯🇵", "KES": "🇰🇪",
+        "KGS": "🇰🇬", "KHR": "🇰🇭", "KRW": "🇰🇷", "KWD": "🇰🇼",
+        "KZT": "🇰🇿", "LAK": "🇱🇦", "LBP": "🇱🇧", "LKR": "🇱🇰",
+        "MAD": "🇲🇦", "MDL": "🇲🇩", "MMK": "🇲🇲", "MNT": "🇲🇳",
+        "MXN": "🇲🇽", "MYR": "🇲🇾", "NGN": "🇳🇬", "NIO": "🇳🇮",
+        "NOK": "🇳🇴", "NPR": "🇳🇵", "NZD": "🇳🇿", "OMR": "🇴🇲",
+        "PAB": "🇵🇦", "PEN": "🇵🇪", "PHP": "🇵🇭", "PKR": "🇵🇰",
+        "PLN": "🇵🇱", "PYG": "🇵🇾", "QAR": "🇶🇦", "RON": "🇷🇴",
+        "RSD": "🇷🇸", "RUB": "🇷🇺", "RWF": "🇷🇼", "SAR": "🇸🇦",
+        "SEK": "🇸🇪", "SGD": "🇸🇬", "THB": "🇹🇭", "TRY": "🇹🇷",
+        "TTD": "🇹🇹", "TWD": "🇹🇼", "TZS": "🇹🇿", "UAH": "🇺🇦",
+        "UGX": "🇺🇬", "USD": "🇺🇸", "UYU": "🇺🇾", "UZS": "🇺🇿",
+        "VES": "🇻🇪", "VND": "🇻🇳", "XAF": "🇨🇲", "XCD": "🇦🇬",
+        "XOF": "🇸🇳", "XPF": "🇵🇫", "YER": "🇾🇪", "ZAR": "🇿🇦"
+    ]
 }

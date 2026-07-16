@@ -13,6 +13,7 @@ struct SettingsView: View {
     @AppStorage("faceIDEnabled") private var faceIDEnabled = true
     @AppStorage(CurrencySettings.storageKey) private var currencyCode = CurrencySettings.defaultCode
     @AppStorage(AppearanceSettings.darkModeStorageKey) private var isDarkModeEnabled = false
+    @AppStorage(AppearanceSettings.accentColorStorageKey) private var accentColorID = AppearanceSettings.defaultAccentColorID
 
     var body: some View {
         NavigationStack {
@@ -27,12 +28,8 @@ struct SettingsView: View {
                                 currencyOption(code)
                             }
                         } label: {
-                            HStack {
-                                Label(L10n.Settings.currency, systemImage: "dollarsign.circle")
-                                    .labelStyle(SettingsLabelStyle())
-                                Spacer()
-                                currencyValue(currencyCode)
-                            }
+                            Label(L10n.Settings.currency, systemImage: "dollarsign.circle")
+                                .labelStyle(SettingsLabelStyle())
                         }
                         .pickerStyle(.navigationLink)
                         Picker(L10n.Settings.language, selection: Binding(
@@ -51,7 +48,12 @@ struct SettingsView: View {
                             Text(L10n.Settings.themeDark).tag(true)
                         }
                         .pickerStyle(.segmented)
-                        destinationRow(title: L10n.Settings.accent, symbol: "paintpalette", value: L10n.Settings.accentValue)
+                        Picker(L10n.Settings.accent, selection: $accentColorID) {
+                            ForEach(CategoryColor.allCases, id: \.self) { color in
+                                accentColorOption(color)
+                            }
+                        }
+                        .pickerStyle(.navigationLink)
                     }
 
                     Section(L10n.Settings.sectionNotifications) {
@@ -95,7 +97,7 @@ struct SettingsView: View {
                     .accessibilityLabel(L10n.Common.back)
                 }
             }
-            .tint(.indigo)
+            .tint(accentColor.displayColor)
         }
         .preferredColorScheme(isDarkModeEnabled ? .dark : .light)
     }
@@ -111,7 +113,7 @@ struct SettingsView: View {
         } label: {
             HStack(spacing: 12) {
                 Image(systemName: symbol)
-                    .foregroundStyle(.indigo)
+                    .foregroundStyle(accentColor.displayColor)
                     .frame(width: 24)
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -149,23 +151,23 @@ struct SettingsView: View {
         HStack(spacing: 10) {
             Text(CurrencySettings.flag(for: code))
                 .font(.title3)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(CurrencySettings.displayName(for: code))
-                Text(code)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+            Text(code)
         }
         .tag(code)
     }
 
-    private func currencyValue(_ code: String) -> some View {
-        HStack(spacing: 6) {
-            Text(CurrencySettings.flag(for: code))
-            Text(code)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+    private func accentColorOption(_ color: CategoryColor) -> some View {
+        HStack(spacing: 10) {
+            Circle()
+                .fill(color.displayColor)
+                .frame(width: 18, height: 18)
+            Text(L10n.NewCategory.color(color.rawValue))
         }
+        .tag(color.rawValue)
+    }
+
+    private var accentColor: CategoryColor {
+        CategoryColor(rawValue: accentColorID) ?? .blue
     }
 
     private var appVersion: String {
@@ -177,7 +179,7 @@ private struct SettingsLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 12) {
             configuration.icon
-                .foregroundStyle(.indigo)
+                .foregroundStyle(.tint)
                 .frame(width: 24)
             configuration.title
         }
