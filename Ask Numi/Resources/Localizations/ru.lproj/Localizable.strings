@@ -37,6 +37,7 @@
 /* Dashboard — Insight Card */
 "dashboard.insight_card.title" = "AI-инсайт";
 "dashboard.insight_card.cta.show_details" = "Показать детали  →";
+"dashboard.insight_card.not_enough_data" = "Пока недостаточно сопоставимых расходов за текущий и прошлый месяцы.";
 
 /* Dashboard — Recent Transactions */
 "dashboard.recent.title" = "Последние операции";

@@ -61,6 +61,7 @@ enum L10n {
         static var budgetSetup: String { l("dashboard.budget_card.cta.setup") }
         static var insightTitle: String     { l("dashboard.insight_card.title") }
         static var insightShowDetails: String { l("dashboard.insight_card.cta.show_details") }
+        static var insightNotEnoughData: String { l("dashboard.insight_card.not_enough_data") }
         static var recentTitle: String      { l("dashboard.recent.title") }
         static var recentEmpty: String      { l("dashboard.recent.empty") }
     }

@@ -20,6 +20,7 @@ enum FinancialAdviceTask: Equatable, Sendable {
     case categoryTotal(String)
     case spendingTotal
     case spendingOverview
+    case monthlySpendingTrend(MonthlySpendingTrend)
     case savingsPlan
     case general
 

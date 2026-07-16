@@ -31,6 +31,7 @@
 "dashboard.budget_card.cta.setup" = "Set up budget";
 "dashboard.insight_card.title" = "AI insight";
 "dashboard.insight_card.cta.show_details" = "Show details  →";
+"dashboard.insight_card.not_enough_data" = "There isn't enough comparable expense data for this month and last month yet.";
 "dashboard.recent.title" = "Recent operations";
 "dashboard.recent.empty" = "No operations yet — add your first one in the Operations tab.";
 

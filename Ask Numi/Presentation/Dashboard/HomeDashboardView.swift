@@ -6,9 +6,10 @@
 import SwiftUI
 
 struct HomeDashboardView: View {
-    let snapshot: DashboardSnapshot // ponytail: insight card still mock, wire when that feature lands
+    let snapshot: DashboardSnapshot
     let fetchTransactions: FetchTransactionsUseCase
     let fetchBudgets: FetchBudgetsUseCase
+    let getMonthlyInsight: GetMonthlySpendingInsightUseCase
     let showBudgets: () -> Void
     @Binding var selectedTab: AppTab
     @State private var isShowingSettings = false
@@ -16,6 +17,7 @@ struct HomeDashboardView: View {
     @State private var budgets: [Budget] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
+    @State private var insightState: DashboardInsightState = .loading
 
     private var summary: FinancialSummary {
         FinancialSummary(
@@ -57,7 +59,9 @@ struct HomeDashboardView: View {
                                 isLoading: isLoading,
                                 onTap: showBudgets
                             )
-                            InsightCard(insight: snapshot.insight)
+                            InsightCard(state: insightState) {
+                                selectedTab = .assistant
+                            }
                             RecentTransactions(transactions: recentTransactions)
                         }
                         .padding(.horizontal, 16)
@@ -86,7 +90,6 @@ struct HomeDashboardView: View {
 
     private func loadDashboard() async {
         isLoading = true
-        defer { isLoading = false }
 
         do {
             async let loadedTransactions = fetchTransactions.execute()
@@ -94,8 +97,30 @@ struct HomeDashboardView: View {
             transactions = try await loadedTransactions
             budgets = try await loadedBudgets
             errorMessage = nil
+            isLoading = false
+            await loadInsight()
         } catch {
+            isLoading = false
             errorMessage = error.localizedDescription
+            insightState = .failed
+        }
+    }
+
+    private func loadInsight() async {
+        switch getMonthlyInsight.advisorAvailability {
+        case .available:
+            do {
+                let advice = try await getMonthlyInsight.execute(transactions: transactions)
+                insightState = .content(advice.headline)
+            } catch DomainError.notEnoughData {
+                insightState = .notEnoughData
+            } catch {
+                insightState = .failed
+            }
+        case .downloading:
+            insightState = .downloading
+        case .unavailable:
+            insightState = .unavailable
         }
     }
 }
@@ -313,29 +338,79 @@ private struct AmountCaption: View {
 }
 
 private struct InsightCard: View {
-    let insight: String
+    let state: DashboardInsightState
+    let showDetails: () -> Void
 
     var body: some View {
-        GlassCard(tint: .purple.opacity(0.18)) {
-            HStack(alignment: .top, spacing: 12) {
-                Image(systemName: "sparkles")
-                    .font(.title3)
-                    .foregroundStyle(.purple)
-                    .frame(width: 38, height: 38)
-                    .background(.purple.opacity(0.15), in: .circle)
-
-                VStack(alignment: .leading, spacing: 7) {
-                    Text(L10n.Dashboard.insightTitle)
-                        .font(.subheadline.weight(.bold))
-                    Text(insight)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Text(L10n.Dashboard.insightShowDetails)
-                        .font(.caption.weight(.semibold))
+        Button(action: showDetails) {
+            GlassCard(tint: .purple.opacity(0.18)) {
+                HStack(alignment: .top, spacing: 12) {
+                    Image(systemName: "sparkles")
+                        .font(.title3)
                         .foregroundStyle(.purple)
+                        .frame(width: 38, height: 38)
+                        .background(.purple.opacity(0.15), in: .circle)
+
+                    VStack(alignment: .leading, spacing: 7) {
+                        Text(L10n.Dashboard.insightTitle)
+                            .font(.subheadline.weight(.bold))
+
+                        insightContent
+                    }
                 }
             }
+            .contentShape(.rect)
         }
+        .buttonStyle(.plain)
+        .disabled(!state.showsDetails)
+    }
+
+    @ViewBuilder
+    private var insightContent: some View {
+        switch state {
+        case .loading:
+            HStack(spacing: 8) {
+                ProgressView()
+                    .controlSize(.small)
+                Text(L10n.Assistant.thinking)
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        case .content(let insight):
+            Text(insight)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(L10n.Dashboard.insightShowDetails)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.purple)
+        case .downloading:
+            status(L10n.Assistant.noticeDownloading)
+        case .unavailable:
+            status(L10n.Assistant.noticeUnavailable)
+        case .notEnoughData:
+            status(L10n.Dashboard.insightNotEnoughData)
+        case .failed:
+            status(L10n.Assistant.errorGeneric)
+        }
+    }
+
+    private func status(_ text: String) -> some View {
+        Text(text)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+    }
+}
+
+private enum DashboardInsightState {
+    case loading
+    case content(String)
+    case downloading
+    case unavailable
+    case notEnoughData
+    case failed
+
+    var showsDetails: Bool {
+        if case .content = self { true } else { false }
     }
 }
 
@@ -444,11 +519,9 @@ struct DashboardBackground: View {
 
 struct DashboardSnapshot {
     let userName: String
-    let insight: String
 
     static let preview = DashboardSnapshot(
-        userName: "Руслан",
-        insight: "Расходы на кафе выросли на 24% за последние 2 недели."
+        userName: "Руслан"
     )
 }
 
@@ -457,6 +530,7 @@ struct DashboardSnapshot {
         snapshot: .preview,
         fetchTransactions: AppContainer(isStoredInMemoryOnly: true).makeFetchTransactionsUseCase(),
         fetchBudgets: AppContainer(isStoredInMemoryOnly: true).makeFetchBudgetsUseCase(),
+        getMonthlyInsight: AppContainer(isStoredInMemoryOnly: true).makeMonthlySpendingInsightUseCase(),
         showBudgets: {},
         selectedTab: .constant(.home)
     )
@@ -467,6 +541,7 @@ struct DashboardSnapshot {
         snapshot: .preview,
         fetchTransactions: AppContainer(isStoredInMemoryOnly: true).makeFetchTransactionsUseCase(),
         fetchBudgets: AppContainer(isStoredInMemoryOnly: true).makeFetchBudgetsUseCase(),
+        getMonthlyInsight: AppContainer(isStoredInMemoryOnly: true).makeMonthlySpendingInsightUseCase(),
         showBudgets: {},
         selectedTab: .constant(.home)
     )

@@ -19,6 +19,7 @@ struct ContentView: View {
                     snapshot: .preview,
                     fetchTransactions: container.makeFetchTransactionsUseCase(),
                     fetchBudgets: container.makeFetchBudgetsUseCase(),
+                    getMonthlyInsight: container.makeMonthlySpendingInsightUseCase(),
                     showBudgets: {
                         planSection = .budgets
                         selectedTab = .plan
