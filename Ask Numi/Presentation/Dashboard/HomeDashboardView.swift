@@ -175,6 +175,7 @@ private struct BalanceCard: View {
                             .foregroundStyle(.red)
                         Text(OperationFormatting.amount(summary.totalExpenses, sign: .expense))
                             .font(.title3.weight(.bold))
+                            .foregroundStyle(.red)
                     }
                 }
                 .redacted(reason: isLoading ? .placeholder : [])
@@ -395,7 +396,7 @@ private struct TransactionRow: View {
             VStack(alignment: .trailing, spacing: 3) {
                 Text(OperationFormatting.amount(transaction.amount, sign: transaction.kind))
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(transaction.kind == .income ? .green : .primary)
+                    .foregroundStyle(transaction.kind == .income ? .green : .red)
                 Text(timeLabel)
                     .font(.caption2)
                     .foregroundStyle(.secondary)

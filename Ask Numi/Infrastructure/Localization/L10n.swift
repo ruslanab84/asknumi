@@ -106,6 +106,7 @@ enum L10n {
         static var categoryPlaceholder: String { l("add_operation.field.category.placeholder") }
         static var categoryTooLong: String     { l("add_operation.field.category.too_long") }
         static var createCategory: String      { l("add_operation.category.create") }
+        static var selectCategory: String      { l("add_operation.category.select") }
         static var dateLabel: String           { l("add_operation.field.date.label") }
         static var magicSection: String        { l("add_operation.magic.section") }
         static var magicPlaceholder: String    { l("add_operation.magic.placeholder") }

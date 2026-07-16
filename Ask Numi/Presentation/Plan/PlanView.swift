@@ -366,7 +366,7 @@ private struct UpcomingPayments: View {
 
                             Text(OperationFormatting.amount(subscription.amount, sign: .expense))
                                 .font(.subheadline.weight(.semibold))
-                                .foregroundStyle(.primary)
+                                .foregroundStyle(.red)
                         }
                         .contentShape(.rect)
                         .onTapGesture { onEdit(subscription) }

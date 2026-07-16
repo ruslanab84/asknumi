@@ -82,6 +82,7 @@
 "add_operation.field.category.placeholder" = "Например: Продукты, Bolt или зарплата";
 "add_operation.field.category.too_long" = "Название должно быть не длиннее 60 символов.";
 "add_operation.category.create" = "Создать свою категорию";
+"add_operation.category.select" = "Выбрать категорию";
 "add_operation.field.date.label" = "Дата и время";
 "add_operation.magic.section" = "Быстрый ввод";
 "add_operation.magic.placeholder" = "Опишите словами, напр. «Потратил 350 на кофе в Surf»";

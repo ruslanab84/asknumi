@@ -342,7 +342,7 @@ private struct OperationsRow: View {
             VStack(alignment: .trailing, spacing: 3) {
                 Text(OperationFormatting.amount(transaction.amount, sign: transaction.kind))
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(transaction.kind == .income ? .green : .primary)
+                    .foregroundStyle(transaction.kind == .income ? .green : .red)
                 Text(transaction.date.formatted(.dateTime.hour().minute()))
                     .font(.caption2)
                     .foregroundStyle(.secondary)
@@ -413,7 +413,6 @@ private struct AddOperationView: View {
     @State private var note: String?
     @State private var isSaving = false
     @State private var errorMessage: String?
-    @State private var isPresentingNewCategory = false
     @State private var magicText = ""
     @State private var isParsing = false
     @State private var magicError: String?
@@ -446,7 +445,7 @@ private struct AddOperationView: View {
     }
 
     // Saved categories for the selected kind, most recent first, then defaults; deduped case-insensitively.
-    private var suggestedCategories: [OperationCategorySuggestion] {
+    private var availableCategories: [OperationCategorySuggestion] {
         let savedCategories = categories
             .filter { $0.kind == kind }
             .map { OperationCategorySuggestion(name: $0.name, icon: $0.icon) }
@@ -461,11 +460,6 @@ private struct AddOperationView: View {
         var seen = Set<String>()
         return (savedCategories + savedTransactions + defaults)
             .filter { seen.insert($0.name.lowercased()).inserted }
-            .filter {
-                trimmedCategory.isEmpty ||
-                    ($0.name.localizedCaseInsensitiveContains(trimmedCategory) &&
-                        $0.name.caseInsensitiveCompare(trimmedCategory) != .orderedSame)
-            }
     }
 
     var body: some View {
@@ -486,50 +480,25 @@ private struct AddOperationView: View {
                 }
 
                 Section(L10n.AddOperation.sectionCategory) {
-                    TextField(L10n.AddOperation.categoryPlaceholder, text: $category)
-                        .focused($focusedField, equals: .category)
-                        .submitLabel(.next)
-                        .onSubmit { focusedField = .amount }
-                        .onChange(of: category) { _, value in
-                            categoryIcon = categories.first {
-                                $0.kind == kind && $0.name.caseInsensitiveCompare(value) == .orderedSame
-                            }?.icon ?? CategoryIcon.suggested(for: value, kind: kind)
-                        }
-
-                    if category.count > 60 {
-                        Text(L10n.AddOperation.categoryTooLong)
-                            .font(.caption)
-                            .foregroundStyle(.red)
-                    }
-
-                    if !suggestedCategories.isEmpty {
-                        ScrollView(.horizontal) {
-                            HStack(spacing: 8) {
-                                ForEach(suggestedCategories) { suggestion in
-                                    Button {
-                                        category = suggestion.name
-                                        categoryIcon = suggestion.icon
-                                        focusedField = .amount
-                                    } label: {
-                                        Label(suggestion.name, systemImage: suggestion.icon)
-                                    }
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundStyle(.primary)
-                                    .padding(.horizontal, 14)
-                                    .frame(height: 32)
-                                    .glassEffect(.regular.interactive(), in: .capsule)
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                            .padding(.vertical, 2)
-                        }
-                        .scrollIndicators(.hidden)
-                    }
-
-                    Button {
-                        isPresentingNewCategory = true
+                    NavigationLink {
+                        CategorySelectionView(
+                            kind: kind,
+                            categories: availableCategories,
+                            selectedCategory: category,
+                            addCategory: addCategory,
+                            onSelect: { selected in
+                                kind = selected.kind
+                                category = selected.name
+                                categoryIcon = selected.icon
+                                focusedField = .amount
+                            },
+                            onCategorySaved: onCategorySaved
+                        )
                     } label: {
-                        Label(L10n.AddOperation.createCategory, systemImage: "plus.circle.fill")
+                        Label(
+                            category.isEmpty ? L10n.AddOperation.selectCategory : category,
+                            systemImage: category.isEmpty ? CategoryIcon.fallback : categoryIcon
+                        )
                     }
                 }
 
@@ -576,21 +545,11 @@ private struct AddOperationView: View {
                     .disabled(!canSave)
                 }
             }
-            .sheet(isPresented: $isPresentingNewCategory) {
-                NewCategoryView(kind: kind, addCategory: addCategory) { newCategory in
-                    onCategorySaved(newCategory)
-                    kind = newCategory.kind
-                    category = newCategory.name
-                    categoryIcon = newCategory.icon
-                    focusedField = .amount
-                }
-            }
             .onChange(of: kind) {
                 categoryIcon = categories.first {
                     $0.kind == kind && $0.name.caseInsensitiveCompare(category) == .orderedSame
                 }?.icon ?? CategoryIcon.suggested(for: category, kind: kind)
             }
-            .onAppear { focusedField = .category }
         }
     }
 
@@ -650,7 +609,7 @@ private struct AddOperationView: View {
         categoryIcon = categories.first {
             $0.kind == draft.kind && $0.name.caseInsensitiveCompare(draft.category) == .orderedSame
         }?.icon ?? CategoryIcon.suggested(for: draft.category, kind: draft.kind)
-        focusedField = draft.category.isEmpty ? .category : .amount
+        focusedField = draft.category.isEmpty ? nil : .amount
     }
 
     private func save() async {
@@ -690,9 +649,77 @@ private struct OperationCategorySuggestion: Identifiable {
     var id: String { name.lowercased() }
 }
 
+private struct CategorySelectionView: View {
+    let kind: TransactionKind
+    let categories: [OperationCategorySuggestion]
+    let selectedCategory: String
+    let addCategory: AddTransactionCategoryUseCase
+    let onSelect: (TransactionCategory) -> Void
+    let onCategorySaved: (TransactionCategory) -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var isPresentingNewCategory = false
+    @State private var createdCategory: TransactionCategory?
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(categories) { category in
+                    Button {
+                        select(TransactionCategory(name: category.name, kind: kind, icon: category.icon))
+                    } label: {
+                        HStack(spacing: 12) {
+                            Image(systemName: category.icon)
+                                .foregroundStyle(kind == .expense ? .red : .green)
+                                .frame(width: 28)
+                            Text(category.name)
+                                .foregroundStyle(.primary)
+                            Spacer()
+                            if category.name.caseInsensitiveCompare(selectedCategory) == .orderedSame {
+                                Image(systemName: "checkmark")
+                                    .foregroundStyle(.indigo)
+                            }
+                        }
+                    }
+                    .accessibilityAddTraits(
+                        category.name.caseInsensitiveCompare(selectedCategory) == .orderedSame ? .isSelected : []
+                    )
+                }
+            }
+
+            Section {
+                Button {
+                    isPresentingNewCategory = true
+                } label: {
+                    Label(L10n.AddOperation.createCategory, systemImage: "plus.circle.fill")
+                }
+            }
+        }
+        .scrollContentBackground(.hidden)
+        .background { DashboardBackground() }
+        .navigationTitle(L10n.AddOperation.selectCategory)
+        .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $isPresentingNewCategory, onDismiss: selectCreatedCategory) {
+            NewCategoryView(kind: kind, addCategory: addCategory) { category in
+                createdCategory = category
+                onCategorySaved(category)
+            }
+        }
+    }
+
+    private func select(_ category: TransactionCategory) {
+        onSelect(category)
+        dismiss()
+    }
+
+    private func selectCreatedCategory() {
+        guard let createdCategory else { return }
+        select(createdCategory)
+    }
+}
+
 private enum Field {
     case magic
-    case category
     case amount
 }
 
@@ -745,7 +772,7 @@ private struct OperationDaySection: Identifiable {
 
 enum OperationFormatting {
     static func amount(_ amount: Decimal, sign kind: TransactionKind) -> String {
-        "\(kind == .income ? "+" : "−")\(plain(amount))"
+        kind == .income ? "+\(plain(amount))" : plain(amount)
     }
 
     /// Amount with currency and no forced sign, e.g. "4 280 AZN"; negative values keep the typographic minus.

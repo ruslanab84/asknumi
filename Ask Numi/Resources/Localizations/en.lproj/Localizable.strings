@@ -66,6 +66,7 @@
 "add_operation.field.category.placeholder" = "For example: Groceries, Bolt, or salary";
 "add_operation.field.category.too_long" = "The name must be 60 characters or fewer.";
 "add_operation.category.create" = "Create custom category";
+"add_operation.category.select" = "Choose category";
 "add_operation.field.date.label" = "Date and time";
 "add_operation.magic.section" = "Quick add";
 "add_operation.magic.placeholder" = "Describe it, e.g. “Spent 350 on coffee at Surf”";
