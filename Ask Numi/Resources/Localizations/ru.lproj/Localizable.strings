@@ -152,7 +152,7 @@
 "plan.section.goals" = "Цели";
 "plan.payments.title" = "Ближайшие платежи";
 "plan.payments.cta.all" = "Все платежи";
-"plan.forecast.title" = "Прогнозируемый остаток";
+"plan.forecast.title" = "Остаток после ближайших платежей";
 "plan.budgets.title" = "Бюджеты";
 "plan.budgets.cta.all" = "Все";
 "plan.budgets.label.remaining" = "Осталось %@";

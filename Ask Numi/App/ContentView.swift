@@ -46,7 +46,6 @@ struct ContentView: View {
                 )
             case .plan:
                 PlanView(
-                    snapshot: .preview,
                     fetchTransactions: container.makeFetchTransactionsUseCase(),
                     fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
                     saveSubscription: container.makeSaveSubscriptionUseCase(),

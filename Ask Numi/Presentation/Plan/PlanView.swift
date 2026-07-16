@@ -6,7 +6,6 @@
 import SwiftUI
 
 struct PlanView: View {
-    let snapshot: PlanSnapshot
     let fetchTransactions: FetchTransactionsUseCase
     let fetchSubscriptions: FetchSubscriptionsUseCase
     let saveSubscription: SaveSubscriptionUseCase
@@ -166,13 +165,22 @@ struct PlanView: View {
                 onDelete: deleteSubscription
             )
 
-            BalanceForecast(balance: snapshot.forecastBalance)
+            BalanceForecast(balance: forecastBalance)
             if !budgetOverview.items.isEmpty {
                 BudgetPreviewCard(overview: budgetOverview) {
                     section = .budgets
                 }
             }
         }
+    }
+
+    private var forecastBalance: Decimal {
+        subscriptions.reduce(
+            FinancialSummary(
+                transactions: transactions,
+                period: DateInterval(start: .distantPast, end: .distantFuture)
+            ).balance
+        ) { $0 - $1.amount }
     }
 
     private var budgetsContent: some View {
@@ -248,13 +256,11 @@ struct PlanView: View {
 
     private func loadPlan() async {
         do {
-            async let loadedTransactions = fetchTransactions.execute()
-            async let loadedSubscriptions = fetchSubscriptions.execute()
             async let loadedBudgets = fetchBudgets.execute()
             async let loadedGoals = fetchGoals.execute()
 
-            transactions = try await loadedTransactions
-            subscriptions = try await loadedSubscriptions
+            transactions = try await fetchTransactions.execute()
+            subscriptions = try await fetchSubscriptions.execute()
             budgets = try await loadedBudgets
             goals = try await loadedGoals
             refreshBudgetOverview()
@@ -702,7 +708,7 @@ private enum BudgetField {
 }
 
 private struct BalanceForecast: View {
-    let balance: String
+    let balance: Decimal
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -711,7 +717,7 @@ private struct BalanceForecast: View {
                 .foregroundStyle(.green)
 
             HStack {
-                Text(balance)
+                Text(OperationFormatting.plain(balance))
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                 Spacer()
                 ForecastLine()
@@ -926,18 +932,9 @@ enum PlanSection: CaseIterable {
     }
 }
 
-struct PlanSnapshot {
-    let forecastBalance: String
-
-    static let preview = PlanSnapshot(
-        forecastBalance: "3 890 AZN"
-    )
-}
-
 #Preview("Светлая тема") {
     let container = AppContainer(isStoredInMemoryOnly: true)
     PlanView(
-        snapshot: .preview,
         fetchTransactions: container.makeFetchTransactionsUseCase(),
         fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
         saveSubscription: container.makeSaveSubscriptionUseCase(),
@@ -956,7 +953,6 @@ struct PlanSnapshot {
 #Preview("Тёмная тема") {
     let container = AppContainer(isStoredInMemoryOnly: true)
     PlanView(
-        snapshot: .preview,
         fetchTransactions: container.makeFetchTransactionsUseCase(),
         fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
         saveSubscription: container.makeSaveSubscriptionUseCase(),

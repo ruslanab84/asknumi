@@ -134,7 +134,7 @@
 "plan.section.goals" = "Goals";
 "plan.payments.title" = "Upcoming payments";
 "plan.payments.cta.all" = "All payments";
-"plan.forecast.title" = "Forecast balance";
+"plan.forecast.title" = "Balance after upcoming payments";
 "plan.budgets.title" = "Budgets";
 "plan.budgets.cta.all" = "All";
 "plan.budgets.label.remaining" = "%@ remaining";
