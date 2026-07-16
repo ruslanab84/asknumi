@@ -6,8 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		B77F96F9300955B400861C70 /* MyTabularClassifier.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = B77F96F8300955B400861C70 /* MyTabularClassifier.mlmodel */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		B77F5C9330036C3E00861C70 /* Ask Numi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Ask Numi.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B77F96F8300955B400861C70 /* MyTabularClassifier.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; path = MyTabularClassifier.mlmodel; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -34,6 +39,7 @@
 			children = (
 				B77F5C9530036C3E00861C70 /* Ask Numi */,
 				B77F5C9430036C3E00861C70 /* Products */,
+				B77F96F8300955B400861C70 /* MyTabularClassifier.mlmodel */,
 			);
 			sourceTree = "<group>";
 		};
@@ -120,6 +126,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B77F96F9300955B400861C70 /* MyTabularClassifier.mlmodel in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -18,6 +18,7 @@ final class AppContainer {
     let savingsGoalRepository: SavingsGoalRepository
     let advisor: FinancialAdvisor
     let transactionParser: TransactionParser
+    let transactionClassifier: any TransactionClassifier
 
     init(isStoredInMemoryOnly: Bool = false) {
         do {
@@ -41,6 +42,7 @@ final class AppContainer {
         savingsGoalRepository = SwiftDataSavingsGoalRepository(modelContainer: modelContainer)
         advisor = FoundationModelsAdvisor()
         transactionParser = FoundationModelsTransactionParser()
+        transactionClassifier = MLClassificationService()
 
         #if DEBUG
         BudgetOverview.assertSelfCheck()
@@ -49,6 +51,7 @@ final class AppContainer {
         FoundationModelsAdvisor.assertSelfCheck()
         Task { await GetFinancialAdviceUseCase.assertAsyncSelfCheck() }
         Task { await ParseNaturalInputUseCase.assertSelfCheck() }
+        Task { await MLClassificationService.assertSelfCheck() }
         #endif
     }
 

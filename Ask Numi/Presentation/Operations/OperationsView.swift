@@ -13,6 +13,7 @@ struct OperationsView: View {
     let updateTransaction: UpdateTransactionUseCase
     let deleteTransaction: DeleteTransactionUseCase
     let parseNaturalInput: ParseNaturalInputUseCase
+    let transactionClassifier: any TransactionClassifier
     @Binding var selectedTab: AppTab
 
     @State private var transactions: [Transaction] = []
@@ -82,7 +83,8 @@ struct OperationsView: View {
                     existingTransactions: transactions,
                     categories: categories,
                     addCategory: addCategory,
-                    parseNaturalInput: parseNaturalInput
+                    parseNaturalInput: parseNaturalInput,
+                    transactionClassifier: transactionClassifier
                 ) { transaction in
                     transactions.append(transaction)
                     transactions.sort { $0.date > $1.date }
@@ -97,6 +99,7 @@ struct OperationsView: View {
                     existingTransactions: transactions,
                     categories: categories,
                     addCategory: addCategory,
+                    transactionClassifier: transactionClassifier,
                     editing: transaction
                 ) { updated in
                     if let index = transactions.firstIndex(where: { $0.id == updated.id }) {
@@ -375,6 +378,7 @@ private struct AddOperationView: View {
         categories: [TransactionCategory],
         addCategory: AddTransactionCategoryUseCase,
         parseNaturalInput: ParseNaturalInputUseCase? = nil,
+        transactionClassifier: any TransactionClassifier,
         editing: Transaction? = nil,
         onSaved: @escaping (Transaction) -> Void,
         onCategorySaved: @escaping (TransactionCategory) -> Void
@@ -395,8 +399,12 @@ private struct AddOperationView: View {
             _categoryIcon = State(initialValue: editing.categoryIcon)
             _amountText = State(initialValue: "\(editing.amount)")
             _date = State(initialValue: editing.date)
-            _note = State(initialValue: editing.note)
         }
+        _classificationViewModel = State(initialValue: AddOperationClassificationViewModel(
+            classifier: transactionClassifier,
+            merchantText: editing?.note ?? ""
+        ))
+        _hasUserSelectedCategory = State(initialValue: editing != nil)
     }
 
     private static let defaultCategories: [TransactionKind: [String]] = [
@@ -410,12 +418,13 @@ private struct AddOperationView: View {
     @State private var categoryIcon = CategoryIcon.fallback
     @State private var amountText = ""
     @State private var date = Date.now
-    @State private var note: String?
     @State private var isSaving = false
     @State private var errorMessage: String?
     @State private var magicText = ""
     @State private var isParsing = false
     @State private var magicError: String?
+    @State private var classificationViewModel: AddOperationClassificationViewModel
+    @State private var hasUserSelectedCategory: Bool
     @FocusState private var focusedField: Field?
 
     private var showsQuickAdd: Bool {
@@ -463,6 +472,8 @@ private struct AddOperationView: View {
     }
 
     var body: some View {
+        @Bindable var classification = classificationViewModel
+
         NavigationStack {
             Form {
                 if showsQuickAdd {
@@ -479,6 +490,30 @@ private struct AddOperationView: View {
                     .tint(kind == .expense ? .red : .green)
                 }
 
+                Section(L10n.AddOperation.merchantSection) {
+                    TextField(L10n.AddOperation.merchantPlaceholder, text: $classification.merchantText)
+                        .textInputAutocapitalization(.characters)
+                        .autocorrectionDisabled()
+                        .focused($focusedField, equals: .merchant)
+
+                    if let suggestion = classification.suggestion {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(L10n.AddOperation.suggestedCategory)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            HStack {
+                                Label(suggestion.category.localized, systemImage: suggestion.category.icon)
+                                Spacer()
+                                Text(suggestion.confidence, format: .percent.precision(.fractionLength(0)))
+                                    .foregroundStyle(.secondary)
+                            }
+                            ProgressView(value: suggestion.confidence)
+                                .tint(.indigo)
+                        }
+                        .accessibilityElement(children: .combine)
+                    }
+                }
+
                 Section(L10n.AddOperation.sectionCategory) {
                     NavigationLink {
                         CategorySelectionView(
@@ -490,6 +525,7 @@ private struct AddOperationView: View {
                                 kind = selected.kind
                                 category = selected.name
                                 categoryIcon = selected.icon
+                                hasUserSelectedCategory = true
                                 focusedField = .amount
                             },
                             onCategorySaved: onCategorySaved
@@ -550,6 +586,19 @@ private struct AddOperationView: View {
                     $0.kind == kind && $0.name.caseInsensitiveCompare(category) == .orderedSame
                 }?.icon ?? CategoryIcon.suggested(for: category, kind: kind)
             }
+            .task(id: classification.merchantText) {
+                let previousSuggestion = classification.suggestion
+                await classification.refreshSuggestion()
+                guard !hasUserSelectedCategory else { return }
+                if let suggestion = classification.suggestion {
+                    kind = suggestion.category.kind
+                    category = suggestion.category.localized
+                    categoryIcon = suggestion.category.icon
+                } else if let previousSuggestion, category == previousSuggestion.category.localized {
+                    category = ""
+                    categoryIcon = CategoryIcon.fallback
+                }
+            }
         }
     }
 
@@ -605,7 +654,8 @@ private struct AddOperationView: View {
         kind = draft.kind
         category = draft.category
         amountText = "\(draft.amount)"
-        note = draft.note
+        classificationViewModel.merchantText = draft.note ?? ""
+        hasUserSelectedCategory = false
         categoryIcon = categories.first {
             $0.kind == draft.kind && $0.name.caseInsensitiveCompare(draft.category) == .orderedSame
         }?.icon ?? CategoryIcon.suggested(for: draft.category, kind: draft.kind)
@@ -616,6 +666,8 @@ private struct AddOperationView: View {
         guard let amount, canSave else { return }
         isSaving = true
         errorMessage = nil
+        let merchant = classificationViewModel.merchantText
+            .trimmingCharacters(in: .whitespacesAndNewlines)
 
         let transaction = Transaction(
             id: editing?.id ?? UUID(),
@@ -624,7 +676,7 @@ private struct AddOperationView: View {
             category: trimmedCategory,
             categoryIcon: categoryIcon,
             date: date,
-            note: note
+            note: merchant.isEmpty ? nil : merchant
         )
 
         do {
@@ -720,6 +772,7 @@ private struct CategorySelectionView: View {
 
 private enum Field {
     case magic
+    case merchant
     case amount
 }
 
@@ -819,6 +872,7 @@ extension TransactionKind {
         updateTransaction: container.makeUpdateTransactionUseCase(),
         deleteTransaction: container.makeDeleteTransactionUseCase(),
         parseNaturalInput: container.makeParseNaturalInputUseCase(),
+        transactionClassifier: container.transactionClassifier,
         selectedTab: .constant(.operations)
     )
 }

@@ -34,6 +34,7 @@ struct ContentView: View {
                     updateTransaction: container.makeUpdateTransactionUseCase(),
                     deleteTransaction: container.makeDeleteTransactionUseCase(),
                     parseNaturalInput: container.makeParseNaturalInputUseCase(),
+                    transactionClassifier: container.transactionClassifier,
                     selectedTab: $selectedTab
                 )
             case .assistant:

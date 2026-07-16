@@ -112,6 +112,10 @@ enum L10n {
         static var magicPlaceholder: String    { l("add_operation.magic.placeholder") }
         static var magicButton: String         { l("add_operation.magic.accessibility.parse") }
         static var magicFailed: String         { l("add_operation.magic.error.failed") }
+        static var merchantSection: String      { l("add_operation.merchant.section") }
+        static var merchantPlaceholder: String  { l("add_operation.merchant.placeholder") }
+        static var suggestedCategory: String    { l("add_operation.ml.suggested_category") }
+        static func mlCategory(_ id: String) -> String { l("add_operation.category.ml.\(id)") }
 
         static var defaultExpenseCategories: [String] {
             ["groceries", "food", "transport", "auto", "home", "health", "entertainment", "clothes"]

@@ -88,6 +88,19 @@
 "add_operation.magic.placeholder" = "Опишите словами, напр. «Потратил 350 на кофе в Surf»";
 "add_operation.magic.accessibility.parse" = "Заполнить форму из описания";
 "add_operation.magic.error.failed" = "Не удалось разобрать. Переформулируйте или заполните поля ниже.";
+"add_operation.merchant.section" = "Продавец";
+"add_operation.merchant.placeholder" = "Например: WALMART #2847";
+"add_operation.ml.suggested_category" = "Предложенная категория";
+"add_operation.category.ml.food" = "Еда";
+"add_operation.category.ml.transport" = "Транспорт";
+"add_operation.category.ml.subscriptions" = "Подписки";
+"add_operation.category.ml.shopping" = "Покупки";
+"add_operation.category.ml.utilities" = "Коммунальные услуги";
+"add_operation.category.ml.health" = "Здоровье";
+"add_operation.category.ml.entertainment" = "Развлечения";
+"add_operation.category.ml.cash" = "Наличные";
+"add_operation.category.ml.income" = "Доход";
+"add_operation.category.ml.other" = "Другое";
 
 /* Add Operation — Default category suggestions */
 "add_operation.category.default.groceries" = "Продукты";
