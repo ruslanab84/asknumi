@@ -19,6 +19,7 @@ struct Transaction: Identifiable, Hashable, Sendable {
     var categoryColor: CategoryColor
     var date: Date
     var note: String?
+    var isImpulse: Bool
 
     nonisolated init(
         id: UUID = UUID(),
@@ -28,7 +29,8 @@ struct Transaction: Identifiable, Hashable, Sendable {
         categoryIcon: String = CategoryIcon.fallback,
         categoryColor: CategoryColor? = nil,
         date: Date = .now,
-        note: String? = nil
+        note: String? = nil,
+        isImpulse: Bool = false
     ) {
         self.id = id
         self.amount = amount
@@ -38,5 +40,6 @@ struct Transaction: Identifiable, Hashable, Sendable {
         self.categoryColor = categoryColor ?? CategoryColor.defaultColor(for: kind)
         self.date = date
         self.note = note
+        self.isImpulse = isImpulse
     }
 }

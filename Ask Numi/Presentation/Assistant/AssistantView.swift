@@ -135,14 +135,19 @@ struct AssistantView: View {
 
     private var inputBar: some View {
         HStack(spacing: 10) {
-            TextField(L10n.Assistant.inputPlaceholder, text: $draft)
-                .focused($isInputFocused)
-                .submitLabel(.send)
-                .onSubmit { submit(draft) }
-                .disabled(availability != .available)
+            HStack(spacing: 10) {
+                TextField(L10n.Assistant.inputPlaceholder, text: $draft)
+                    .focused($isInputFocused)
+                    .submitLabel(.send)
+                    .onSubmit { submit(draft) }
+                    .disabled(availability != .available)
 
-            Image(systemName: "mic.fill")
-                .foregroundStyle(.secondary)
+                Image(systemName: "mic.fill")
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 16)
+            .frame(height: 50)
+            .glassEffect(.regular, in: .capsule)
 
             Button {
                 submit(draft)
@@ -160,10 +165,6 @@ struct AssistantView: View {
             )
             .accessibilityLabel(L10n.Assistant.sendLabel)
         }
-        .padding(.leading, 16)
-        .padding(.trailing, 5)
-        .frame(height: 50)
-        .glassEffect(.regular, in: .capsule)
     }
 
     private func submit(_ text: String) {

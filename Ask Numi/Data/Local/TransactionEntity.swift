@@ -19,6 +19,7 @@ final class TransactionEntity {
     var categoryColorRaw: String?
     var date: Date
     var note: String?
+    var isImpulse: Bool?
 
     init(
         id: UUID,
@@ -28,7 +29,8 @@ final class TransactionEntity {
         categoryIconRaw: String?,
         categoryColorRaw: String?,
         date: Date,
-        note: String?
+        note: String?,
+        isImpulse: Bool?
     ) {
         self.id = id
         self.amount = amount
@@ -38,6 +40,7 @@ final class TransactionEntity {
         self.categoryColorRaw = categoryColorRaw
         self.date = date
         self.note = note
+        self.isImpulse = isImpulse
     }
 }
 
@@ -51,7 +54,8 @@ extension TransactionEntity {
             categoryIconRaw: transaction.categoryIcon,
             categoryColorRaw: transaction.categoryColor.rawValue,
             date: transaction.date,
-            note: transaction.note
+            note: transaction.note,
+            isImpulse: transaction.isImpulse
         )
     }
 
@@ -67,7 +71,8 @@ extension TransactionEntity {
             categoryIcon: categoryIconRaw ?? CategoryIcon.suggested(for: categoryRaw, kind: kind),
             categoryColor: categoryColorRaw.flatMap(CategoryColor.init(rawValue:)),
             date: date,
-            note: note
+            note: note,
+            isImpulse: isImpulse ?? false
         )
     }
 }

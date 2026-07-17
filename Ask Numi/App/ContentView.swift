@@ -19,7 +19,9 @@ struct ContentView: View {
                     snapshot: .preview,
                     fetchTransactions: container.makeFetchTransactionsUseCase(),
                     fetchBudgets: container.makeFetchBudgetsUseCase(),
+                    fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
                     getMonthlyInsight: container.makeMonthlySpendingInsightUseCase(),
+                    getFinancialTwin: container.makeFinancialTwinUseCase(),
                     showBudgets: {
                         planSection = .budgets
                         selectedTab = .plan

@@ -9,15 +9,20 @@ struct HomeDashboardView: View {
     let snapshot: DashboardSnapshot
     let fetchTransactions: FetchTransactionsUseCase
     let fetchBudgets: FetchBudgetsUseCase
+    let fetchSubscriptions: FetchSubscriptionsUseCase
     let getMonthlyInsight: GetMonthlySpendingInsightUseCase
+    let getFinancialTwin: GetFinancialTwinUseCase
     let showBudgets: () -> Void
     @Binding var selectedTab: AppTab
     @State private var isShowingSettings = false
     @State private var transactions: [Transaction] = []
     @State private var budgets: [Budget] = []
+    @State private var subscriptions: [Subscription] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var insightState: DashboardInsightState = .loading
+    @State private var financialTwinReport = FinancialTwinReport.empty
+    @State private var isShowingFinancialTwin = false
 
     private var summary: FinancialSummary {
         FinancialSummary(
@@ -59,6 +64,12 @@ struct HomeDashboardView: View {
                                 isLoading: isLoading,
                                 onTap: showBudgets
                             )
+                            FinancialTwinSummaryCard(
+                                report: financialTwinReport,
+                                isLoading: isLoading
+                            ) {
+                                isShowingFinancialTwin = true
+                            }
                             InsightCard(state: insightState) {
                                 selectedTab = .assistant
                             }
@@ -82,6 +93,9 @@ struct HomeDashboardView: View {
             .fullScreenCover(isPresented: $isShowingSettings) {
                 SettingsView()
             }
+            .sheet(isPresented: $isShowingFinancialTwin) {
+                FinancialTwinDetailsView(report: financialTwinReport)
+            }
             .task {
                 await loadDashboard()
             }
@@ -94,8 +108,15 @@ struct HomeDashboardView: View {
         do {
             async let loadedTransactions = fetchTransactions.execute()
             async let loadedBudgets = fetchBudgets.execute()
+            async let loadedSubscriptions = fetchSubscriptions.execute()
             transactions = try await loadedTransactions
             budgets = try await loadedBudgets
+            subscriptions = try await loadedSubscriptions
+            financialTwinReport = getFinancialTwin.execute(
+                transactions: transactions,
+                budgets: budgets,
+                subscriptions: subscriptions
+            )
             errorMessage = nil
             isLoading = false
             await loadInsight()
@@ -113,7 +134,7 @@ struct HomeDashboardView: View {
                 let advice = try await getMonthlyInsight.execute(transactions: transactions)
                 insightState = .content(advice.headline)
             } catch DomainError.notEnoughData {
-                insightState = .notEnoughData
+                insightState = .content(fallbackInsight)
             } catch {
                 insightState = .failed
             }
@@ -122,6 +143,23 @@ struct HomeDashboardView: View {
         case .unavailable:
             insightState = .unavailable
         }
+    }
+
+    private var fallbackInsight: String {
+        if let category = summary.expensesByCategory.first {
+            return L10n.Dashboard.insightTopCategory(
+                category.category,
+                OperationFormatting.plain(category.amount),
+                CurrencySettings.selectedCode
+            )
+        }
+        if summary.totalIncome > 0 {
+            return L10n.Dashboard.insightRecordedIncome(
+                OperationFormatting.plain(summary.totalIncome),
+                CurrencySettings.selectedCode
+            )
+        }
+        return L10n.Dashboard.insightEmpty
     }
 }
 
@@ -387,8 +425,6 @@ private struct InsightCard: View {
             status(L10n.Assistant.noticeDownloading)
         case .unavailable:
             status(L10n.Assistant.noticeUnavailable)
-        case .notEnoughData:
-            status(L10n.Dashboard.insightNotEnoughData)
         case .failed:
             status(L10n.Assistant.errorGeneric)
         }
@@ -406,7 +442,6 @@ private enum DashboardInsightState {
     case content(String)
     case downloading
     case unavailable
-    case notEnoughData
     case failed
 
     var showsDetails: Bool {
@@ -490,7 +525,7 @@ private struct TransactionRow: View {
     }
 }
 
-private struct GlassCard<Content: View>: View {
+struct GlassCard<Content: View>: View {
     let tint: Color
     @ViewBuilder let content: Content
 
@@ -530,7 +565,9 @@ struct DashboardSnapshot {
         snapshot: .preview,
         fetchTransactions: AppContainer(isStoredInMemoryOnly: true).makeFetchTransactionsUseCase(),
         fetchBudgets: AppContainer(isStoredInMemoryOnly: true).makeFetchBudgetsUseCase(),
+        fetchSubscriptions: AppContainer(isStoredInMemoryOnly: true).makeFetchSubscriptionsUseCase(),
         getMonthlyInsight: AppContainer(isStoredInMemoryOnly: true).makeMonthlySpendingInsightUseCase(),
+        getFinancialTwin: AppContainer(isStoredInMemoryOnly: true).makeFinancialTwinUseCase(),
         showBudgets: {},
         selectedTab: .constant(.home)
     )
@@ -541,7 +578,9 @@ struct DashboardSnapshot {
         snapshot: .preview,
         fetchTransactions: AppContainer(isStoredInMemoryOnly: true).makeFetchTransactionsUseCase(),
         fetchBudgets: AppContainer(isStoredInMemoryOnly: true).makeFetchBudgetsUseCase(),
+        fetchSubscriptions: AppContainer(isStoredInMemoryOnly: true).makeFetchSubscriptionsUseCase(),
         getMonthlyInsight: AppContainer(isStoredInMemoryOnly: true).makeMonthlySpendingInsightUseCase(),
+        getFinancialTwin: AppContainer(isStoredInMemoryOnly: true).makeFinancialTwinUseCase(),
         showBudgets: {},
         selectedTab: .constant(.home)
     )

@@ -61,7 +61,16 @@ enum L10n {
         static var budgetSetup: String { l("dashboard.budget_card.cta.setup") }
         static var insightTitle: String     { l("dashboard.insight_card.title") }
         static var insightShowDetails: String { l("dashboard.insight_card.cta.show_details") }
-        static var insightNotEnoughData: String { l("dashboard.insight_card.not_enough_data") }
+        static func insightTopCategory(_ category: String, _ amount: String, _ currency: String) -> String {
+            String(format: l("dashboard.insight_card.top_category"), category, amount, currency)
+        }
+        static func insightRecordedIncome(_ amount: String, _ currency: String) -> String {
+            String(format: l("dashboard.insight_card.recorded_income"), amount, currency)
+        }
+        static var insightEmpty: String { l("dashboard.insight_card.empty") }
+        static var financialTwinTitle: String { l("dashboard.financial_twin.title") }
+        static var financialTwinEmpty: String { l("dashboard.financial_twin.empty") }
+        static var financialTwinDetails: String { l("dashboard.financial_twin.cta.details") }
         static var recentTitle: String      { l("dashboard.recent.title") }
         static var recentEmpty: String      { l("dashboard.recent.empty") }
     }
@@ -93,6 +102,7 @@ enum L10n {
         static var deleteAction: String     { l("operations.row.action.delete") }
         static var deleteAlertTitle: String { l("operations.delete_alert.title") }
         static var deleteAlertOk: String    { l("operations.delete_alert.button.ok") }
+        static var impulseLabel: String     { l("operations.row.accessibility.impulse") }
     }
 
     // MARK: - Add Operation
@@ -116,6 +126,9 @@ enum L10n {
         static var merchantSection: String      { l("add_operation.merchant.section") }
         static var merchantPlaceholder: String  { l("add_operation.merchant.placeholder") }
         static var suggestedCategory: String    { l("add_operation.ml.suggested_category") }
+        static var behaviorSection: String      { l("add_operation.behavior.section") }
+        static var impulsePurchase: String      { l("add_operation.behavior.impulse") }
+        static var impulseHint: String          { l("add_operation.behavior.impulse.hint") }
         static func mlCategory(_ id: String) -> String { l("add_operation.category.ml.\(id)") }
 
         static var defaultExpenseCategories: [String] {
@@ -126,6 +139,106 @@ enum L10n {
             ["salary", "freelance", "gift", "interest"]
                 .map { l("add_operation.category.default.\($0)") }
         }
+    }
+
+    // MARK: - Financial Twin
+
+    enum FinancialTwin {
+        static var title: String { l("financial_twin.title") }
+        static var privacy: String { l("financial_twin.privacy") }
+        static var emptyTitle: String { l("financial_twin.empty.title") }
+        static var emptyMessage: String { l("financial_twin.empty.message") }
+        static var evidenceTitle: String { l("financial_twin.evidence.title") }
+        static var methodTitle: String { l("financial_twin.method.title") }
+        static var close: String { l("financial_twin.button.close") }
+        static func sources(_ transactions: Int, _ budgets: Int, _ subscriptions: Int) -> String {
+            String(format: l("financial_twin.sources"), transactions, budgets, subscriptions)
+        }
+
+        static var snapshotTitle: String { l("financial_twin.snapshot.title") }
+        static func snapshotTopCategory(_ category: String, _ amount: String, _ currency: String, _ percent: Int) -> String {
+            String(format: l("financial_twin.snapshot.headline.top_category"), category, amount, currency, percent)
+        }
+        static func snapshotBalance(_ balance: String, _ currency: String) -> String {
+            String(format: l("financial_twin.snapshot.headline.balance"), balance, currency)
+        }
+        static func snapshotTotals(
+            _ income: String,
+            _ expenses: String,
+            _ balance: String,
+            _ currency: String,
+            _ count: Int
+        ) -> String {
+            String(format: l("financial_twin.snapshot.evidence.totals"), income, currency, expenses, currency, balance, currency, count)
+        }
+        static var snapshotMethod: String { l("financial_twin.snapshot.method") }
+
+        static var paydayTitle: String { l("financial_twin.payday.title") }
+        static func paydayHeadline(_ category: String, _ percent: Int) -> String {
+            String(format: l("financial_twin.payday.headline"), category, percent)
+        }
+        static func paydayComparison(_ count: Int, _ firstFive: String, _ baseline: String, _ currency: String) -> String {
+            String(format: l("financial_twin.payday.evidence.comparison"), count, firstFive, currency, baseline, currency)
+        }
+        static func paydayDate(_ date: String) -> String {
+            String(format: l("financial_twin.payday.evidence.date"), date)
+        }
+        static var paydayMethod: String { l("financial_twin.payday.method") }
+
+        static var impulseTitle: String { l("financial_twin.impulse.title") }
+        static func impulseHeadline(_ weekday: String, _ dayPart: String) -> String {
+            String(format: l("financial_twin.impulse.headline"), weekday, dayPart)
+        }
+        static func impulseSummary(_ matching: Int, _ total: Int, _ amount: String, _ currency: String) -> String {
+            String(format: l("financial_twin.impulse.evidence.summary"), matching, total, amount, currency)
+        }
+        static func impulseSample(_ date: String, _ amount: String, _ currency: String) -> String {
+            String(format: l("financial_twin.impulse.evidence.sample"), date, amount, currency)
+        }
+        static func dayPart(_ value: FinancialTwinDayPart) -> String {
+            l("financial_twin.impulse.day_part.\(value.rawValue)")
+        }
+        static var impulseMethod: String { l("financial_twin.impulse.method") }
+
+        static var budgetTitle: String { l("financial_twin.budget.title") }
+        static var budgetHeadline: String { l("financial_twin.budget.headline") }
+        static func budgetCrossing(
+            _ category: String,
+            _ limit: String,
+            _ date: String,
+            _ spent: String,
+            _ currency: String
+        ) -> String {
+            String(format: l("financial_twin.budget.evidence.crossing"), category, limit, currency, date, spent, currency)
+        }
+        static var budgetMethod: String { l("financial_twin.budget.method") }
+
+        static var monthEndTitle: String { l("financial_twin.month_end.title") }
+        static func monthEndHeadline(_ amount: String, _ currency: String) -> String {
+            String(format: l("financial_twin.month_end.headline"), amount, currency)
+        }
+        static func monthEndSample(
+            _ month: String,
+            _ income: String,
+            _ expenses: String,
+            _ balance: String,
+            _ currency: String
+        ) -> String {
+            String(format: l("financial_twin.month_end.evidence.sample"), month, income, expenses, balance, currency)
+        }
+        static var monthEndMethod: String { l("financial_twin.month_end.method") }
+
+        static var recurringTitle: String { l("financial_twin.recurring.title") }
+        static func recurringHeadline(_ name: String) -> String {
+            String(format: l("financial_twin.recurring.headline"), name)
+        }
+        static func recurringSummary(_ name: String, _ amount: String, _ currency: String, _ count: Int) -> String {
+            String(format: l("financial_twin.recurring.evidence.summary"), name, amount, currency, count)
+        }
+        static func recurringSample(_ date: String, _ amount: String, _ currency: String) -> String {
+            String(format: l("financial_twin.recurring.evidence.sample"), date, amount, currency)
+        }
+        static var recurringMethod: String { l("financial_twin.recurring.method") }
     }
 
     // MARK: - Assistant

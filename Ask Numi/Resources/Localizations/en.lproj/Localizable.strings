@@ -31,7 +31,12 @@
 "dashboard.budget_card.cta.setup" = "Set up budget";
 "dashboard.insight_card.title" = "AI insight";
 "dashboard.insight_card.cta.show_details" = "Show details  →";
-"dashboard.insight_card.not_enough_data" = "There isn't enough comparable expense data for this month and last month yet.";
+"dashboard.insight_card.top_category" = "Your largest recorded expense category is “%@”: %@ %@.";
+"dashboard.insight_card.recorded_income" = "Recorded income: %@ %@.";
+"dashboard.insight_card.empty" = "Add your first operation to receive a personalized insight.";
+"dashboard.financial_twin.title" = "Financial Digital Twin";
+"dashboard.financial_twin.empty" = "Add an operation to see your first financial result.";
+"dashboard.financial_twin.cta.details" = "Open data and calculations  →";
 "dashboard.recent.title" = "Recent operations";
 "dashboard.recent.empty" = "No operations yet — add your first one in the Operations tab.";
 
@@ -56,6 +61,7 @@
 "operations.row.action.delete" = "Delete";
 "operations.delete_alert.title" = "Couldn't delete operation";
 "operations.delete_alert.button.ok" = "OK";
+"operations.row.accessibility.impulse" = "Marked as an impulse purchase";
 
 /* Add Operation */
 "add_operation.title.new" = "New operation";
@@ -76,6 +82,9 @@
 "add_operation.merchant.section" = "Merchant";
 "add_operation.merchant.placeholder" = "For example: WALMART #2847";
 "add_operation.ml.suggested_category" = "Suggested category";
+"add_operation.behavior.section" = "Behavior";
+"add_operation.behavior.impulse" = "Impulse purchase";
+"add_operation.behavior.impulse.hint" = "Mark these purchases yourself so Numi never guesses your intent.";
 "add_operation.category.ml.food" = "Food";
 "add_operation.category.ml.transport" = "Transport";
 "add_operation.category.ml.subscriptions" = "Subscriptions";
@@ -98,6 +107,54 @@
 "add_operation.category.default.freelance" = "Freelance";
 "add_operation.category.default.gift" = "Gift";
 "add_operation.category.default.interest" = "Interest";
+
+/* Financial Digital Twin */
+"financial_twin.title" = "Financial Digital Twin";
+"financial_twin.privacy" = "Every conclusion is calculated on device from saved data, without AI guesses.";
+"financial_twin.sources" = "Sources: operations — %d, budgets — %d, scheduled payments — %d.";
+"financial_twin.empty.title" = "No operations yet";
+"financial_twin.empty.message" = "Add income or an expense to get your first calculated result.";
+"financial_twin.evidence.title" = "Data behind this conclusion";
+"financial_twin.method.title" = "How it was calculated";
+"financial_twin.button.close" = "Close";
+
+"financial_twin.snapshot.title" = "Saved cash flow";
+"financial_twin.snapshot.headline.top_category" = "Largest spending category: “%@” — %@ %@ (%d%% of expenses).";
+"financial_twin.snapshot.headline.balance" = "Recorded cash-flow difference: %@ %@.";
+"financial_twin.snapshot.evidence.totals" = "Income %@ %@; expenses %@ %@; difference %@ %@ across %d operations.";
+"financial_twin.snapshot.method" = "Income and expenses are summed across all saved operations. The largest expense category is its share of recorded spending.";
+
+"financial_twin.payday.title" = "After payday";
+"financial_twin.payday.headline" = "After payday, spending in “%@” is %d%% higher during the first five days.";
+"financial_twin.payday.evidence.comparison" = "Salary windows compared: %d. First 5-day average: %@ %@; other days adjusted to 5 days: %@ %@.";
+"financial_twin.payday.evidence.date" = "Salary payment included: %@.";
+"financial_twin.payday.method" = "The category average in completed five-day windows after salary is compared with all other days, adjusted to five days. A rise of at least 20% across at least two salary payments is shown.";
+
+"financial_twin.impulse.title" = "Impulse purchases";
+"financial_twin.impulse.headline" = "Marked impulse purchases happen most often on %@, %@.";
+"financial_twin.impulse.evidence.summary" = "Matching marked operations: %d of %d, totaling %@ %@.";
+"financial_twin.impulse.evidence.sample" = "%@: %@ %@.";
+"financial_twin.impulse.day_part.morning" = "in the morning";
+"financial_twin.impulse.day_part.afternoon" = "in the afternoon";
+"financial_twin.impulse.day_part.evening" = "in the evening";
+"financial_twin.impulse.day_part.night" = "at night";
+"financial_twin.impulse.method" = "Only expenses you explicitly mark as impulse purchases are used. Weekday and time-of-day combinations are compared after at least three marks.";
+
+"financial_twin.budget.title" = "Budget overrun";
+"financial_twin.budget.headline" = "One or more current limits were exceeded this month.";
+"financial_twin.budget.evidence.crossing" = "%@: limit %@ %@, exceeded on %@ after recorded spending reached %@ %@.";
+"financial_twin.budget.method" = "Current-month expenses are added by category in date order. The first operation that takes the total above the current limit is shown.";
+
+"financial_twin.month_end.title" = "Month-end remainder";
+"financial_twin.month_end.headline" = "Median remainder across completed months: %@ %@.";
+"financial_twin.month_end.evidence.sample" = "%@: income %@, expenses %@, remainder %@ %@.";
+"financial_twin.month_end.method" = "The median of income minus expenses is taken across up to six recent completed months that contain both. This is the remainder from recorded operations, not a bank balance.";
+
+"financial_twin.recurring.title" = "Unplanned recurring expenses";
+"financial_twin.recurring.headline" = "Possible recurring expense outside the plan: “%@”.";
+"financial_twin.recurring.evidence.summary" = "%@: typical amount %@ %@, matches — %d.";
+"financial_twin.recurring.evidence.sample" = "%@: %@ %@.";
+"financial_twin.recurring.method" = "Expenses with the same merchant or category are matched across at least three nearby months: once per month, within 10% in amount and four days in billing date. Saved scheduled payments are excluded.";
 
 /* Assistant */
 "assistant.header.title" = "Assistant";

@@ -37,7 +37,12 @@
 /* Dashboard — Insight Card */
 "dashboard.insight_card.title" = "AI-инсайт";
 "dashboard.insight_card.cta.show_details" = "Показать детали  →";
-"dashboard.insight_card.not_enough_data" = "Пока недостаточно сопоставимых расходов за текущий и прошлый месяцы.";
+"dashboard.insight_card.top_category" = "Самая крупная категория расходов — «%@»: %@ %@.";
+"dashboard.insight_card.recorded_income" = "Записанный доход: %@ %@.";
+"dashboard.insight_card.empty" = "Добавьте первую операцию, чтобы получить персональный инсайт.";
+"dashboard.financial_twin.title" = "Финансовый Digital Twin";
+"dashboard.financial_twin.empty" = "Добавьте операцию, чтобы увидеть первый финансовый результат.";
+"dashboard.financial_twin.cta.details" = "Открыть данные и расчёты  →";
 
 /* Dashboard — Recent Transactions */
 "dashboard.recent.title" = "Последние операции";
@@ -72,6 +77,7 @@
 "operations.row.action.delete" = "Удалить";
 "operations.delete_alert.title" = "Не удалось удалить операцию";
 "operations.delete_alert.button.ok" = "Понятно";
+"operations.row.accessibility.impulse" = "Отмечено как импульсивная покупка";
 
 /* Add Operation */
 "add_operation.title.new" = "Новая операция";
@@ -92,6 +98,9 @@
 "add_operation.merchant.section" = "Продавец";
 "add_operation.merchant.placeholder" = "Например: WALMART #2847";
 "add_operation.ml.suggested_category" = "Предложенная категория";
+"add_operation.behavior.section" = "Поведение";
+"add_operation.behavior.impulse" = "Импульсивная покупка";
+"add_operation.behavior.impulse.hint" = "Отмечайте такие покупки сами — Numi не будет угадывать ваше намерение.";
 "add_operation.category.ml.food" = "Еда";
 "add_operation.category.ml.transport" = "Транспорт";
 "add_operation.category.ml.subscriptions" = "Подписки";
@@ -116,6 +125,54 @@
 "add_operation.category.default.freelance" = "Фриланс";
 "add_operation.category.default.gift" = "Подарок";
 "add_operation.category.default.interest" = "Проценты";
+
+/* Financial Digital Twin */
+"financial_twin.title" = "Финансовый Digital Twin";
+"financial_twin.privacy" = "Все выводы рассчитаны на устройстве из сохранённых данных без AI-догадок.";
+"financial_twin.sources" = "Источники: операции — %d, бюджеты — %d, плановые платежи — %d.";
+"financial_twin.empty.title" = "Операций пока нет";
+"financial_twin.empty.message" = "Добавьте доход или расход, чтобы получить первый рассчитанный результат.";
+"financial_twin.evidence.title" = "На каких данных основан вывод";
+"financial_twin.method.title" = "Как рассчитано";
+"financial_twin.button.close" = "Закрыть";
+
+"financial_twin.snapshot.title" = "Сохранённый денежный поток";
+"financial_twin.snapshot.headline.top_category" = "Самая крупная категория расходов — «%@»: %@ %@ (%d%% всех расходов).";
+"financial_twin.snapshot.headline.balance" = "Разница доходов и расходов по сохранённым операциям: %@ %@.";
+"financial_twin.snapshot.evidence.totals" = "Доходы %@ %@; расходы %@ %@; разница %@ %@ по %d операциям.";
+"financial_twin.snapshot.method" = "Доходы и расходы суммируются по всем сохранённым операциям. Для крупнейшей категории рассчитывается её доля в записанных расходах.";
+
+"financial_twin.payday.title" = "После зарплаты";
+"financial_twin.payday.headline" = "После зарплаты расходы в категории «%@» выше на %d%% в первые пять дней.";
+"financial_twin.payday.evidence.comparison" = "Сравнено окон после зарплаты: %d. В среднем за первые 5 дней: %@ %@; обычные 5 дней: %@ %@.";
+"financial_twin.payday.evidence.date" = "Учтена зарплата: %@.";
+"financial_twin.payday.method" = "Средняя сумма категории в завершённых пятидневных окнах после зарплаты сравнена с расходами в остальные дни, приведёнными к пяти дням. Показывается рост от 20% и минимум по двум зарплатам.";
+
+"financial_twin.impulse.title" = "Импульсивные покупки";
+"financial_twin.impulse.headline" = "Чаще всего отмеченные импульсивные покупки происходят: %@, %@.";
+"financial_twin.impulse.evidence.summary" = "Совпало отмеченных операций: %d из %d, общая сумма %@ %@.";
+"financial_twin.impulse.evidence.sample" = "%@: %@ %@.";
+"financial_twin.impulse.day_part.morning" = "утром";
+"financial_twin.impulse.day_part.afternoon" = "днём";
+"financial_twin.impulse.day_part.evening" = "вечером";
+"financial_twin.impulse.day_part.night" = "ночью";
+"financial_twin.impulse.method" = "Используются только расходы, которые вы сами отметили как импульсивные. Сравниваются сочетания дня недели и части суток; нужно минимум три отметки.";
+
+"financial_twin.budget.title" = "Превышение бюджета";
+"financial_twin.budget.headline" = "Один или несколько текущих лимитов превышены в этом месяце.";
+"financial_twin.budget.evidence.crossing" = "%@: лимит %@ %@, превышен %@ после учтённых расходов %@ %@.";
+"financial_twin.budget.method" = "Расходы текущего месяца суммируются по категории в порядке дат. Показывается первая операция, после которой сумма стала выше текущего лимита.";
+
+"financial_twin.month_end.title" = "Остаток к концу месяца";
+"financial_twin.month_end.headline" = "Медианный остаток по завершённым месяцам: %@ %@.";
+"financial_twin.month_end.evidence.sample" = "%@: доход %@, расходы %@, остаток %@ %@.";
+"financial_twin.month_end.method" = "Берётся медиана доходов минус расходы максимум за шесть последних завершённых месяцев, где записаны и доходы, и расходы. Это остаток по операциям, а не банковский баланс.";
+
+"financial_twin.recurring.title" = "Неучтённые регулярные траты";
+"financial_twin.recurring.headline" = "Возможная регулярная трата вне плана: «%@».";
+"financial_twin.recurring.evidence.summary" = "%@: типичная сумма %@ %@, совпадений — %d.";
+"financial_twin.recurring.evidence.sample" = "%@: %@ %@.";
+"financial_twin.recurring.method" = "Ищутся траты с одинаковым продавцом или категорией минимум в трёх близких месяцах: одна в месяц, разница суммы до 10% и даты до четырёх дней. Сохранённые плановые платежи исключаются.";
 
 /* Assistant */
 "assistant.header.title" = "Помощник";

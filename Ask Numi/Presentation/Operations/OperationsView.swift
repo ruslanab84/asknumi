@@ -333,8 +333,16 @@ private struct OperationsRow: View {
                 )
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(transaction.category)
-                    .font(.subheadline.weight(.semibold))
+                HStack(spacing: 5) {
+                    Text(transaction.category)
+                        .font(.subheadline.weight(.semibold))
+                    if transaction.isImpulse {
+                        Image(systemName: "bolt.fill")
+                            .font(.caption2)
+                            .foregroundStyle(.orange)
+                            .accessibilityLabel(L10n.Operations.impulseLabel)
+                    }
+                }
                 Text(transaction.kind.title)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -400,6 +408,7 @@ private struct AddOperationView: View {
             _categoryColor = State(initialValue: editing.categoryColor)
             _amountText = State(initialValue: "\(editing.amount)")
             _date = State(initialValue: editing.date)
+            _isImpulse = State(initialValue: editing.isImpulse)
         }
         _classificationViewModel = State(initialValue: AddOperationClassificationViewModel(
             classifier: transactionClassifier,
@@ -420,6 +429,7 @@ private struct AddOperationView: View {
     @State private var categoryColor = CategoryColor.defaultColor(for: .expense)
     @State private var amountText = ""
     @State private var date = Date.now
+    @State private var isImpulse = false
     @State private var isSaving = false
     @State private var errorMessage: String?
     @State private var magicText = ""
@@ -496,30 +506,6 @@ private struct AddOperationView: View {
                     .tint(kind == .expense ? .red : .green)
                 }
 
-                Section(L10n.AddOperation.merchantSection) {
-                    TextField(L10n.AddOperation.merchantPlaceholder, text: $classification.merchantText)
-                        .textInputAutocapitalization(.characters)
-                        .autocorrectionDisabled()
-                        .focused($focusedField, equals: .merchant)
-
-                    if let suggestion = classification.suggestion {
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(L10n.AddOperation.suggestedCategory)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            HStack {
-                                Label(suggestion.category.localized, systemImage: suggestion.category.icon)
-                                Spacer()
-                                Text(suggestion.confidence, format: .percent.precision(.fractionLength(0)))
-                                    .foregroundStyle(.secondary)
-                            }
-                            ProgressView(value: suggestion.confidence)
-                                .tint(.indigo)
-                        }
-                        .accessibilityElement(children: .combine)
-                    }
-                }
-
                 Section(L10n.AddOperation.sectionCategory) {
                     NavigationLink {
                         CategorySelectionView(
@@ -561,6 +547,16 @@ private struct AddOperationView: View {
                         selection: $date,
                         displayedComponents: [.date, .hourAndMinute]
                     )
+                }
+
+                if kind == .expense {
+                    Section(L10n.AddOperation.behaviorSection) {
+                        Toggle(L10n.AddOperation.impulsePurchase, isOn: $isImpulse)
+                            .tint(.orange)
+                        Text(L10n.AddOperation.impulseHint)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 if let errorMessage {
@@ -692,7 +688,8 @@ private struct AddOperationView: View {
             categoryIcon: categoryIcon,
             categoryColor: categoryColor,
             date: date,
-            note: merchant.isEmpty ? nil : merchant
+            note: merchant.isEmpty ? nil : merchant,
+            isImpulse: kind == .expense && isImpulse
         )
 
         do {
@@ -789,7 +786,6 @@ private struct CategorySelectionView: View {
 
 private enum Field {
     case magic
-    case merchant
     case amount
 }
 
