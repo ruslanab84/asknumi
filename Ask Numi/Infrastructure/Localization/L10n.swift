@@ -93,6 +93,20 @@ enum L10n {
         static var filterAll: String        { l("operations.filter.all") }
         static var filterExpenses: String   { l("operations.filter.expenses") }
         static var filterIncome: String     { l("operations.filter.income") }
+        static var presentationPickerLabel: String { l("operations.presentation.label") }
+        static var presentationDaily: String { l("operations.presentation.daily") }
+        static var presentationCalendar: String { l("operations.presentation.calendar") }
+        static var presentationMonthly: String { l("operations.presentation.monthly") }
+        static var balance: String          { l("operations.summary.balance") }
+        static var previousMonth: String    { l("operations.calendar.accessibility.previous_month") }
+        static var nextMonth: String        { l("operations.calendar.accessibility.next_month") }
+        static func calendarDayBalance(_ date: String, _ balance: String) -> String {
+            String(format: l("operations.calendar.accessibility.day_balance"), date, balance)
+        }
+        static var selectedDateEmptyTitle: String { l("operations.calendar.empty.title") }
+        static var selectedDateEmptyMessage: String { l("operations.calendar.empty.message") }
+        static var periodEmptyTitle: String { l("operations.period.empty.title") }
+        static var periodEmptyMessage: String { l("operations.period.empty.message") }
         static var loading: String          { l("operations.list.loading") }
         static var loadErrorTitle: String   { l("operations.list.error.title") }
         static var emptyTitle: String       { l("operations.list.empty.title") }
@@ -465,12 +479,16 @@ enum L10n {
 
     enum NewCategory {
         static var title: String                  { l("new_category.title") }
+        static var editTitle: String              { l("new_category.title.edit") }
         static var kindPickerLabel: String        { l("new_category.kind_picker.label") }
         static var nameLabel: String              { l("new_category.field.name.label") }
         static var namePlaceholder: String        { l("new_category.field.name.placeholder") }
         static var colorLabel: String             { l("new_category.field.color.label") }
         static var iconLabel: String              { l("new_category.field.icon.label") }
         static var selectIconLabel: String        { l("new_category.field.icon.accessibility.select") }
+        static func editAction(_ name: String) -> String {
+            String(format: l("new_category.action.edit"), name)
+        }
         static var descriptionLabel: String       { l("new_category.field.description.label") }
         static var descriptionPlaceholder: String { l("new_category.field.description.placeholder") }
         static func color(_ id: String) -> String { l("new_category.color.\(id)") }

@@ -7,6 +7,8 @@ import SwiftUI
 
 struct NewCategoryView: View {
     let addCategory: AddTransactionCategoryUseCase?
+    let updateCategory: UpdateTransactionCategoryUseCase?
+    let editing: TransactionCategory?
     let onSaved: (TransactionCategory) -> Void
 
     @Environment(\.dismiss) private var dismiss
@@ -23,12 +25,18 @@ struct NewCategoryView: View {
     init(
         kind: TransactionKind = .expense,
         addCategory: AddTransactionCategoryUseCase? = nil,
+        updateCategory: UpdateTransactionCategoryUseCase? = nil,
+        editing: TransactionCategory? = nil,
         onSaved: @escaping (TransactionCategory) -> Void = { _ in }
     ) {
         self.addCategory = addCategory
+        self.updateCategory = updateCategory
+        self.editing = editing
         self.onSaved = onSaved
-        _kind = State(initialValue: kind)
-        _selectedColor = State(initialValue: .defaultColor(for: kind))
+        _kind = State(initialValue: editing?.kind ?? kind)
+        _name = State(initialValue: editing?.name ?? "")
+        _selectedIcon = State(initialValue: editing?.icon ?? CategoryIcon.options[0])
+        _selectedColor = State(initialValue: editing?.color ?? .defaultColor(for: kind))
     }
 
     private var trimmedName: String {
@@ -64,7 +72,7 @@ struct NewCategoryView: View {
                 .scrollIndicators(.hidden)
                 .scrollDismissesKeyboard(.interactively)
             }
-            .navigationTitle(L10n.NewCategory.title)
+            .navigationTitle(editing == nil ? L10n.NewCategory.title : L10n.NewCategory.editTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -175,9 +183,22 @@ struct NewCategoryView: View {
         guard canSave else { return }
         isSaving = true
 
-        let category = TransactionCategory(name: trimmedName, kind: kind, icon: selectedIcon, color: selectedColor)
+        let category = TransactionCategory(
+            id: editing?.id ?? UUID(),
+            name: trimmedName,
+            kind: kind,
+            icon: selectedIcon,
+            color: selectedColor
+        )
         do {
-            if let addCategory {
+            if editing != nil {
+                guard let updateCategory else {
+                    assertionFailure("UpdateTransactionCategoryUseCase is required when editing a category")
+                    isSaving = false
+                    return
+                }
+                try await updateCategory.execute(category)
+            } else if let addCategory {
                 try await addCategory.execute(category)
             }
             onSaved(category)

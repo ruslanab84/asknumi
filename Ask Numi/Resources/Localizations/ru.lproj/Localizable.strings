@@ -96,6 +96,18 @@
 "operations.filter.all" = "Все";
 "operations.filter.expenses" = "Расходы";
 "operations.filter.income" = "Доходы";
+"operations.presentation.label" = "Отображение операций";
+"operations.presentation.daily" = "По дням";
+"operations.presentation.calendar" = "Календарь";
+"operations.presentation.monthly" = "По месяцам";
+"operations.summary.balance" = "Остаток";
+"operations.calendar.accessibility.previous_month" = "Предыдущий месяц";
+"operations.calendar.accessibility.next_month" = "Следующий месяц";
+"operations.calendar.accessibility.day_balance" = "%@, остаток %@";
+"operations.calendar.empty.title" = "На эту дату нет операций";
+"operations.calendar.empty.message" = "Выберите другую дату или добавьте операцию.";
+"operations.period.empty.title" = "Нет подходящих операций";
+"operations.period.empty.message" = "Измените фильтр или поисковый запрос.";
 
 /* Operations — List states */
 "operations.list.loading" = "Загрузка операций…";
@@ -371,12 +383,14 @@
 
 /* New Category */
 "new_category.title" = "Новая категория";
+"new_category.title.edit" = "Изменить категорию";
 "new_category.kind_picker.label" = "Тип категории";
 "new_category.field.name.label" = "Название категории";
 "new_category.field.name.placeholder" = "Например: Продукты";
 "new_category.field.color.label" = "Цвет";
 "new_category.field.icon.label" = "Иконка";
 "new_category.field.icon.accessibility.select" = "Выбрать иконку";
+"new_category.action.edit" = "Изменить категорию «%@»";
 "new_category.field.description.label" = "Описание (необязательно)";
 "new_category.field.description.placeholder" = "Введите описание категории";
 

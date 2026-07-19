@@ -34,6 +34,7 @@ struct ContentView: View {
                     fetchTransactions: container.makeFetchTransactionsUseCase(),
                     fetchCategories: container.makeFetchTransactionCategoriesUseCase(),
                     addCategory: container.makeAddTransactionCategoryUseCase(),
+                    updateCategory: container.makeUpdateTransactionCategoryUseCase(),
                     addTransaction: container.makeAddTransactionUseCase(),
                     updateTransaction: container.makeUpdateTransactionUseCase(),
                     deleteTransaction: container.makeDeleteTransactionUseCase(),

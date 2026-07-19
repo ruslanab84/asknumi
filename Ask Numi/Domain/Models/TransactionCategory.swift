@@ -46,15 +46,25 @@ enum CategoryIcon {
     nonisolated static let options = [
         "cart", "basket", "bag", "banknote", "creditcard",
         "car", "bus", "tram", "fuelpump", "airplane",
+        "bicycle", "scooter", "ferry", "train.side.front.car", "steeringwheel",
         "house", "building.2", "bolt", "drop", "flame",
+        "bed.double", "sofa", "washer", "refrigerator", "lamp.table",
         "fork.knife", "takeoutbag.and.cup.and.straw", "cup.and.saucer", "wineglass", "smoke.fill",
+        "carrot", "fish", "fork.knife.circle", "popcorn", "mug",
         "heart", "cross.case", "pills", "stethoscope", "dumbbell",
+        "tooth", "bandage", "facemask", "figure.run", "figure.mind.and.body",
         "figure.walk", "tshirt", "gift", "birthday.cake", "stroller",
+        "shoe", "handbag", "eyeglasses", "watch.analog", "sunglasses",
         "pawprint", "suitcase", "calendar", "clock", "phone",
+        "globe", "map", "mappin.and.ellipse", "tent", "beach.umbrella",
         "book", "graduationcap", "briefcase", "laptopcomputer", "chart.line.uptrend.xyaxis",
+        "printer", "keyboard", "display", "server.rack", "shippingbox",
         "gamecontroller", "film", "music.note", "headphones", "camera",
+        "tv", "ticket", "theatermasks", "paintpalette", "sportscourt",
         "wrench.and.screwdriver", "hammer", "scissors", "paintbrush", "leaf",
-        "tree", "lightbulb", "ellipsis"
+        "tree", "lightbulb", "ellipsis", "person.2", "person.crop.circle",
+        "shield", "lock", "key", "doc.text", "folder",
+        "percent", "dollarsign.circle", "eurosign.circle", "bitcoinsign.circle", "chart.pie"
     ]
 
     nonisolated static func suggested(for category: String, kind: TransactionKind) -> String {

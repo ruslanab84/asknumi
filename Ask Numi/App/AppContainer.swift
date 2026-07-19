@@ -66,6 +66,10 @@ final class AppContainer {
         AddTransactionCategoryUseCase(repository: transactionCategoryRepository)
     }
 
+    func makeUpdateTransactionCategoryUseCase() -> UpdateTransactionCategoryUseCase {
+        UpdateTransactionCategoryUseCase(repository: transactionCategoryRepository)
+    }
+
     func makeAddTransactionUseCase() -> AddTransactionUseCase {
         AddTransactionUseCase(repository: transactionRepository)
     }

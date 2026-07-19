@@ -10,6 +10,7 @@ struct OperationsView: View {
     let fetchTransactions: FetchTransactionsUseCase
     let fetchCategories: FetchTransactionCategoriesUseCase
     let addCategory: AddTransactionCategoryUseCase
+    let updateCategory: UpdateTransactionCategoryUseCase
     let addTransaction: AddTransactionUseCase
     let updateTransaction: UpdateTransactionUseCase
     let deleteTransaction: DeleteTransactionUseCase
@@ -20,31 +21,50 @@ struct OperationsView: View {
     @State private var categories: [TransactionCategory] = []
     @State private var query = ""
     @State private var filter: OperationsFilter = .all
+    @State private var presentation: OperationsPresentation = .daily
+    @State private var displayedMonth = Calendar.current.dateInterval(of: .month, for: .now)?.start ?? .now
+    @State private var selectedDate = Calendar.current.startOfDay(for: .now)
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var isPresentingAddOperation = false
     @State private var editingTransaction: Transaction?
     @State private var deleteErrorMessage: String?
 
+    private var filteredTransactions: [Transaction] {
+        transactions.filter { transaction in
+            filter.matches(transaction) &&
+                (query.isEmpty || transaction.category.localizedCaseInsensitiveContains(query))
+        }
+    }
+
     private var sections: [OperationDaySection] {
         let calendar = Calendar.current
-        let grouped = Dictionary(grouping: transactions) { calendar.startOfDay(for: $0.date) }
+        let grouped = Dictionary(grouping: filteredTransactions) { calendar.startOfDay(for: $0.date) }
 
         return grouped.keys.sorted(by: >).compactMap { date in
             guard let transactions = grouped[date] else { return nil }
-            let visibleTransactions = transactions.filter { transaction in
-                filter.matches(transaction) &&
-                    (query.isEmpty || transaction.category.localizedCaseInsensitiveContains(query))
-            }
-            guard !visibleTransactions.isEmpty else { return nil }
-
             return OperationDaySection(
                 date: date,
-                transactions: visibleTransactions.sorted { $0.date > $1.date },
+                transactions: transactions.sorted { $0.date > $1.date },
                 totalExpenses: total(for: transactions, kind: .expense),
                 totalIncome: total(for: transactions, kind: .income)
             )
         }
+    }
+
+    private var selectedDaySection: OperationDaySection? {
+        let calendar = Calendar.current
+        let dayTransactions = filteredTransactions
+            .filter { calendar.isDate($0.date, inSameDayAs: selectedDate) }
+            .sorted { $0.date > $1.date }
+        guard !dayTransactions.isEmpty else { return nil }
+
+        return OperationDaySection(
+            date: calendar.startOfDay(for: selectedDate),
+            transactions: dayTransactions,
+            totalExpenses: total(for: dayTransactions, kind: .expense),
+            totalIncome: total(for: dayTransactions, kind: .income)
+        )
     }
 
     var body: some View {
@@ -78,13 +98,14 @@ struct OperationsView: View {
                     existingTransactions: transactions,
                     categories: categories,
                     addCategory: addCategory,
+                    updateCategory: updateCategory,
                     parseNaturalInput: parseNaturalInput,
                     transactionClassifier: transactionClassifier
                 ) { transaction in
                     transactions.append(transaction)
                     transactions.sort { $0.date > $1.date }
                 } onCategorySaved: { category in
-                    categories.append(category)
+                    storeCategory(category)
                 }
             }
             .sheet(item: $editingTransaction) { transaction in
@@ -94,6 +115,7 @@ struct OperationsView: View {
                     existingTransactions: transactions,
                     categories: categories,
                     addCategory: addCategory,
+                    updateCategory: updateCategory,
                     transactionClassifier: transactionClassifier,
                     editing: transaction
                 ) { updated in
@@ -102,7 +124,7 @@ struct OperationsView: View {
                         transactions.sort { $0.date > $1.date }
                     }
                 } onCategorySaved: { category in
-                    categories.append(category)
+                    storeCategory(category)
                 }
             }
             .alert(
@@ -117,6 +139,9 @@ struct OperationsView: View {
                 Text(deleteErrorMessage ?? "")
             }
             .task {
+                #if DEBUG
+                OperationCalendarLayout.assertSelfCheck()
+                #endif
                 await loadData()
             }
         }
@@ -175,25 +200,51 @@ struct OperationsView: View {
     private var filters: some View {
         HStack(spacing: 8) {
             ForEach(OperationsFilter.allCases, id: \.self) { item in
-                Button(item.title) {
+                Button {
                     filter = item
+                } label: {
+                    Text(item.title)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 34)
                 }
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(filter == item ? .white : .primary)
-                .padding(.horizontal, 16)
-                .frame(height: 34)
+                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity)
                 .glassEffect(.regular.tint(filter == item ? accentColor : .clear).interactive(), in: .capsule)
                 .accessibilityAddTraits(filter == item ? .isSelected : [])
             }
 
-            Spacer()
+            presentationMenu
         }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var presentationMenu: some View {
+        Menu {
+            Picker(L10n.Operations.presentationPickerLabel, selection: $presentation) {
+                ForEach(OperationsPresentation.allCases, id: \.self) { presentation in
+                    Label(presentation.title, systemImage: presentation.systemImage)
+                        .tag(presentation)
+                }
+            }
+        } label: {
+            Text(presentation.title)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(accentColor)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .frame(maxWidth: .infinity)
+                .frame(height: 34)
+        }
+        .frame(maxWidth: .infinity)
+        .glassEffect(.regular.interactive(), in: .capsule)
     }
 
     @ViewBuilder
     private var content: some View {
-        let visibleSections = sections
-
         if isLoading && transactions.isEmpty {
             ProgressView(L10n.Operations.loading)
                 .frame(maxWidth: .infinity)
@@ -221,13 +272,62 @@ struct OperationsView: View {
                 .buttonStyle(.borderedProminent)
             }
             .padding(.top, 48)
-        } else if visibleSections.isEmpty {
+        } else {
+            switch presentation {
+            case .daily:
+                dailyContent
+            case .calendar:
+                calendarContent
+            case .monthly:
+                monthlyContent
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var dailyContent: some View {
+        if sections.isEmpty {
             ContentUnavailableView.search(text: query)
                 .padding(.top, 48)
         } else {
-            ForEach(visibleSections) { section in
+            ForEach(sections) { section in
                 transactionSection(section)
             }
+        }
+    }
+
+    @ViewBuilder
+    private var calendarContent: some View {
+        OperationsCalendarView(
+            transactions: filteredTransactions,
+            displayedMonth: $displayedMonth,
+            selectedDate: $selectedDate
+        )
+
+        if let selectedDaySection {
+            transactionSection(selectedDaySection)
+        } else {
+            ContentUnavailableView {
+                Label(L10n.Operations.selectedDateEmptyTitle, systemImage: "calendar.badge.minus")
+            } description: {
+                Text(L10n.Operations.selectedDateEmptyMessage)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 20)
+        }
+    }
+
+    @ViewBuilder
+    private var monthlyContent: some View {
+        if filteredTransactions.isEmpty {
+            ContentUnavailableView {
+                Label(L10n.Operations.periodEmptyTitle, systemImage: "calendar")
+            } description: {
+                Text(L10n.Operations.periodEmptyMessage)
+            }
+            .padding(.top, 48)
+        } else {
+            OperationsMonthlyView(transactions: filteredTransactions)
         }
     }
 
@@ -311,6 +411,15 @@ struct OperationsView: View {
             errorMessage = error.localizedDescription
         }
     }
+
+    private func storeCategory(_ category: TransactionCategory) {
+        if let index = categories.firstIndex(where: { $0.id == category.id }) {
+            categories[index] = category
+        } else {
+            categories.append(category)
+        }
+        categories.sort { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
 }
 
 private struct OperationsRow: View {
@@ -366,6 +475,7 @@ private struct AddOperationView: View {
     let existingTransactions: [Transaction]
     let categories: [TransactionCategory]
     let addCategory: AddTransactionCategoryUseCase
+    let updateCategory: UpdateTransactionCategoryUseCase
     /// Optional on-device parser. When present and available, a quick-add
     /// field lets the user describe the operation in words. Omitted (nil)
     /// when editing an existing operation.
@@ -380,6 +490,7 @@ private struct AddOperationView: View {
         existingTransactions: [Transaction],
         categories: [TransactionCategory],
         addCategory: AddTransactionCategoryUseCase,
+        updateCategory: UpdateTransactionCategoryUseCase,
         parseNaturalInput: ParseNaturalInputUseCase? = nil,
         transactionClassifier: any TransactionClassifier,
         editing: Transaction? = nil,
@@ -391,6 +502,7 @@ private struct AddOperationView: View {
         self.existingTransactions = existingTransactions
         self.categories = categories
         self.addCategory = addCategory
+        self.updateCategory = updateCategory
         self.parseNaturalInput = parseNaturalInput
         self.editing = editing
         self.onSaved = onSaved
@@ -464,7 +576,7 @@ private struct AddOperationView: View {
     private var availableCategories: [OperationCategorySuggestion] {
         let savedCategories = categories
             .filter { $0.kind == kind }
-            .map { OperationCategorySuggestion(name: $0.name, icon: $0.icon, color: $0.color) }
+            .map { OperationCategorySuggestion(name: $0.name, icon: $0.icon, color: $0.color, savedCategory: $0) }
         let savedTransactions = existingTransactions
             .filter { $0.kind == kind }
             .sorted { $0.date > $1.date }
@@ -509,6 +621,7 @@ private struct AddOperationView: View {
                             categories: availableCategories,
                             selectedCategory: category,
                             addCategory: addCategory,
+                            updateCategory: updateCategory,
                             onSelect: { selected in
                                 kind = selected.kind
                                 category = selected.name
@@ -713,6 +826,7 @@ private struct OperationCategorySuggestion: Identifiable {
     let name: String
     let icon: String
     let color: CategoryColor
+    var savedCategory: TransactionCategory? = nil
 
     var id: String { name.lowercased() }
 }
@@ -722,42 +836,64 @@ private struct CategorySelectionView: View {
     let categories: [OperationCategorySuggestion]
     let selectedCategory: String
     let addCategory: AddTransactionCategoryUseCase
+    let updateCategory: UpdateTransactionCategoryUseCase
     let onSelect: (TransactionCategory) -> Void
     let onCategorySaved: (TransactionCategory) -> Void
 
     @Environment(\.dismiss) private var dismiss
-    @State private var isPresentingNewCategory = false
+    @State private var editorDestination: CategoryEditorDestination?
     @State private var createdCategory: TransactionCategory?
 
     var body: some View {
         List {
             Section {
                 ForEach(categories) { category in
-                    Button {
-                        select(TransactionCategory(name: category.name, kind: kind, icon: category.icon, color: category.color))
-                    } label: {
-                        HStack(spacing: 12) {
-                            Image(systemName: category.icon)
-                                .foregroundStyle(category.color.displayColor)
-                                .frame(width: 28)
-                            Text(category.name)
-                                .foregroundStyle(.primary)
-                            Spacer()
-                            if category.name.caseInsensitiveCompare(selectedCategory) == .orderedSame {
-                                Image(systemName: "checkmark")
-                                    .foregroundStyle(.tint)
+                    HStack(spacing: 8) {
+                        Button {
+                            select(category.savedCategory ?? TransactionCategory(
+                                name: category.name,
+                                kind: kind,
+                                icon: category.icon,
+                                color: category.color
+                            ))
+                        } label: {
+                            HStack(spacing: 12) {
+                                Image(systemName: category.icon)
+                                    .foregroundStyle(category.color.displayColor)
+                                    .frame(width: 28)
+                                Text(category.name)
+                                    .foregroundStyle(.primary)
+                                Spacer()
+                                if category.name.caseInsensitiveCompare(selectedCategory) == .orderedSame {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(.tint)
+                                }
                             }
+                            .contentShape(.rect)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityAddTraits(
+                            category.name.caseInsensitiveCompare(selectedCategory) == .orderedSame ? .isSelected : []
+                        )
+
+                        if let savedCategory = category.savedCategory {
+                            Button {
+                                editorDestination = .edit(savedCategory)
+                            } label: {
+                                Image(systemName: "pencil")
+                                    .foregroundStyle(.secondary)
+                                    .frame(width: 36, height: 36)
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(L10n.NewCategory.editAction(category.name))
                         }
                     }
-                    .accessibilityAddTraits(
-                        category.name.caseInsensitiveCompare(selectedCategory) == .orderedSame ? .isSelected : []
-                    )
                 }
             }
 
             Section {
                 Button {
-                    isPresentingNewCategory = true
+                    editorDestination = .new
                 } label: {
                     Label(L10n.AddOperation.createCategory, systemImage: "plus.circle.fill")
                 }
@@ -767,10 +903,19 @@ private struct CategorySelectionView: View {
         .background { DashboardBackground() }
         .navigationTitle(L10n.AddOperation.selectCategory)
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $isPresentingNewCategory, onDismiss: selectCreatedCategory) {
-            NewCategoryView(kind: kind, addCategory: addCategory) { category in
-                createdCategory = category
-                onCategorySaved(category)
+        .sheet(item: $editorDestination, onDismiss: selectCreatedCategory) { destination in
+            switch destination {
+            case .new:
+                NewCategoryView(kind: kind, addCategory: addCategory) { category in
+                    createdCategory = category
+                    onCategorySaved(category)
+                }
+            case .edit(let category):
+                NewCategoryView(
+                    updateCategory: updateCategory,
+                    editing: category,
+                    onSaved: onCategorySaved
+                )
             }
         }
     }
@@ -783,6 +928,18 @@ private struct CategorySelectionView: View {
     private func selectCreatedCategory() {
         guard let createdCategory else { return }
         select(createdCategory)
+    }
+}
+
+private enum CategoryEditorDestination: Identifiable {
+    case new
+    case edit(TransactionCategory)
+
+    var id: String {
+        switch self {
+        case .new: "new"
+        case .edit(let category): category.id.uuidString
+        }
     }
 }
 
@@ -809,6 +966,28 @@ private enum OperationsFilter: CaseIterable {
         case .all: true
         case .expenses: transaction.kind == .expense
         case .income: transaction.kind == .income
+        }
+    }
+}
+
+private enum OperationsPresentation: CaseIterable {
+    case daily
+    case calendar
+    case monthly
+
+    var title: String {
+        switch self {
+        case .daily: L10n.Operations.presentationDaily
+        case .calendar: L10n.Operations.presentationCalendar
+        case .monthly: L10n.Operations.presentationMonthly
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .daily: "list.bullet"
+        case .calendar: "calendar"
+        case .monthly: "chart.bar.xaxis"
         }
     }
 }
@@ -843,11 +1022,11 @@ enum OperationFormatting {
         kind == .income ? "+\(plain(amount))" : plain(amount)
     }
 
-    /// Amount with currency and no forced sign, e.g. "4 280 AZN"; negative values keep the typographic minus.
+    /// Amount with currency and no forced sign, e.g. "4 280 ₼"; negative values keep the typographic minus.
     static func plain(_ amount: Decimal) -> String {
         let number = amountFormatter(for: LocalizationManager.shared.currentLanguage)
             .string(from: NSDecimalNumber(decimal: amount)) ?? amount.description
-        return "\(number) \(CurrencySettings.selectedCode)"
+        return "\(number) \(CurrencySettings.symbol(for: CurrencySettings.selectedCode))"
     }
 
     private static let russianAmountFormatter = makeAmountFormatter(locale: "ru_RU")
@@ -883,6 +1062,7 @@ extension TransactionKind {
         fetchTransactions: container.makeFetchTransactionsUseCase(),
         fetchCategories: container.makeFetchTransactionCategoriesUseCase(),
         addCategory: container.makeAddTransactionCategoryUseCase(),
+        updateCategory: container.makeUpdateTransactionCategoryUseCase(),
         addTransaction: container.makeAddTransactionUseCase(),
         updateTransaction: container.makeUpdateTransactionUseCase(),
         deleteTransaction: container.makeDeleteTransactionUseCase(),

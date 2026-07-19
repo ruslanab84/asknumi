@@ -20,6 +20,25 @@ enum CurrencySettings {
         flags[code] ?? "🌐"
     }
 
+    static func symbol(for code: String) -> String {
+        symbols[code] ?? code
+    }
+
+    private static let symbols = Dictionary(uniqueKeysWithValues: supportedCodes.map { code in
+        let symbol = Locale.availableIdentifiers.lazy
+            .map(Locale.init(identifier:))
+            .filter { $0.currency?.identifier == code }
+            .compactMap { locale in
+                let formatter = NumberFormatter()
+                formatter.numberStyle = .currency
+                formatter.locale = locale
+                formatter.currencyCode = code
+                return formatter.currencySymbol
+            }
+            .min { $0.count < $1.count } ?? code
+        return (code, symbol)
+    })
+
     private static let flags: [String: String] = [
         "AED": "🇦🇪", "AFN": "🇦🇫", "ALL": "🇦🇱", "AMD": "🇦🇲",
         "ARS": "🇦🇷", "AUD": "🇦🇺", "AWG": "🇦🇼", "AZN": "🇦🇿",

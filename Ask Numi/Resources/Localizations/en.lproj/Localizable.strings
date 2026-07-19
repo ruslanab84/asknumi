@@ -84,6 +84,18 @@
 "operations.filter.all" = "All";
 "operations.filter.expenses" = "Expenses";
 "operations.filter.income" = "Income";
+"operations.presentation.label" = "Display operations";
+"operations.presentation.daily" = "Daily";
+"operations.presentation.calendar" = "Calendar";
+"operations.presentation.monthly" = "Monthly";
+"operations.summary.balance" = "Balance";
+"operations.calendar.accessibility.previous_month" = "Previous month";
+"operations.calendar.accessibility.next_month" = "Next month";
+"operations.calendar.accessibility.day_balance" = "%@, balance %@";
+"operations.calendar.empty.title" = "No operations on this date";
+"operations.calendar.empty.message" = "Select another date or add an operation.";
+"operations.period.empty.title" = "No matching operations";
+"operations.period.empty.message" = "Change the filter or search query.";
 "operations.list.loading" = "Loading operations…";
 "operations.list.error.title" = "Couldn't load operations";
 "operations.list.empty.title" = "No operations";
@@ -351,12 +363,14 @@
 
 /* New Category */
 "new_category.title" = "New category";
+"new_category.title.edit" = "Edit category";
 "new_category.kind_picker.label" = "Category type";
 "new_category.field.name.label" = "Category name";
 "new_category.field.name.placeholder" = "For example: Groceries";
 "new_category.field.color.label" = "Color";
 "new_category.field.icon.label" = "Icon";
 "new_category.field.icon.accessibility.select" = "Select icon";
+"new_category.action.edit" = "Edit %@";
 "new_category.field.description.label" = "Description (optional)";
 "new_category.field.description.placeholder" = "Enter category description";
 "new_category.color.red" = "Red";

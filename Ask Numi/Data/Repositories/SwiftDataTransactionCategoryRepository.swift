@@ -19,4 +19,19 @@ actor SwiftDataTransactionCategoryRepository: TransactionCategoryRepository {
         modelContext.insert(TransactionCategoryEntity(category))
         try modelContext.save()
     }
+
+    func update(_ category: TransactionCategory) async throws {
+        let id = category.id
+        let descriptor = FetchDescriptor<TransactionCategoryEntity>(
+            predicate: #Predicate { $0.id == id }
+        )
+        guard let entity = try modelContext.fetch(descriptor).first else {
+            throw DomainError.categoryNotFound
+        }
+        entity.name = category.name
+        entity.kindRaw = category.kind.rawValue
+        entity.icon = category.icon
+        entity.colorRaw = category.color.rawValue
+        try modelContext.save()
+    }
 }
