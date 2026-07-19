@@ -285,51 +285,108 @@ private struct AnswerCard: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(report.advice.headline)
-                .font(.subheadline.weight(.semibold))
+            answer
 
             if !categories.isEmpty {
-                HStack(spacing: 18) {
-                    SpendingRing(
-                        total: OperationFormatting.plain(report.summary.totalExpenses),
-                        categories: categories
-                    )
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        ForEach(categories) { category in
-                            HStack(spacing: 7) {
-                                Circle()
-                                    .fill(category.color)
-                                    .frame(width: 8, height: 8)
-                                Text(category.title)
-                                    .font(.caption)
-                                Spacer()
-                                Text(category.share.formatted(.percent.precision(.fractionLength(0))))
-                                    .font(.caption.weight(.semibold))
-                            }
-                        }
-                    }
-                }
+                spendingBreakdown
             }
 
-            VStack(alignment: .leading, spacing: 8) {
-                ForEach(report.advice.tips, id: \.self) { tip in
-                    HStack(alignment: .top, spacing: 8) {
-                        Image(systemName: "sparkle")
-                            .font(.caption2)
-                            .foregroundStyle(.tint)
-                            .padding(.top, 2)
-                        Text(tip)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
+            if !report.advice.tips.isEmpty {
+                tips
+            }
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .multilineTextAlignment(.leading)
+        .background(accentColor.opacity(0.04), in: .rect(cornerRadius: 22))
+        .glassEffect(.regular.tint(accentColor.opacity(0.12)), in: .rect(cornerRadius: 22))
+        .overlay {
+            RoundedRectangle(cornerRadius: 22)
+                .stroke(accentColor.opacity(0.16), lineWidth: 1)
+        }
+    }
+
+    private var answer: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "sparkles")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(accentColor)
+                .frame(width: 32, height: 32)
+                .background(accentColor.opacity(0.16), in: .circle)
+                .accessibilityHidden(true)
+
+            Text(report.advice.headline)
+                .font(.body.weight(.medium))
+                .lineSpacing(3)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+
+    private var spendingBreakdown: some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 20) {
+                spendingRing
+                legend.fixedSize(horizontal: true, vertical: false)
+            }
+
+            VStack(spacing: 16) {
+                spendingRing
+                legend
             }
         }
         .padding(16)
+        .frame(maxWidth: .infinity)
+        .background(.primary.opacity(0.035), in: .rect(cornerRadius: 18))
+        .overlay {
+            RoundedRectangle(cornerRadius: 18)
+                .stroke(.primary.opacity(0.06), lineWidth: 1)
+        }
+    }
+
+    private var spendingRing: some View {
+        SpendingRing(
+            total: OperationFormatting.plain(report.summary.totalExpenses),
+            categories: categories
+        )
+    }
+
+    private var legend: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            ForEach(categories) { category in
+                HStack(spacing: 8) {
+                    RoundedRectangle(cornerRadius: 3)
+                        .fill(category.color)
+                        .frame(width: 10, height: 10)
+                    Text(category.title)
+                        .font(.caption)
+                        .lineLimit(1)
+                    Spacer(minLength: 8)
+                    Text(category.share.formatted(.percent.precision(.fractionLength(0))))
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .monospacedDigit()
+                }
+            }
+        }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .multilineTextAlignment(.leading)
-        .glassEffect(.regular.tint(accentColor.opacity(0.12)), in: .rect(cornerRadius: 22))
+    }
+
+    private var tips: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Divider()
+
+            ForEach(report.advice.tips, id: \.self) { tip in
+                HStack(alignment: .top, spacing: 8) {
+                    Image(systemName: "sparkle")
+                        .font(.caption2)
+                        .foregroundStyle(.tint)
+                        .padding(.top, 2)
+                    Text(tip)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
     }
 
     private static func share(_ amount: Decimal, of total: Decimal) -> Double {
@@ -343,28 +400,42 @@ private struct SpendingRing: View {
 
     var body: some View {
         ZStack {
+            Circle()
+                .stroke(.primary.opacity(0.06), lineWidth: 14)
+
             ForEach(Array(categories.enumerated()), id: \.element.id) { index, category in
                 Circle()
-                    .trim(from: start(for: index), to: start(for: index) + category.share - 0.012)
-                    .stroke(category.color, style: StrokeStyle(lineWidth: 13, lineCap: .butt))
+                    .trim(
+                        from: start(for: index) + inset(for: category),
+                        to: start(for: index) + category.share - inset(for: category)
+                    )
+                    .stroke(category.color, style: StrokeStyle(lineWidth: 14, lineCap: .round))
                     .rotationEffect(.degrees(-90))
             }
 
-            VStack(spacing: 2) {
+            VStack(spacing: 3) {
                 Text(L10n.Assistant.chartTotal)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
                 Text(total)
-                    .font(.caption.weight(.bold))
+                    .font(.subheadline.weight(.bold))
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+                    .frame(maxWidth: 82)
             }
         }
-        .frame(width: 112, height: 112)
+        .frame(width: 124, height: 124)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(L10n.Assistant.chartTotalExpenses(total))
     }
 
     private func start(for index: Int) -> Double {
         categories.prefix(index).reduce(0) { $0 + $1.share }
+    }
+
+    private func inset(for category: SpendingCategory) -> Double {
+        min(0.004, category.share / 4)
     }
 }
 

@@ -10,8 +10,6 @@ enum DashboardPalette {
     static let avatarHighlight = Color(red: 124.0 / 255, green: 127.0 / 255, blue: 240.0 / 255)
     static let ai = Color(red: 175.0 / 255, green: 82.0 / 255, blue: 222.0 / 255)
     static let income = Color(red: 52.0 / 255, green: 199.0 / 255, blue: 89.0 / 255)
-    static let incomeLabel = Color(red: 36.0 / 255, green: 138.0 / 255, blue: 61.0 / 255)
-    static let expense = Color(red: 255.0 / 255, green: 59.0 / 255, blue: 48.0 / 255)
 }
 
 struct HomeDashboardView: View {
@@ -224,7 +222,7 @@ private struct FinancialOverviewSection: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             BalanceHero(summary: summary, isLoading: isLoading)
-            IncomeExpenseRow(summary: summary, isLoading: isLoading)
+            DailyMoneyTipCard()
         }
     }
 }
@@ -258,60 +256,46 @@ private struct BalanceHero: View {
     }
 }
 
-private struct IncomeExpenseRow: View {
-    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
-    let summary: FinancialSummary
-    let isLoading: Bool
+private struct DailyMoneyTipCard: View {
+    @Environment(\.calendar) private var calendar
+    @Environment(\.scenePhase) private var scenePhase
+    @State private var date = Date.now
 
-    private var layout: AnyLayout {
-        dynamicTypeSize.isAccessibilitySize
-            ? AnyLayout(VStackLayout(spacing: 12))
-            : AnyLayout(HStackLayout(spacing: 12))
+    private var tip: String {
+        let tips = L10n.Dashboard.dailyTips
+        let day = calendar.ordinality(of: .day, in: .era, for: date) ?? 1
+        return tips[(day - 1) % tips.count]
     }
 
     var body: some View {
-        layout {
-            metric(
-                title: L10n.Dashboard.income,
-                systemImage: "arrow.down",
-                amount: OperationFormatting.amount(summary.totalIncome, sign: .income),
-                labelColor: DashboardPalette.incomeLabel,
-                amountColor: .primary,
-                backgroundColor: DashboardPalette.income.opacity(0.1)
-            )
-            metric(
-                title: L10n.Dashboard.expenses,
-                systemImage: "arrow.up",
-                amount: OperationFormatting.amount(summary.totalExpenses, sign: .expense),
-                labelColor: DashboardPalette.expense,
-                amountColor: DashboardPalette.expense,
-                backgroundColor: DashboardPalette.expense.opacity(0.08)
-            )
-        }
-        .redacted(reason: isLoading ? .placeholder : [])
-    }
+        GlassCard(tint: DashboardPalette.primary.opacity(0.12)) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "lightbulb.max.fill")
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(DashboardPalette.primary)
+                    .padding(10)
+                    .background(DashboardPalette.primary.opacity(0.12), in: .rect(cornerRadius: 12))
+                    .accessibilityHidden(true)
 
-    private func metric(
-        title: String,
-        systemImage: String,
-        amount: String,
-        labelColor: Color,
-        amountColor: Color,
-        backgroundColor: Color
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Label(title, systemImage: systemImage)
-                .font(.caption2.weight(.semibold))
-                .foregroundStyle(labelColor)
-            Text(amount)
-                .font(.headline)
-                .foregroundStyle(amountColor)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(L10n.Dashboard.dailyTipTitle)
+                        .font(.subheadline.weight(.bold))
+                    Text(tip)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .accessibilityElement(children: .combine)
         }
-        .padding(12)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .glassEffect(.regular.tint(backgroundColor), in: .rect(cornerRadius: 18))
+        .onChange(of: scenePhase) { _, newPhase in
+            if newPhase == .active {
+                date = .now
+            }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .NSCalendarDayChanged)) { _ in
+            date = .now
+        }
     }
 }
 

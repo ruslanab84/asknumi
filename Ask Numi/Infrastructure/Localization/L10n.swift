@@ -40,8 +40,10 @@ enum L10n {
             String(format: l("dashboard.greeting"), name)
         }
         static var totalBalance: String     { l("dashboard.balance_card.label.total_balance") }
-        static var income: String           { l("dashboard.balance_card.label.income") }
-        static var expenses: String         { l("dashboard.balance_card.label.expenses") }
+        static var dailyTipTitle: String    { l("dashboard.daily_tip.title") }
+        static var dailyTips: [String] {
+            (1...31).map { l("dashboard.daily_tip.\($0)") }
+        }
         static func budgetTitle(_ month: String) -> String {
             String(format: l("dashboard.budget_card.title"), month)
         }
