@@ -123,6 +123,7 @@ struct HomeDashboardView: View {
             .task {
                 #if DEBUG
                 DashboardSpendingBreakdown.assertSelfCheck()
+                DashboardMonthlyExpenseComparison.assertSelfCheck()
                 #endif
                 await loadDashboard()
             }
@@ -173,16 +174,17 @@ struct HomeDashboardView: View {
     }
 
     private var fallbackInsight: String {
-        if let category = summary.expensesByCategory.first {
-            return L10n.Dashboard.insightTopCategory(
-                category.category,
-                OperationFormatting.plain(category.amount),
+        let comparison = DashboardMonthlyExpenseComparison(transactions: transactions)
+        if comparison.current > 0 || comparison.previous > 0 {
+            return L10n.Dashboard.insightMonthComparison(
+                OperationFormatting.plain(comparison.current),
+                OperationFormatting.plain(comparison.previous),
                 CurrencySettings.selectedCode
             )
         }
-        if summary.totalIncome > 0 {
+        if monthlySummary.totalIncome > 0 {
             return L10n.Dashboard.insightRecordedIncome(
-                OperationFormatting.plain(summary.totalIncome),
+                OperationFormatting.plain(monthlySummary.totalIncome),
                 CurrencySettings.selectedCode
             )
         }
@@ -412,6 +414,71 @@ private struct DashboardSpendingBreakdown {
         assert(breakdown.categories.count == 4)
         assert(breakdown.categories.last?.amount == 10)
         assert(breakdown.share(of: 40) == 0.4)
+    }
+    #endif
+}
+
+private struct DashboardMonthlyExpenseComparison {
+    let current: Decimal
+    let previous: Decimal
+
+    init(
+        transactions: [Transaction],
+        now: Date = .now,
+        calendar: Calendar = .current
+    ) {
+        guard let currentPeriod = calendar.dateInterval(of: .month, for: now),
+              let previousMonth = calendar.date(byAdding: .month, value: -1, to: currentPeriod.start),
+              let previousPeriod = calendar.dateInterval(of: .month, for: previousMonth) else {
+            current = 0
+            previous = 0
+            return
+        }
+
+        let currentEnd = min(now, currentPeriod.end)
+        let elapsed = calendar.dateComponents(
+            [.day, .hour, .minute, .second],
+            from: currentPeriod.start,
+            to: currentEnd
+        )
+        let previousEnd = min(
+            calendar.date(byAdding: elapsed, to: previousPeriod.start) ?? previousPeriod.end,
+            previousPeriod.end
+        )
+        current = Self.total(in: transactions, from: currentPeriod.start, to: currentEnd)
+        previous = Self.total(in: transactions, from: previousPeriod.start, to: previousEnd)
+    }
+
+    private static func total(in transactions: [Transaction], from start: Date, to end: Date) -> Decimal {
+        transactions.reduce(Decimal.zero) { total, transaction in
+            guard transaction.kind == .expense,
+                  transaction.date >= start,
+                  transaction.date < end else { return total }
+            return total + transaction.amount
+        }
+    }
+
+    #if DEBUG
+    static func assertSelfCheck() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0) ?? .current
+        let date = { (month: Int, day: Int) in
+            calendar.date(from: DateComponents(year: 2026, month: month, day: day, hour: 12))!
+        }
+        let comparison = DashboardMonthlyExpenseComparison(
+            transactions: [
+                Transaction(amount: 10, kind: .expense, category: "Current", date: date(7, 10)),
+                Transaction(amount: 90, kind: .expense, category: "Future", date: date(7, 25)),
+                Transaction(amount: 7, kind: .expense, category: "Previous", date: date(6, 10)),
+                Transaction(amount: 80, kind: .expense, category: "Old future", date: date(6, 25)),
+                Transaction(amount: 100, kind: .income, category: "Income", date: date(7, 10))
+            ],
+            now: date(7, 20),
+            calendar: calendar
+        )
+
+        assert(comparison.current == 10)
+        assert(comparison.previous == 7)
     }
     #endif
 }

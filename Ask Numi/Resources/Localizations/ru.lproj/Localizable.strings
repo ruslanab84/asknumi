@@ -72,9 +72,9 @@
 "dashboard.budget_card.cta.setup" = "Настроить бюджет";
 
 /* Dashboard — Insight Card */
-"dashboard.insight_card.title" = "AI-инсайт";
+"dashboard.insight_card.title" = "Инсайт за месяц";
 "dashboard.insight_card.cta.show_details" = "Показать детали  →";
-"dashboard.insight_card.top_category" = "Самая крупная категория расходов — «%@»: %@ %@.";
+"dashboard.insight_card.month_comparison" = "Записанные расходы: %@ %@ в этом месяце против %@ %@ за тот же период прошлого месяца.";
 "dashboard.insight_card.recorded_income" = "Записанный доход: %@ %@.";
 "dashboard.insight_card.empty" = "Добавьте первую операцию, чтобы получить персональный инсайт.";
 "dashboard.attention.title" = "Требует внимания";

@@ -68,8 +68,8 @@ enum L10n {
         static var budgetSetup: String { l("dashboard.budget_card.cta.setup") }
         static var insightTitle: String     { l("dashboard.insight_card.title") }
         static var insightShowDetails: String { l("dashboard.insight_card.cta.show_details") }
-        static func insightTopCategory(_ category: String, _ amount: String, _ currency: String) -> String {
-            String(format: l("dashboard.insight_card.top_category"), category, amount, currency)
+        static func insightMonthComparison(_ current: String, _ previous: String, _ currency: String) -> String {
+            String(format: l("dashboard.insight_card.month_comparison"), current, currency, previous, currency)
         }
         static func insightRecordedIncome(_ amount: String, _ currency: String) -> String {
             String(format: l("dashboard.insight_card.recorded_income"), amount, currency)
