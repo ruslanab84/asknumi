@@ -131,6 +131,15 @@
 "add_operation.magic.placeholder" = "Describe it, e.g. “Spent 350 on coffee at Surf”";
 "add_operation.magic.accessibility.parse" = "Fill the form from the description";
 "add_operation.magic.error.failed" = "Couldn't read that. Try rephrasing, or fill the fields below.";
+"add_operation.receipt.section" = "Receipt";
+"add_operation.receipt.button.scan" = "Scan receipt";
+"add_operation.receipt.processing" = "Reading receipt…";
+"add_operation.receipt.error.title" = "Couldn't add receipt";
+"add_operation.receipt.error.ok" = "OK";
+"add_operation.receipt.error.camera_unavailable" = "Receipt scanning isn't available on this device.";
+"add_operation.receipt.error.camera_denied" = "Allow camera access in Settings to scan receipts.";
+"add_operation.receipt.error.no_items" = "No products with prices were found. Retake the photo with the full receipt in view.";
+"add_operation.receipt.error.failed" = "The receipt couldn't be processed. Try taking the photo again.";
 "add_operation.merchant.section" = "Merchant";
 "add_operation.merchant.placeholder" = "For example: WALMART #2847";
 "add_operation.ml.suggested_category" = "Suggested category";

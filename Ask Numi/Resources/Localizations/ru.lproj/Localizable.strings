@@ -149,6 +149,15 @@
 "add_operation.magic.placeholder" = "Опишите словами, напр. «Потратил 350 на кофе в Surf»";
 "add_operation.magic.accessibility.parse" = "Заполнить форму из описания";
 "add_operation.magic.error.failed" = "Не удалось разобрать. Переформулируйте или заполните поля ниже.";
+"add_operation.receipt.section" = "Чек";
+"add_operation.receipt.button.scan" = "Сканировать чек";
+"add_operation.receipt.processing" = "Распознаём чек…";
+"add_operation.receipt.error.title" = "Не удалось добавить чек";
+"add_operation.receipt.error.ok" = "Понятно";
+"add_operation.receipt.error.camera_unavailable" = "Сканирование чеков недоступно на этом устройстве.";
+"add_operation.receipt.error.camera_denied" = "Разрешите доступ к камере в Настройках, чтобы сканировать чеки.";
+"add_operation.receipt.error.no_items" = "Товары с ценами не найдены. Сфотографируйте чек целиком ещё раз.";
+"add_operation.receipt.error.failed" = "Не удалось обработать чек. Попробуйте сфотографировать его ещё раз.";
 "add_operation.merchant.section" = "Продавец";
 "add_operation.merchant.placeholder" = "Например: WALMART #2847";
 "add_operation.ml.suggested_category" = "Предложенная категория";

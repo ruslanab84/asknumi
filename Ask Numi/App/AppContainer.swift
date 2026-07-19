@@ -53,6 +53,7 @@ final class AppContainer {
         GetMonthlySpendingInsightUseCase.assertSelfCheck()
         GetFinancialTwinUseCase.assertSelfCheck()
         FoundationModelsAdvisor.assertSelfCheck()
+        ReceiptImportService.assertSelfCheck()
         Task { await GetFinancialAdviceUseCase.assertAsyncSelfCheck() }
         Task { await ParseNaturalInputUseCase.assertSelfCheck() }
         Task { await MLClassificationService.assertSelfCheck() }

@@ -35,6 +35,14 @@ actor SwiftDataTransactionRepository: TransactionRepository {
         try modelContext.save()
     }
 
+    func add(_ transactions: [Transaction]) async throws {
+        try modelContext.transaction {
+            for transaction in transactions {
+                modelContext.insert(TransactionEntity(transaction))
+            }
+        }
+    }
+
     func update(_ transaction: Transaction) async throws {
         // `id` is @Attribute(.unique), so insert performs an upsert on the existing row.
         modelContext.insert(TransactionEntity(transaction))

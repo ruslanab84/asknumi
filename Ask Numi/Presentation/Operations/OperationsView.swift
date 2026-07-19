@@ -425,6 +425,15 @@ struct OperationsView: View {
 private struct OperationsRow: View {
     let transaction: Transaction
 
+    private var title: String {
+        transaction.note ?? transaction.category
+    }
+
+    private var details: String {
+        let categoryOrKind = transaction.note == nil ? transaction.kind.title : transaction.category
+        return transaction.fundingSource.map { "\(categoryOrKind) · \($0)" } ?? categoryOrKind
+    }
+
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: transaction.categoryIcon)
@@ -438,7 +447,7 @@ private struct OperationsRow: View {
 
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 5) {
-                    Text(transaction.category)
+                    Text(title)
                         .font(.subheadline.weight(.semibold))
                     if transaction.isImpulse {
                         Image(systemName: "bolt.fill")
@@ -447,7 +456,7 @@ private struct OperationsRow: View {
                             .accessibilityLabel(L10n.Operations.impulseLabel)
                     }
                 }
-                Text(transaction.fundingSource.map { "\(transaction.kind.title) · \($0)" } ?? transaction.kind.title)
+                Text(details)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -483,6 +492,7 @@ private struct AddOperationView: View {
     let editing: Transaction?
     let onSaved: (Transaction) -> Void
     let onCategorySaved: (TransactionCategory) -> Void
+    private let receiptImporter: ReceiptImportService
 
     init(
         addTransaction: AddTransactionUseCase,
@@ -507,6 +517,7 @@ private struct AddOperationView: View {
         self.editing = editing
         self.onSaved = onSaved
         self.onCategorySaved = onCategorySaved
+        receiptImporter = ReceiptImportService(classifier: transactionClassifier)
 
         if let editing {
             _kind = State(initialValue: editing.kind)
@@ -544,6 +555,10 @@ private struct AddOperationView: View {
     @State private var magicText = ""
     @State private var isParsing = false
     @State private var magicError: String?
+    @State private var isPresentingReceiptScanner = false
+    @State private var capturedReceipt: CapturedReceipt?
+    @State private var isImportingReceipt = false
+    @State private var receiptError: String?
     @State private var classificationViewModel: AddOperationClassificationViewModel
     @State private var hasUserSelectedCategory: Bool
     @FocusState private var focusedField: Field?
@@ -579,7 +594,8 @@ private struct AddOperationView: View {
             trimmedCategory.count <= 60 &&
             amount != nil &&
             (kind == .income || !trimmedFundingSource.isEmpty) &&
-            !isSaving
+            !isSaving &&
+            !isImportingReceipt
     }
 
     private var availableCategories: [OperationCategorySuggestion] {
@@ -641,6 +657,10 @@ private struct AddOperationView: View {
                     .tint(kind == .expense ? .red : .green)
                 }
                 .listRowBackground(Color(uiColor: .secondarySystemBackground))
+
+                if editing == nil && kind == .expense {
+                    receiptSection
+                }
 
                 Section(kind == .income ? L10n.AddOperation.sectionIncomeSource : L10n.AddOperation.sectionCategory) {
                     NavigationLink {
@@ -724,6 +744,7 @@ private struct AddOperationView: View {
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button(L10n.Common.cancel) { dismiss() }
+                        .disabled(isImportingReceipt)
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
@@ -732,6 +753,28 @@ private struct AddOperationView: View {
                     }
                     .disabled(!canSave)
                 }
+            }
+            .fullScreenCover(isPresented: $isPresentingReceiptScanner) {
+                ReceiptDocumentScanner(
+                    onScan: { capturedReceipt = $0 },
+                    onFailure: { receiptError = L10n.AddOperation.receiptFailed }
+                )
+                .ignoresSafeArea()
+            }
+            .alert(
+                L10n.AddOperation.receiptErrorTitle,
+                isPresented: Binding(
+                    get: { receiptError != nil },
+                    set: { if !$0 { receiptError = nil } }
+                )
+            ) {
+                Button(L10n.AddOperation.receiptErrorOK, role: .cancel) {}
+            } message: {
+                Text(receiptError ?? "")
+            }
+            .task(id: capturedReceipt?.id) {
+                guard let capturedReceipt else { return }
+                await importReceipt(capturedReceipt)
             }
             .task(id: classification.merchantText) {
                 let previousSuggestion = classification.suggestion
@@ -748,7 +791,87 @@ private struct AddOperationView: View {
                     categoryColor = CategoryColor.defaultColor(for: kind)
                 }
             }
+            .interactiveDismissDisabled(isSaving || isImportingReceipt)
         }
+    }
+
+    private var receiptSection: some View {
+        Section(L10n.AddOperation.receiptSection) {
+            Button {
+                Task { await openReceiptScanner() }
+            } label: {
+                HStack(spacing: 10) {
+                    if isImportingReceipt {
+                        ProgressView()
+                        Text(L10n.AddOperation.receiptProcessing)
+                    } else {
+                        Label(L10n.AddOperation.receiptScan, systemImage: "camera.viewfinder")
+                    }
+                    Spacer()
+                }
+            }
+            .disabled(isImportingReceipt)
+        }
+        .listRowBackground(Color(uiColor: .secondarySystemBackground))
+    }
+
+    private func openReceiptScanner() async {
+        guard !isImportingReceipt else { return }
+        focusedField = nil
+        receiptError = nil
+
+        guard ReceiptDocumentScanner.isSupported else {
+            receiptError = L10n.AddOperation.receiptCameraUnavailable
+            return
+        }
+        guard await ReceiptDocumentScanner.requestCameraAccess() else {
+            receiptError = L10n.AddOperation.receiptCameraDenied
+            return
+        }
+        guard !Task.isCancelled else { return }
+        isPresentingReceiptScanner = true
+    }
+
+    private func importReceipt(_ receipt: CapturedReceipt) async {
+        guard !isImportingReceipt else { return }
+        isImportingReceipt = true
+        receiptError = nil
+        defer {
+            isImportingReceipt = false
+            capturedReceipt = nil
+        }
+
+        do {
+            let drafts = try await receiptImporter.expenses(from: receipt.images)
+            let transactions = drafts.map(makeReceiptTransaction)
+            try await addTransaction.execute(transactions)
+            transactions.forEach(onSaved)
+            dismiss()
+        } catch is CancellationError {
+            return
+        } catch ReceiptImportError.noLineItems {
+            receiptError = L10n.AddOperation.receiptNoItems
+        } catch {
+            receiptError = L10n.AddOperation.receiptFailed
+        }
+    }
+
+    private func makeReceiptTransaction(_ draft: ReceiptExpenseDraft) -> Transaction {
+        let categoryName = draft.category.localized
+        let savedCategory = categories.first {
+            $0.kind == .expense && $0.name.caseInsensitiveCompare(categoryName) == .orderedSame
+        }
+
+        return Transaction(
+            amount: draft.amount,
+            kind: .expense,
+            category: savedCategory?.name ?? categoryName,
+            categoryIcon: savedCategory?.icon ?? draft.category.icon,
+            categoryColor: savedCategory?.color ?? CategoryColor.defaultColor(for: .expense),
+            fundingSource: trimmedFundingSource,
+            date: date,
+            note: draft.name
+        )
     }
 
     private var fundingSourceSection: some View {

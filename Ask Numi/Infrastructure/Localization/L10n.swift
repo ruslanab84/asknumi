@@ -149,6 +149,15 @@ enum L10n {
         static var magicPlaceholder: String    { l("add_operation.magic.placeholder") }
         static var magicButton: String         { l("add_operation.magic.accessibility.parse") }
         static var magicFailed: String         { l("add_operation.magic.error.failed") }
+        static var receiptSection: String      { l("add_operation.receipt.section") }
+        static var receiptScan: String         { l("add_operation.receipt.button.scan") }
+        static var receiptProcessing: String   { l("add_operation.receipt.processing") }
+        static var receiptErrorTitle: String   { l("add_operation.receipt.error.title") }
+        static var receiptErrorOK: String      { l("add_operation.receipt.error.ok") }
+        static var receiptCameraUnavailable: String { l("add_operation.receipt.error.camera_unavailable") }
+        static var receiptCameraDenied: String { l("add_operation.receipt.error.camera_denied") }
+        static var receiptNoItems: String      { l("add_operation.receipt.error.no_items") }
+        static var receiptFailed: String       { l("add_operation.receipt.error.failed") }
         static var merchantSection: String      { l("add_operation.merchant.section") }
         static var merchantPlaceholder: String  { l("add_operation.merchant.placeholder") }
         static var suggestedCategory: String    { l("add_operation.ml.suggested_category") }
