@@ -506,6 +506,7 @@ private struct AddOperationView: View {
                     .pickerStyle(.segmented)
                     .tint(kind == .expense ? .red : .green)
                 }
+                .listRowBackground(Color(uiColor: .secondarySystemBackground))
 
                 Section(L10n.AddOperation.sectionCategory) {
                     NavigationLink {
@@ -531,6 +532,7 @@ private struct AddOperationView: View {
                         )
                     }
                 }
+                .listRowBackground(Color(uiColor: .secondarySystemBackground))
 
                 Section(L10n.AddOperation.sectionAmount) {
                     HStack {
@@ -541,6 +543,7 @@ private struct AddOperationView: View {
                             .foregroundStyle(.secondary)
                     }
                 }
+                .listRowBackground(Color(uiColor: .secondarySystemBackground))
 
                 Section(L10n.AddOperation.sectionDate) {
                     DatePicker(
@@ -549,6 +552,7 @@ private struct AddOperationView: View {
                         displayedComponents: [.date, .hourAndMinute]
                     )
                 }
+                .listRowBackground(Color(uiColor: .secondarySystemBackground))
 
                 if kind == .expense {
                     Section(L10n.AddOperation.behaviorSection) {
@@ -558,6 +562,7 @@ private struct AddOperationView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+                    .listRowBackground(Color(uiColor: .secondarySystemBackground))
                 }
 
                 if let errorMessage {
@@ -565,6 +570,7 @@ private struct AddOperationView: View {
                         Text(errorMessage)
                             .foregroundStyle(.red)
                     }
+                    .listRowBackground(Color(uiColor: .secondarySystemBackground))
                 }
             }
             .formStyle(.grouped)
@@ -642,6 +648,7 @@ private struct AddOperationView: View {
                     .foregroundStyle(.red)
             }
         }
+        .listRowBackground(Color(uiColor: .secondarySystemBackground))
     }
 
     private func parseMagicText() async {
