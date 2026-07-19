@@ -294,9 +294,12 @@
 "plan.subscription.section.details" = "Подписка";
 "plan.subscription.section.amount" = "Сумма списания";
 "plan.subscription.section.date" = "Следующее списание";
+"plan.subscription.section.end_date" = "Окончание автоплатежа";
 "plan.subscription.field.name.placeholder" = "Например: iCloud или Netflix";
 "plan.subscription.field.name.too_long" = "Название должно быть не длиннее 60 символов.";
 "plan.subscription.field.date.label" = "Дата списания";
+"plan.subscription.field.end_date.toggle" = "Указать дату окончания";
+"plan.subscription.field.end_date.label" = "Дата окончания";
 "plan.subscription.error.load" = "Не удалось загрузить подписки.";
 "plan.subscription.error.save" = "Не удалось сохранить подписку.";
 "plan.subscription.error.delete" = "Не удалось удалить подписку.";

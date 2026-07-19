@@ -12,7 +12,9 @@ actor SwiftDataSubscriptionRepository: SubscriptionRepository {
         let descriptor = FetchDescriptor<SubscriptionEntity>(
             sortBy: [SortDescriptor(\.nextChargeDate)]
         )
-        return try modelContext.fetch(descriptor).map { $0.toDomain() }
+        return try modelContext.fetch(descriptor)
+            .map { $0.toDomain() }
+            .filter(\.hasRemainingCharges)
     }
 
     func save(_ subscription: Subscription) async throws {

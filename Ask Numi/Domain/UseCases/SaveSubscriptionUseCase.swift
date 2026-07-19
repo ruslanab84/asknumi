@@ -17,6 +17,9 @@ struct SaveSubscriptionUseCase: Sendable {
             throw DomainError.invalidName
         }
         guard subscription.amount > 0 else { throw DomainError.invalidAmount }
+        guard subscription.endDate.map({ $0 >= subscription.nextChargeDate }) ?? true else {
+            throw DomainError.invalidDate
+        }
         try await repository.save(subscription)
     }
 }

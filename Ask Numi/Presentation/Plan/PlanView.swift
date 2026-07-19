@@ -393,6 +393,8 @@ private struct SubscriptionEditorView: View {
     @State private var name: String
     @State private var amountText: String
     @State private var chargeDate: Date
+    @State private var hasEndDate: Bool
+    @State private var endDate: Date
     @State private var isSaving = false
     @State private var errorMessage: String?
 
@@ -404,9 +406,12 @@ private struct SubscriptionEditorView: View {
         self.subscription = subscription
         self.saveSubscription = saveSubscription
         self.onSaved = onSaved
+        let initialChargeDate = subscription?.nextChargeDate ?? .now
         _name = State(initialValue: subscription?.name ?? "")
         _amountText = State(initialValue: subscription.map { "\($0.amount)" } ?? "")
-        _chargeDate = State(initialValue: subscription?.nextChargeDate ?? .now)
+        _chargeDate = State(initialValue: initialChargeDate)
+        _hasEndDate = State(initialValue: subscription?.endDate != nil)
+        _endDate = State(initialValue: subscription?.endDate ?? initialChargeDate)
     }
 
     private var trimmedName: String {
@@ -424,7 +429,11 @@ private struct SubscriptionEditorView: View {
     }
 
     private var canSave: Bool {
-        !trimmedName.isEmpty && trimmedName.count <= 60 && amount != nil && !isSaving
+        !trimmedName.isEmpty &&
+            trimmedName.count <= 60 &&
+            amount != nil &&
+            (!hasEndDate || endDate >= chargeDate) &&
+            !isSaving
     }
 
     var body: some View {
@@ -457,6 +466,18 @@ private struct SubscriptionEditorView: View {
                     )
                 }
 
+                Section(L10n.Plan.subscriptionSectionEndDate) {
+                    Toggle(L10n.Plan.subscriptionEndDateToggle, isOn: $hasEndDate)
+                    if hasEndDate {
+                        DatePicker(
+                            L10n.Plan.subscriptionEndDateLabel,
+                            selection: $endDate,
+                            in: chargeDate...,
+                            displayedComponents: .date
+                        )
+                    }
+                }
+
                 if let errorMessage {
                     Text(errorMessage).foregroundStyle(.red)
                 }
@@ -474,6 +495,11 @@ private struct SubscriptionEditorView: View {
                     .disabled(!canSave)
                 }
             }
+            .onChange(of: chargeDate) { _, newDate in
+                if endDate < newDate {
+                    endDate = newDate
+                }
+            }
         }
     }
 
@@ -486,7 +512,8 @@ private struct SubscriptionEditorView: View {
             id: subscription?.id ?? UUID(),
             name: trimmedName,
             amount: amount,
-            nextChargeDate: chargeDate
+            nextChargeDate: chargeDate,
+            endDate: hasEndDate ? endDate : nil
         )
         do {
             try await saveSubscription.execute(saved)

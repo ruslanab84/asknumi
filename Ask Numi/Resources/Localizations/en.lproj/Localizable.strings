@@ -274,9 +274,12 @@
 "plan.subscription.section.details" = "Subscription";
 "plan.subscription.section.amount" = "Charge amount";
 "plan.subscription.section.date" = "Next charge";
+"plan.subscription.section.end_date" = "Autopayment end";
 "plan.subscription.field.name.placeholder" = "For example: iCloud or Netflix";
 "plan.subscription.field.name.too_long" = "The name must be 60 characters or fewer.";
 "plan.subscription.field.date.label" = "Charge date";
+"plan.subscription.field.end_date.toggle" = "Set end date";
+"plan.subscription.field.end_date.label" = "End date";
 "plan.subscription.error.load" = "Couldn't load subscriptions.";
 "plan.subscription.error.save" = "Couldn't save the subscription.";
 "plan.subscription.error.delete" = "Couldn't delete the subscription.";

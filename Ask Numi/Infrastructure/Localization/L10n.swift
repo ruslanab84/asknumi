@@ -354,9 +354,12 @@ enum L10n {
         static var subscriptionSectionDetails: String { l("plan.subscription.section.details") }
         static var subscriptionSectionAmount: String { l("plan.subscription.section.amount") }
         static var subscriptionSectionDate: String { l("plan.subscription.section.date") }
+        static var subscriptionSectionEndDate: String { l("plan.subscription.section.end_date") }
         static var subscriptionNamePlaceholder: String { l("plan.subscription.field.name.placeholder") }
         static var subscriptionNameTooLong: String { l("plan.subscription.field.name.too_long") }
         static var subscriptionDateLabel: String { l("plan.subscription.field.date.label") }
+        static var subscriptionEndDateToggle: String { l("plan.subscription.field.end_date.toggle") }
+        static var subscriptionEndDateLabel: String { l("plan.subscription.field.end_date.label") }
         static var loadError: String { l("plan.error.load") }
         static var saveError: String { l("plan.subscription.error.save") }
         static var deleteError: String { l("plan.subscription.error.delete") }

@@ -13,6 +13,7 @@ final class SubscriptionEntity {
     var amount: Decimal
     var billingDay: Int
     var nextChargeDate: Date
+    var endDate: Date?
 
     init(_ subscription: Subscription) {
         id = subscription.id
@@ -20,10 +21,17 @@ final class SubscriptionEntity {
         amount = subscription.amount
         billingDay = subscription.billingDay
         nextChargeDate = subscription.nextChargeDate
+        endDate = subscription.endDate
     }
 
     func toDomain() -> Subscription {
-        var subscription = Subscription(id: id, name: name, amount: amount, nextChargeDate: nextChargeDate)
+        var subscription = Subscription(
+            id: id,
+            name: name,
+            amount: amount,
+            nextChargeDate: nextChargeDate,
+            endDate: endDate
+        )
         subscription.billingDay = billingDay
         return subscription
     }

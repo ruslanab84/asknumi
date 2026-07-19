@@ -63,7 +63,8 @@ actor SwiftDataTransactionRepository: TransactionRepository {
 
         try modelContext.transaction {
             for subscription in subscriptions {
-                while subscription.nextChargeDate <= now {
+                while subscription.nextChargeDate <= now,
+                      subscription.endDate.map({ subscription.nextChargeDate <= $0 }) ?? true {
                     modelContext.insert(TransactionEntity(Transaction(
                         amount: subscription.amount,
                         kind: .expense,
