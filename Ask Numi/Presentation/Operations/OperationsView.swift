@@ -447,7 +447,7 @@ private struct OperationsRow: View {
                             .accessibilityLabel(L10n.Operations.impulseLabel)
                     }
                 }
-                Text(transaction.kind.title)
+                Text(transaction.fundingSource.map { "\(transaction.kind.title) · \($0)" } ?? transaction.kind.title)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -513,6 +513,7 @@ private struct AddOperationView: View {
             _category = State(initialValue: editing.category)
             _categoryIcon = State(initialValue: editing.categoryIcon)
             _categoryColor = State(initialValue: editing.categoryColor)
+            _fundingSource = State(initialValue: editing.fundingSource ?? "")
             _amountText = State(initialValue: "\(editing.amount)")
             _date = State(initialValue: editing.date)
             _isImpulse = State(initialValue: editing.isImpulse)
@@ -534,6 +535,7 @@ private struct AddOperationView: View {
     @State private var category = ""
     @State private var categoryIcon = CategoryIcon.fallback
     @State private var categoryColor = CategoryColor.defaultColor(for: .expense)
+    @State private var fundingSource = ""
     @State private var amountText = ""
     @State private var date = Date.now
     @State private var isImpulse = false
@@ -558,6 +560,10 @@ private struct AddOperationView: View {
         category.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    private var trimmedFundingSource: String {
+        fundingSource.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     private var amount: Decimal? {
         let normalized = amountText
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -569,11 +575,33 @@ private struct AddOperationView: View {
     }
 
     private var canSave: Bool {
-        !trimmedCategory.isEmpty && trimmedCategory.count <= 60 && amount != nil && !isSaving
+        !trimmedCategory.isEmpty &&
+            trimmedCategory.count <= 60 &&
+            amount != nil &&
+            (kind == .income || !trimmedFundingSource.isEmpty) &&
+            !isSaving
     }
 
-    // Saved categories for the selected kind, most recent first, then defaults; deduped case-insensitively.
     private var availableCategories: [OperationCategorySuggestion] {
+        suggestions(for: kind)
+    }
+
+    private var availableFundingSources: [OperationCategorySuggestion] {
+        suggestions(for: .income)
+    }
+
+    private var fundingSourceIcon: String {
+        availableFundingSources.first {
+            $0.name.caseInsensitiveCompare(fundingSource) == .orderedSame
+        }?.icon ?? "creditcard"
+    }
+
+    private var kindSelection: Binding<TransactionKind> {
+        Binding(get: { kind }, set: selectKind)
+    }
+
+    // Saved categories first, then recent operations and defaults; deduped case-insensitively.
+    private func suggestions(for kind: TransactionKind) -> [OperationCategorySuggestion] {
         let savedCategories = categories
             .filter { $0.kind == kind }
             .map { OperationCategorySuggestion(name: $0.name, icon: $0.icon, color: $0.color, savedCategory: $0) }
@@ -604,7 +632,7 @@ private struct AddOperationView: View {
                 }
 
                 Section(L10n.AddOperation.sectionKind) {
-                    Picker(L10n.AddOperation.sectionKind, selection: $kind) {
+                    Picker(L10n.AddOperation.sectionKind, selection: kindSelection) {
                         ForEach(TransactionKind.allCases, id: \.self) { kind in
                             Text(kind.title).tag(kind)
                         }
@@ -614,12 +642,15 @@ private struct AddOperationView: View {
                 }
                 .listRowBackground(Color(uiColor: .secondarySystemBackground))
 
-                Section(L10n.AddOperation.sectionCategory) {
+                Section(kind == .income ? L10n.AddOperation.sectionIncomeSource : L10n.AddOperation.sectionCategory) {
                     NavigationLink {
                         CategorySelectionView(
                             kind: kind,
                             categories: availableCategories,
                             selectedCategory: category,
+                            navigationTitle: kind == .income
+                                ? L10n.AddOperation.sectionIncomeSource
+                                : L10n.AddOperation.selectCategory,
                             addCategory: addCategory,
                             updateCategory: updateCategory,
                             onSelect: { selected in
@@ -640,6 +671,10 @@ private struct AddOperationView: View {
                     }
                 }
                 .listRowBackground(Color(uiColor: .secondarySystemBackground))
+
+                if kind == .expense {
+                    fundingSourceSection
+                }
 
                 Section(L10n.AddOperation.sectionAmount) {
                     HStack {
@@ -698,14 +733,6 @@ private struct AddOperationView: View {
                     .disabled(!canSave)
                 }
             }
-            .onChange(of: kind) {
-                categoryIcon = categories.first {
-                    $0.kind == kind && $0.name.caseInsensitiveCompare(category) == .orderedSame
-                }?.icon ?? CategoryIcon.suggested(for: category, kind: kind)
-                categoryColor = categories.first {
-                    $0.kind == kind && $0.name.caseInsensitiveCompare(category) == .orderedSame
-                }?.color ?? CategoryColor.defaultColor(for: kind)
-            }
             .task(id: classification.merchantText) {
                 let previousSuggestion = classification.suggestion
                 await classification.refreshSuggestion()
@@ -722,6 +749,36 @@ private struct AddOperationView: View {
                 }
             }
         }
+    }
+
+    private var fundingSourceSection: some View {
+        Section {
+            NavigationLink {
+                CategorySelectionView(
+                    kind: .income,
+                    categories: availableFundingSources,
+                    selectedCategory: fundingSource,
+                    navigationTitle: L10n.AddOperation.selectFundingSource,
+                    addCategory: addCategory,
+                    updateCategory: updateCategory,
+                    onSelect: { selected in
+                        fundingSource = selected.name
+                        focusedField = .amount
+                    },
+                    onCategorySaved: onCategorySaved
+                )
+            } label: {
+                Label(
+                    fundingSource.isEmpty ? L10n.AddOperation.selectFundingSource : fundingSource,
+                    systemImage: fundingSourceIcon
+                )
+            }
+        } header: {
+            Text(L10n.AddOperation.sectionFundingSource)
+        } footer: {
+            Text(L10n.AddOperation.fundingSourceHint)
+        }
+        .listRowBackground(Color(uiColor: .secondarySystemBackground))
     }
 
     private var quickAddSection: some View {
@@ -802,6 +859,7 @@ private struct AddOperationView: View {
             category: trimmedCategory,
             categoryIcon: categoryIcon,
             categoryColor: categoryColor,
+            fundingSource: trimmedFundingSource,
             date: date,
             note: merchant.isEmpty ? nil : merchant,
             isImpulse: kind == .expense && isImpulse
@@ -820,6 +878,18 @@ private struct AddOperationView: View {
             isSaving = false
         }
     }
+
+    private func selectKind(_ newKind: TransactionKind) {
+        guard kind != newKind else { return }
+        kind = newKind
+        category = ""
+        categoryIcon = CategoryIcon.suggested(for: "", kind: newKind)
+        categoryColor = CategoryColor.defaultColor(for: newKind)
+        hasUserSelectedCategory = false
+        if newKind == .income {
+            isImpulse = false
+        }
+    }
 }
 
 private struct OperationCategorySuggestion: Identifiable {
@@ -835,6 +905,7 @@ private struct CategorySelectionView: View {
     let kind: TransactionKind
     let categories: [OperationCategorySuggestion]
     let selectedCategory: String
+    let navigationTitle: String
     let addCategory: AddTransactionCategoryUseCase
     let updateCategory: UpdateTransactionCategoryUseCase
     let onSelect: (TransactionCategory) -> Void
@@ -901,7 +972,7 @@ private struct CategorySelectionView: View {
         }
         .scrollContentBackground(.hidden)
         .background { DashboardBackground() }
-        .navigationTitle(L10n.AddOperation.selectCategory)
+        .navigationTitle(navigationTitle)
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $editorDestination, onDismiss: selectCreatedCategory) { destination in
             switch destination {

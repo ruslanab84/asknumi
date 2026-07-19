@@ -17,6 +17,7 @@ final class TransactionEntity {
     var categoryRaw: String
     var categoryIconRaw: String?
     var categoryColorRaw: String?
+    var fundingSourceRaw: String?
     var date: Date
     var note: String?
     var isImpulse: Bool?
@@ -28,6 +29,7 @@ final class TransactionEntity {
         categoryRaw: String,
         categoryIconRaw: String?,
         categoryColorRaw: String?,
+        fundingSourceRaw: String?,
         date: Date,
         note: String?,
         isImpulse: Bool?
@@ -38,6 +40,7 @@ final class TransactionEntity {
         self.categoryRaw = categoryRaw
         self.categoryIconRaw = categoryIconRaw
         self.categoryColorRaw = categoryColorRaw
+        self.fundingSourceRaw = fundingSourceRaw
         self.date = date
         self.note = note
         self.isImpulse = isImpulse
@@ -53,6 +56,7 @@ extension TransactionEntity {
             categoryRaw: transaction.category,
             categoryIconRaw: transaction.categoryIcon,
             categoryColorRaw: transaction.categoryColor.rawValue,
+            fundingSourceRaw: transaction.fundingSource,
             date: transaction.date,
             note: transaction.note,
             isImpulse: transaction.isImpulse
@@ -70,6 +74,7 @@ extension TransactionEntity {
             category: categoryRaw,
             categoryIcon: categoryIconRaw ?? CategoryIcon.suggested(for: categoryRaw, kind: kind),
             categoryColor: categoryColorRaw.flatMap(CategoryColor.init(rawValue:)),
+            fundingSource: fundingSourceRaw,
             date: date,
             note: note,
             isImpulse: isImpulse ?? false

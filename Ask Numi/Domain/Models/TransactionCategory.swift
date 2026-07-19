@@ -76,6 +76,8 @@ enum CategoryIcon {
         if name.contains("вино") || name.contains("алког") || name.contains("wine") || name.contains("alcohol") { return "wineglass" }
         if name.contains("аренд") || name.contains("дом") || name.contains("home") { return "house" }
         if name.contains("зарплат") || name.contains("salary") { return "banknote" }
+        if name.contains("card") || name.contains("карт") { return "creditcard" }
+        if name.contains("account") || name.contains("счёт") || name.contains("счет") || name.contains("deposit") || name.contains("депозит") { return "building.2" }
         return kind == .income ? "arrow.down.left.circle.fill" : fallback
     }
 }

@@ -134,12 +134,16 @@
 "add_operation.title.edit" = "Изменить операцию";
 "add_operation.section.kind" = "Тип операции";
 "add_operation.section.category" = "Категория";
+"add_operation.section.income_source" = "Источник дохода или счёт";
+"add_operation.section.funding_source" = "Списать со счёта";
 "add_operation.section.amount" = "Сумма";
 "add_operation.section.date" = "Дата операции";
 "add_operation.field.category.placeholder" = "Например: Продукты, Bolt или зарплата";
 "add_operation.field.category.too_long" = "Название должно быть не длиннее 60 символов.";
 "add_operation.category.create" = "Создать свою категорию";
 "add_operation.category.select" = "Выбрать категорию";
+"add_operation.funding_source.select" = "Выбрать счёт";
+"add_operation.funding_source.hint" = "Счета берутся из ваших категорий дохода.";
 "add_operation.field.date.label" = "Дата и время";
 "add_operation.magic.section" = "Быстрый ввод";
 "add_operation.magic.placeholder" = "Опишите словами, напр. «Потратил 350 на кофе в Surf»";
@@ -172,6 +176,10 @@
 "add_operation.category.default.entertainment" = "Развлечения";
 "add_operation.category.default.clothes" = "Одежда";
 "add_operation.category.default.salary" = "Зарплата";
+"add_operation.category.default.bank_card" = "Банковская карта";
+"add_operation.category.default.credit_card" = "Кредитная карта";
+"add_operation.category.default.current_account" = "Текущий счёт";
+"add_operation.category.default.deposit" = "Депозит";
 "add_operation.category.default.freelance" = "Фриланс";
 "add_operation.category.default.gift" = "Подарок";
 "add_operation.category.default.interest" = "Проценты";

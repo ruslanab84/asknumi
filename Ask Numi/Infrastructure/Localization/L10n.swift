@@ -134,12 +134,16 @@ enum L10n {
         static var titleEdit: String           { l("add_operation.title.edit") }
         static var sectionKind: String         { l("add_operation.section.kind") }
         static var sectionCategory: String     { l("add_operation.section.category") }
+        static var sectionIncomeSource: String { l("add_operation.section.income_source") }
+        static var sectionFundingSource: String { l("add_operation.section.funding_source") }
         static var sectionAmount: String       { l("add_operation.section.amount") }
         static var sectionDate: String         { l("add_operation.section.date") }
         static var categoryPlaceholder: String { l("add_operation.field.category.placeholder") }
         static var categoryTooLong: String     { l("add_operation.field.category.too_long") }
         static var createCategory: String      { l("add_operation.category.create") }
         static var selectCategory: String      { l("add_operation.category.select") }
+        static var selectFundingSource: String { l("add_operation.funding_source.select") }
+        static var fundingSourceHint: String   { l("add_operation.funding_source.hint") }
         static var dateLabel: String           { l("add_operation.field.date.label") }
         static var magicSection: String        { l("add_operation.magic.section") }
         static var magicPlaceholder: String    { l("add_operation.magic.placeholder") }
@@ -158,7 +162,7 @@ enum L10n {
                 .map { l("add_operation.category.default.\($0)") }
         }
         static var defaultIncomeCategories: [String] {
-            ["salary", "freelance", "gift", "interest"]
+            ["salary", "bank_card", "credit_card", "current_account", "deposit", "freelance", "gift", "interest"]
                 .map { l("add_operation.category.default.\($0)") }
         }
     }

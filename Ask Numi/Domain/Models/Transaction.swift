@@ -17,6 +17,7 @@ struct Transaction: Identifiable, Hashable, Sendable {
     var category: String
     var categoryIcon: String
     var categoryColor: CategoryColor
+    var fundingSource: String?
     var date: Date
     var note: String?
     var isImpulse: Bool
@@ -28,6 +29,7 @@ struct Transaction: Identifiable, Hashable, Sendable {
         category: String,
         categoryIcon: String = CategoryIcon.fallback,
         categoryColor: CategoryColor? = nil,
+        fundingSource: String? = nil,
         date: Date = .now,
         note: String? = nil,
         isImpulse: Bool = false
@@ -38,8 +40,17 @@ struct Transaction: Identifiable, Hashable, Sendable {
         self.category = category
         self.categoryIcon = categoryIcon
         self.categoryColor = categoryColor ?? CategoryColor.defaultColor(for: kind)
+        let trimmedFundingSource = fundingSource?.trimmingCharacters(in: .whitespacesAndNewlines)
+        self.fundingSource = kind == .expense && !(trimmedFundingSource?.isEmpty ?? true)
+            ? trimmedFundingSource
+            : nil
         self.date = date
         self.note = note
         self.isImpulse = isImpulse
+    }
+
+    nonisolated static func assertSelfCheck() {
+        assert(Transaction(amount: 1, kind: .expense, category: "Food", fundingSource: " Card ").fundingSource == "Card")
+        assert(Transaction(amount: 1, kind: .income, category: "Salary", fundingSource: "Card").fundingSource == nil)
     }
 }

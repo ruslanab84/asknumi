@@ -116,12 +116,16 @@
 "add_operation.title.edit" = "Edit operation";
 "add_operation.section.kind" = "Operation type";
 "add_operation.section.category" = "Category";
+"add_operation.section.income_source" = "Income source or account";
+"add_operation.section.funding_source" = "Pay from";
 "add_operation.section.amount" = "Amount";
 "add_operation.section.date" = "Operation date";
 "add_operation.field.category.placeholder" = "For example: Groceries, Bolt, or salary";
 "add_operation.field.category.too_long" = "The name must be 60 characters or fewer.";
 "add_operation.category.create" = "Create custom category";
 "add_operation.category.select" = "Choose category";
+"add_operation.funding_source.select" = "Choose account";
+"add_operation.funding_source.hint" = "Accounts come from your income categories.";
 "add_operation.field.date.label" = "Date and time";
 "add_operation.magic.section" = "Quick add";
 "add_operation.magic.placeholder" = "Describe it, e.g. “Spent 350 on coffee at Surf”";
@@ -152,6 +156,10 @@
 "add_operation.category.default.entertainment" = "Entertainment";
 "add_operation.category.default.clothes" = "Clothes";
 "add_operation.category.default.salary" = "Salary";
+"add_operation.category.default.bank_card" = "Bank card";
+"add_operation.category.default.credit_card" = "Credit card";
+"add_operation.category.default.current_account" = "Current account";
+"add_operation.category.default.deposit" = "Deposit";
 "add_operation.category.default.freelance" = "Freelance";
 "add_operation.category.default.gift" = "Gift";
 "add_operation.category.default.interest" = "Interest";
