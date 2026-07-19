@@ -28,10 +28,7 @@ final class FoundationModelsAdvisor: FinancialAdvisor {
         let currencyCode = CurrencySettings.selectedCode
         let responseLanguage = LocalizationManager.shared.currentLanguage == "ru" ? "Russian" : "English"
         if case .categoryTotal(let category) = task {
-            return FinancialAdvice(
-                headline: "\(category): \(plain(summary.totalExpenses)) \(currencyCode)",
-                tips: []
-            )
+            return categoryTotalAdvice(for: summary, category: category, currencyCode: currencyCode)
         }
         if task == .spendingTotal {
             return FinancialAdvice(
@@ -234,6 +231,27 @@ final class FoundationModelsAdvisor: FinancialAdvisor {
         )
     }
 
+    private func categoryTotalAdvice(
+        for summary: FinancialSummary,
+        category: String,
+        currencyCode: String
+    ) -> FinancialAdvice {
+        var average = summary.totalExpenses / Decimal(summary.transactionCount)
+        var roundedAverage = Decimal()
+        NSDecimalRound(&roundedAverage, &average, 2, .bankers)
+        return FinancialAdvice(
+            headline: L10n.Assistant.categoryTotal(
+                flattened(category),
+                plain(summary.totalExpenses),
+                currencyCode
+            ),
+            tips: [
+                L10n.Assistant.categoryOperationCount(summary.transactionCount),
+                L10n.Assistant.categoryAverage(plain(roundedAverage), currencyCode),
+            ]
+        )
+    }
+
     private static func savingsTarget(in question: String) -> SavingsTarget? {
         let value = normalizedText(in: question)
         let fullRange = NSRange(value.startIndex..<value.endIndex, in: value)
@@ -416,6 +434,14 @@ final class FoundationModelsAdvisor: FinancialAdvisor {
             transactions: [Transaction(amount: 50, kind: .expense, category: "Groceries")],
             period: period
         )
+        let categorySummary = FinancialSummary(
+            transactions: [
+                Transaction(amount: 40, kind: .expense, category: "Groceries"),
+                Transaction(amount: 40, kind: .expense, category: "Groceries"),
+                Transaction(amount: 20, kind: .expense, category: "Groceries"),
+            ],
+            period: period
+        )
         let advisor = FoundationModelsAdvisor()
 
         assert(!containsDeadline("How may I save 1000 AZN?"))
@@ -446,6 +472,14 @@ final class FoundationModelsAdvisor: FinancialAdvisor {
             question: "Can I afford a 100 AZN purchase?",
             currencyCode: "AZN"
         ) == nil)
+        let categoryAdvice = advisor.categoryTotalAdvice(
+            for: categorySummary,
+            category: "Groceries",
+            currencyCode: "AZN"
+        )
+        assert(categoryAdvice.headline.contains("100"))
+        assert(categoryAdvice.tips.count == 2)
+        assert(categoryAdvice.tips.last?.contains("33.33") == true)
     }
     #endif
 

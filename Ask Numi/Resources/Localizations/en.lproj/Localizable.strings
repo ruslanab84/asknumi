@@ -203,6 +203,9 @@
 "assistant.error.no_data" = "You haven't recorded any operations for the selected period.";
 "assistant.error.category_not_found" = "You haven't recorded any expenses in that category for the selected period.";
 "assistant.error.generic" = "Couldn't prepare an answer. Try again.";
+"assistant.category_total.headline" = "Recorded spending in “%@” is %@ %@.";
+"assistant.category_total.operation_count" = "Saved operations analyzed: %d.";
+"assistant.category_total.average" = "Average recorded expense: %@ %@ per operation.";
 "assistant.savings.needs_details" = "More verified inputs are needed for an exact savings plan.";
 "assistant.savings.currency_mismatch" = "The target uses %@, but your recorded data uses %@. Currency conversion is unavailable.";
 "assistant.savings.missing_deadline" = "Add a deadline for the savings target.";

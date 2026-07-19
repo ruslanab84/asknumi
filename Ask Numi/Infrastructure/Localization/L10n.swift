@@ -262,6 +262,15 @@ enum L10n {
         static var errorNoData: String        { l("assistant.error.no_data") }
         static var errorCategoryNotFound: String { l("assistant.error.category_not_found") }
         static var errorGeneric: String       { l("assistant.error.generic") }
+        static func categoryTotal(_ category: String, _ amount: String, _ currency: String) -> String {
+            String(format: l("assistant.category_total.headline"), category, amount, currency)
+        }
+        static func categoryOperationCount(_ count: Int) -> String {
+            String(format: l("assistant.category_total.operation_count"), count)
+        }
+        static func categoryAverage(_ amount: String, _ currency: String) -> String {
+            String(format: l("assistant.category_total.average"), amount, currency)
+        }
         static var savingsNeedsDetails: String { l("assistant.savings.needs_details") }
         static var savingsMissingDeadline: String { l("assistant.savings.missing_deadline") }
         static func savingsMissingDeadlineAndIncome(_ currency: String) -> String {

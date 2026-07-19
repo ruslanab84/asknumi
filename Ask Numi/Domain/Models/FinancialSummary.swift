@@ -11,6 +11,7 @@ import Foundation
 /// language models are unreliable at math.
 struct FinancialSummary: Sendable {
     let period: DateInterval
+    let transactionCount: Int
     let totalIncome: Decimal
     let totalExpenses: Decimal
     /// Expense totals per category, sorted descending by amount.
@@ -27,6 +28,7 @@ struct FinancialSummary: Sendable {
 
     init(transactions: [Transaction], period: DateInterval) {
         self.period = period
+        transactionCount = transactions.count
 
         var income: Decimal = 0
         var expenses: Decimal = 0

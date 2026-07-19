@@ -223,6 +223,9 @@
 "assistant.error.no_data" = "За указанный период вы не записали ни одной операции.";
 "assistant.error.category_not_found" = "За указанный период в этой категории нет записанных расходов.";
 "assistant.error.generic" = "Не получилось составить ответ. Попробуйте ещё раз.";
+"assistant.category_total.headline" = "Записанные расходы в категории «%@» составляют %@ %@.";
+"assistant.category_total.operation_count" = "Учтено сохранённых операций: %d.";
+"assistant.category_total.average" = "Средний записанный расход: %@ %@ за операцию.";
 "assistant.savings.needs_details" = "Для точного плана накопления не хватает проверенных данных.";
 "assistant.savings.currency_mismatch" = "Цель указана в %@, а записанные данные — в %@. Конвертация валют недоступна.";
 "assistant.savings.missing_deadline" = "Укажите срок для цели накопления.";
