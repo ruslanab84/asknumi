@@ -3,6 +3,7 @@
 //  Ask Numi
 //
 
+import Charts
 import SwiftUI
 
 enum DashboardPalette {
@@ -10,6 +11,9 @@ enum DashboardPalette {
     static let avatarHighlight = Color(red: 124.0 / 255, green: 127.0 / 255, blue: 240.0 / 255)
     static let ai = Color(red: 175.0 / 255, green: 82.0 / 255, blue: 222.0 / 255)
     static let income = Color(red: 52.0 / 255, green: 199.0 / 255, blue: 89.0 / 255)
+    static let balanceStart = Color(red: 47.0 / 255, green: 99.0 / 255, blue: 236.0 / 255)
+    static let balanceEnd = Color(red: 25.0 / 255, green: 45.0 / 255, blue: 151.0 / 255)
+    static let spendingCategories: [Color] = [.blue, .purple, .orange]
 }
 
 struct HomeDashboardView: View {
@@ -38,6 +42,23 @@ struct HomeDashboardView: View {
         )
     }
 
+    private var currentMonth: DateInterval {
+        Calendar.current.dateInterval(of: .month, for: .now)
+            ?? DateInterval(start: .distantPast, end: .distantFuture)
+    }
+
+    private var monthlyTransactions: [Transaction] {
+        transactions.filter { $0.date >= currentMonth.start && $0.date < currentMonth.end }
+    }
+
+    private var monthlySummary: FinancialSummary {
+        FinancialSummary(transactions: monthlyTransactions, period: currentMonth)
+    }
+
+    private var monthlySpending: DashboardSpendingBreakdown {
+        DashboardSpendingBreakdown(transactions: monthlyTransactions)
+    }
+
     private var recentTransactions: [Transaction] {
         Array(transactions.sorted { $0.date > $1.date }.prefix(5))
     }
@@ -56,7 +77,12 @@ struct HomeDashboardView: View {
                         DashboardHeader(name: snapshot.userName) {
                             isShowingSettings = true
                         }
-                        FinancialOverviewSection(summary: summary, isLoading: isLoading)
+                        FinancialOverviewSection(
+                            summary: summary,
+                            monthlyBalance: monthlySummary.balance,
+                            spending: monthlySpending,
+                            isLoading: isLoading
+                        )
 
                         if let errorMessage {
                             Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
@@ -95,6 +121,9 @@ struct HomeDashboardView: View {
                 FinancialTwinDetailsView(report: financialTwinReport)
             }
             .task {
+                #if DEBUG
+                DashboardSpendingBreakdown.assertSelfCheck()
+                #endif
                 await loadDashboard()
             }
         }
@@ -217,11 +246,14 @@ private struct DashboardHeader: View {
 
 private struct FinancialOverviewSection: View {
     let summary: FinancialSummary
+    let monthlyBalance: Decimal
+    let spending: DashboardSpendingBreakdown
     let isLoading: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            BalanceHero(summary: summary, isLoading: isLoading)
+            BalanceHero(summary: summary, monthlyBalance: monthlyBalance, isLoading: isLoading)
+            SpendingOverviewCard(breakdown: spending, isLoading: isLoading)
             DailyMoneyTipCard()
         }
     }
@@ -229,28 +261,293 @@ private struct FinancialOverviewSection: View {
 
 private struct BalanceHero: View {
     let summary: FinancialSummary
+    let monthlyBalance: Decimal
     let isLoading: Bool
-    @ScaledMetric(relativeTo: .largeTitle) private var balanceFontSize = 40.0
+    @State private var isBalanceHidden = false
+    @ScaledMetric(relativeTo: .largeTitle) private var balanceFontSize = 38.0
+
+    private var monthlyTint: Color {
+        if monthlyBalance > 0 { return DashboardPalette.income }
+        if monthlyBalance < 0 { return Color(red: 1, green: 0.58, blue: 0.56) }
+        return .white.opacity(0.72)
+    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
+        VStack(alignment: .leading, spacing: 18) {
+            HStack {
                 Text(L10n.Dashboard.totalBalance)
                     .font(.footnote.weight(.medium))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white.opacity(0.76))
 
-                Image(systemName: "eye")
-                    .font(.system(size: 12))
-                    .foregroundStyle(.tertiary)
+                Spacer()
+
+                Button {
+                    isBalanceHidden.toggle()
+                } label: {
+                    Image(systemName: isBalanceHidden ? "eye.slash.fill" : "eye.fill")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 34, height: 34)
+                        .background(.white.opacity(0.13), in: .circle)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(
+                    isBalanceHidden ? L10n.Dashboard.showBalance : L10n.Dashboard.hideBalance
+                )
             }
 
-            Text(OperationFormatting.plain(summary.balance))
-                .font(.system(size: balanceFontSize, weight: .heavy, design: .rounded))
-                .tracking(-0.6)
+            VStack(alignment: .leading, spacing: 7) {
+                Text(isBalanceHidden ? "••••••" : OperationFormatting.plain(summary.balance))
+                    .font(.system(size: balanceFontSize, weight: .bold, design: .rounded))
+                    .foregroundStyle(summary.balance < 0 ? Color(red: 1, green: 0.78, blue: 0.76) : .white)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.65)
+                    .contentTransition(.numericText())
+                    .privacySensitive()
+                    .redacted(reason: isLoading ? .placeholder : [])
+
+                HStack(spacing: 5) {
+                    Image(systemName: monthlyBalance >= 0 ? "arrow.up.right" : "arrow.down.right")
+                    Text(OperationFormatting.plain(monthlyBalance))
+                    Text(L10n.Dashboard.thisMonth)
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(monthlyTint)
                 .lineLimit(1)
-                .minimumScaleFactor(0.7)
-                .contentTransition(.numericText())
+                .minimumScaleFactor(0.75)
                 .redacted(reason: isLoading ? .placeholder : [])
+            }
+
+            HStack(spacing: 8) {
+                Text(CurrencySettings.flag(for: CurrencySettings.selectedCode))
+                    .accessibilityHidden(true)
+                Text(CurrencySettings.selectedCode)
+                    .font(.caption.weight(.bold))
+            }
+            .foregroundStyle(.white)
+            .padding(.horizontal, 12)
+            .frame(height: 34)
+            .background(.white.opacity(0.14), in: .capsule)
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            LinearGradient(
+                colors: [DashboardPalette.balanceStart, DashboardPalette.balanceEnd],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ),
+            in: .rect(cornerRadius: 22)
+        )
+        .overlay {
+            RoundedRectangle(cornerRadius: 22)
+                .stroke(.white.opacity(0.14), lineWidth: 1)
+        }
+        .shadow(color: DashboardPalette.balanceEnd.opacity(0.24), radius: 16, y: 10)
+        .animation(.snappy, value: isBalanceHidden)
+    }
+}
+
+private struct DashboardSpendingCategory: Identifiable {
+    let id: String
+    let name: String
+    let icon: String
+    let color: Color
+    let amount: Decimal
+}
+
+private struct DashboardSpendingBreakdown {
+    let total: Decimal
+    let categories: [DashboardSpendingCategory]
+
+    init(transactions: [Transaction]) {
+        let summary = FinancialSummary(
+            transactions: transactions,
+            period: DateInterval(start: .distantPast, end: .distantFuture)
+        )
+        let topCategories = Array(summary.expensesByCategory.prefix(3))
+
+        total = summary.totalExpenses
+        categories = topCategories.enumerated().map { index, item in
+            let transaction = transactions.first {
+                $0.kind == .expense && $0.category == item.category
+            }
+            return DashboardSpendingCategory(
+                id: "category:\(item.category)",
+                name: item.category,
+                icon: transaction?.categoryIcon ?? CategoryIcon.fallback,
+                color: DashboardPalette.spendingCategories[index],
+                amount: item.amount
+            )
+        } + {
+            let other = summary.totalExpenses - topCategories.reduce(Decimal.zero) { $0 + $1.amount }
+            guard other > 0 else { return [] }
+            return [DashboardSpendingCategory(
+                id: "other",
+                name: L10n.Assistant.chartOther,
+                icon: "ellipsis",
+                color: .secondary,
+                amount: other
+            )]
+        }()
+    }
+
+    func share(of amount: Decimal) -> Double {
+        guard total > 0 else { return 0 }
+        return NSDecimalNumber(decimal: amount / total).doubleValue
+    }
+
+    #if DEBUG
+    static func assertSelfCheck() {
+        let transactions = [
+            Transaction(amount: 40, kind: .expense, category: "A", categoryColor: .blue),
+            Transaction(amount: 30, kind: .expense, category: "B", categoryColor: .green),
+            Transaction(amount: 20, kind: .expense, category: "C", categoryColor: .orange),
+            Transaction(amount: 10, kind: .expense, category: "D", categoryColor: .purple),
+            Transaction(amount: 200, kind: .income, category: "Income", categoryColor: .green)
+        ]
+        let breakdown = DashboardSpendingBreakdown(transactions: transactions)
+
+        assert(breakdown.total == 100)
+        assert(breakdown.categories.count == 4)
+        assert(breakdown.categories.last?.amount == 10)
+        assert(breakdown.share(of: 40) == 0.4)
+    }
+    #endif
+}
+
+private struct SpendingOverviewCard: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let breakdown: DashboardSpendingBreakdown
+    let isLoading: Bool
+
+    private var categoryColumns: [GridItem] {
+        Array(
+            repeating: GridItem(.flexible(), alignment: .leading),
+            count: dynamicTypeSize.isAccessibilitySize ? 1 : 2
+        )
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 18) {
+            HStack(alignment: .firstTextBaseline) {
+                Text(L10n.Dashboard.spendingOverview)
+                    .font(.headline)
+
+                Spacer()
+
+                Text(L10n.Dashboard.thisMonth)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            if breakdown.categories.isEmpty && !isLoading {
+                ContentUnavailableView(
+                    L10n.Dashboard.spendingEmpty,
+                    systemImage: "chart.pie"
+                )
+                .frame(maxWidth: .infinity, minHeight: 150)
+            } else {
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 20) {
+                        spendingTotal
+                        Spacer(minLength: 0)
+                        spendingChart
+                    }
+
+                    VStack(alignment: .leading, spacing: 16) {
+                        spendingTotal
+                        spendingChart
+                            .frame(maxWidth: .infinity)
+                    }
+                }
+                .redacted(reason: isLoading ? .placeholder : [])
+
+                LazyVGrid(columns: categoryColumns, alignment: .leading, spacing: 14) {
+                    ForEach(breakdown.categories) { category in
+                        categoryRow(category)
+                    }
+                }
+                .redacted(reason: isLoading ? .placeholder : [])
+            }
+        }
+        .padding(18)
+        .background(
+            Color(uiColor: .secondarySystemBackground).opacity(0.58),
+            in: .rect(cornerRadius: 22)
+        )
+        .glassEffect(.regular, in: .rect(cornerRadius: 22))
+        .overlay {
+            RoundedRectangle(cornerRadius: 22)
+                .stroke(.primary.opacity(0.05), lineWidth: 1)
+        }
+        .shadow(color: .black.opacity(0.05), radius: 12, y: 8)
+    }
+
+    private var spendingTotal: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(L10n.Dashboard.spent)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            Text(OperationFormatting.plain(breakdown.total))
+                .font(.title2.weight(.bold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+                .contentTransition(.numericText())
+        }
+    }
+
+    private var spendingChart: some View {
+        Chart(breakdown.categories) { category in
+            SectorMark(
+                angle: .value(
+                    L10n.Dashboard.spent,
+                    NSDecimalNumber(decimal: category.amount).doubleValue
+                ),
+                innerRadius: .ratio(0.62),
+                angularInset: 2
+            )
+            .cornerRadius(3)
+            .foregroundStyle(category.color)
+        }
+        .frame(width: 126, height: 126)
+        .chartLegend(.hidden)
+        .overlay {
+            Image(systemName: "chart.pie.fill")
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(DashboardPalette.primary)
+        }
+        .accessibilityHidden(true)
+    }
+
+    private func categoryRow(_ category: DashboardSpendingCategory) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 7) {
+                Image(systemName: category.icon)
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(category.color)
+                    .frame(width: 22, height: 22)
+                    .background(category.color.opacity(0.12), in: .rect(cornerRadius: 6))
+                    .accessibilityHidden(true)
+
+                Text(category.name)
+                    .font(.caption.weight(.semibold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.75)
+
+                Spacer(minLength: 4)
+
+                Text(breakdown.share(of: category.amount).formatted(
+                    .percent.precision(.fractionLength(0))
+                ))
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            }
+
+            Text(OperationFormatting.plain(category.amount))
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
         }
         .accessibilityElement(children: .combine)
     }

@@ -40,6 +40,11 @@ enum L10n {
             String(format: l("dashboard.greeting"), name)
         }
         static var totalBalance: String     { l("dashboard.balance_card.label.total_balance") }
+        static var hideBalance: String      { l("dashboard.balance_card.accessibility.hide") }
+        static var showBalance: String      { l("dashboard.balance_card.accessibility.show") }
+        static var thisMonth: String        { l("dashboard.label.this_month") }
+        static var spendingOverview: String { l("dashboard.spending.title") }
+        static var spendingEmpty: String    { l("dashboard.spending.empty") }
         static var dailyTipTitle: String    { l("dashboard.daily_tip.title") }
         static var dailyTips: [String] {
             (1...31).map { l("dashboard.daily_tip.\($0)") }

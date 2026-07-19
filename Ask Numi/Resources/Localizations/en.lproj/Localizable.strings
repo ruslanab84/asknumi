@@ -18,6 +18,11 @@
 "dashboard.header.accessibility.settings" = "Settings";
 "dashboard.greeting" = "Good evening, %@!";
 "dashboard.balance_card.label.total_balance" = "Total balance";
+"dashboard.balance_card.accessibility.hide" = "Hide balance";
+"dashboard.balance_card.accessibility.show" = "Show balance";
+"dashboard.label.this_month" = "This month";
+"dashboard.spending.title" = "Spending overview";
+"dashboard.spending.empty" = "No expenses recorded this month.";
 "dashboard.daily_tip.title" = "Tip of the day";
 "dashboard.daily_tip.1" = "Automatically save part of your income as soon as it arrives.";
 "dashboard.daily_tip.2" = "Start with an affordable 5–10%; consistency matters more than the perfect amount.";

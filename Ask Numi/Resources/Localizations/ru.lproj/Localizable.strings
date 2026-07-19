@@ -20,6 +20,11 @@
 
 /* Dashboard — Balance Card */
 "dashboard.balance_card.label.total_balance" = "Общий баланс";
+"dashboard.balance_card.accessibility.hide" = "Скрыть баланс";
+"dashboard.balance_card.accessibility.show" = "Показать баланс";
+"dashboard.label.this_month" = "В этом месяце";
+"dashboard.spending.title" = "Обзор расходов";
+"dashboard.spending.empty" = "В этом месяце расходы ещё не записаны.";
 
 /* Dashboard — Daily Tip */
 "dashboard.daily_tip.title" = "Совет дня";
