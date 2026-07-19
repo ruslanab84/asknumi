@@ -178,15 +178,11 @@ struct HomeDashboardView: View {
         if comparison.current > 0 || comparison.previous > 0 {
             return L10n.Dashboard.insightMonthComparison(
                 OperationFormatting.plain(comparison.current),
-                OperationFormatting.plain(comparison.previous),
-                CurrencySettings.selectedCode
+                OperationFormatting.plain(comparison.previous)
             )
         }
         if monthlySummary.totalIncome > 0 {
-            return L10n.Dashboard.insightRecordedIncome(
-                OperationFormatting.plain(monthlySummary.totalIncome),
-                CurrencySettings.selectedCode
-            )
+            return L10n.Dashboard.insightRecordedIncome(OperationFormatting.plain(monthlySummary.totalIncome))
         }
         return L10n.Dashboard.insightEmpty
     }

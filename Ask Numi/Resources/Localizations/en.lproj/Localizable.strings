@@ -66,8 +66,8 @@
 "dashboard.budget_card.cta.setup" = "Set up budget";
 "dashboard.insight_card.title" = "Monthly insight";
 "dashboard.insight_card.cta.show_details" = "Show details  →";
-"dashboard.insight_card.month_comparison" = "Recorded spending: %@ %@ this month versus %@ %@ in the same period last month.";
-"dashboard.insight_card.recorded_income" = "Recorded income: %@ %@.";
+"dashboard.insight_card.month_comparison" = "Recorded spending: %@ this month versus %@ in the same period last month.";
+"dashboard.insight_card.recorded_income" = "Recorded income: %@.";
 "dashboard.insight_card.empty" = "Add your first operation to receive a personalized insight.";
 "dashboard.attention.title" = "Needs Attention";
 "dashboard.financial_twin.title" = "Financial Digital Twin";

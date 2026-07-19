@@ -68,11 +68,11 @@ enum L10n {
         static var budgetSetup: String { l("dashboard.budget_card.cta.setup") }
         static var insightTitle: String     { l("dashboard.insight_card.title") }
         static var insightShowDetails: String { l("dashboard.insight_card.cta.show_details") }
-        static func insightMonthComparison(_ current: String, _ previous: String, _ currency: String) -> String {
-            String(format: l("dashboard.insight_card.month_comparison"), current, currency, previous, currency)
+        static func insightMonthComparison(_ current: String, _ previous: String) -> String {
+            String(format: l("dashboard.insight_card.month_comparison"), current, previous)
         }
-        static func insightRecordedIncome(_ amount: String, _ currency: String) -> String {
-            String(format: l("dashboard.insight_card.recorded_income"), amount, currency)
+        static func insightRecordedIncome(_ amount: String) -> String {
+            String(format: l("dashboard.insight_card.recorded_income"), amount)
         }
         static var insightEmpty: String { l("dashboard.insight_card.empty") }
         static var attentionTitle: String { l("dashboard.attention.title") }
