@@ -1,3 +1,11 @@
+# Shared Layouts
+
+## App shell and tab routing
+
+- Source: `Ask Numi/App/ContentView.swift`
+- `ContentView` switches between the four root screens. Each root screen renders the shared floating `AppTabBar` in a bottom safe-area inset.
+
+```swift
 //
 //  ContentView.swift
 //  Ask Numi
@@ -12,8 +20,9 @@ struct ContentView: View {
     @State private var assistantExchanges: [AssistantExchange] = []
 
     var body: some View {
-        TabView(selection: $selectedTab) {
-            Tab(AppTab.home.title, systemImage: AppTab.home.symbol, value: AppTab.home) {
+        Group {
+            switch selectedTab {
+            case .home:
                 HomeDashboardView(
                     snapshot: .preview,
                     fetchTransactions: container.makeFetchTransactionsUseCase(),
@@ -25,11 +34,9 @@ struct ContentView: View {
                         planSection = .budgets
                         selectedTab = .plan
                     },
-                    showAssistant: { selectedTab = .assistant }
+                    selectedTab: $selectedTab
                 )
-            }
-
-            Tab(AppTab.operations.title, systemImage: AppTab.operations.symbol, value: AppTab.operations) {
+            case .operations:
                 OperationsView(
                     fetchTransactions: container.makeFetchTransactionsUseCase(),
                     fetchCategories: container.makeFetchTransactionCategoriesUseCase(),
@@ -38,18 +45,16 @@ struct ContentView: View {
                     updateTransaction: container.makeUpdateTransactionUseCase(),
                     deleteTransaction: container.makeDeleteTransactionUseCase(),
                     parseNaturalInput: container.makeParseNaturalInputUseCase(),
-                    transactionClassifier: container.transactionClassifier
+                    transactionClassifier: container.transactionClassifier,
+                    selectedTab: $selectedTab
                 )
-            }
-
-            Tab(AppTab.assistant.title, systemImage: AppTab.assistant.symbol, value: AppTab.assistant) {
+            case .assistant:
                 AssistantView(
                     getAdvice: container.makeAdviceUseCase(),
+                    selectedTab: $selectedTab,
                     exchanges: $assistantExchanges
                 )
-            }
-
-            Tab(AppTab.plan.title, systemImage: AppTab.plan.symbol, value: AppTab.plan) {
+            case .plan:
                 PlanView(
                     fetchTransactions: container.makeFetchTransactionsUseCase(),
                     fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
@@ -61,6 +66,7 @@ struct ContentView: View {
                     fetchGoals: container.makeFetchSavingsGoalsUseCase(),
                     saveGoal: container.makeSaveSavingsGoalUseCase(),
                     deleteGoal: container.makeDeleteSavingsGoalUseCase(),
+                    selectedTab: $selectedTab,
                     section: $planSection
                 )
             }
@@ -68,7 +74,7 @@ struct ContentView: View {
     }
 }
 
-enum AppTab: Hashable, CaseIterable {
+enum AppTab: CaseIterable {
     case home
     case operations
     case assistant
@@ -93,6 +99,46 @@ enum AppTab: Hashable, CaseIterable {
     }
 }
 
+struct AppTabBar: View {
+    @Binding var selection: AppTab
+    @Environment(\.appAccentColor) private var accentColor
+
+    var body: some View {
+        GlassEffectContainer(spacing: 18) {
+            HStack(spacing: 0) {
+                tabButton(.home)
+                tabButton(.operations)
+                tabButton(.assistant)
+                tabButton(.plan)
+            }
+            .padding(.horizontal, 6)
+            .frame(maxWidth: .infinity, minHeight: 54)
+            .glassEffect(.regular, in: .capsule)
+        }
+        .frame(height: 62)
+    }
+
+    private func tabButton(_ tab: AppTab) -> some View {
+        Button {
+            selection = tab
+        } label: {
+            VStack(spacing: 4) {
+                Image(systemName: tab.symbol)
+                    .symbolVariant(tab == selection ? .fill : .none)
+                    .font(.subheadline.weight(.semibold))
+                Text(tab.title)
+                    .font(.caption2.weight(.medium))
+            }
+            .foregroundStyle(tab == selection ? accentColor : .secondary)
+            .frame(maxWidth: .infinity, minHeight: 54)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(tab == selection ? .isSelected : [])
+    }
+}
+
 #Preview {
     ContentView(container: AppContainer(isStoredInMemoryOnly: true))
 }
+```

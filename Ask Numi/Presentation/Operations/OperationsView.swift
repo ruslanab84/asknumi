@@ -15,7 +15,6 @@ struct OperationsView: View {
     let deleteTransaction: DeleteTransactionUseCase
     let parseNaturalInput: ParseNaturalInputUseCase
     let transactionClassifier: any TransactionClassifier
-    @Binding var selectedTab: AppTab
 
     @State private var transactions: [Transaction] = []
     @State private var categories: [TransactionCategory] = []
@@ -60,7 +59,7 @@ struct OperationsView: View {
                         }
                         .padding(.horizontal, 16)
                         .padding(.top, 12)
-                        .padding(.bottom, 104)
+                        .padding(.bottom, 24)
                     }
                 }
                 .scrollIndicators(.hidden)
@@ -70,11 +69,6 @@ struct OperationsView: View {
                 pinnedControls
                     .padding(.horizontal, 16)
                     .padding(.vertical, 10)
-            }
-            .safeAreaInset(edge: .bottom) {
-                AppTabBar(selection: $selectedTab)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 8)
             }
             .toolbar(.hidden, for: .navigationBar)
             .sheet(isPresented: $isPresentingAddOperation) {
@@ -893,7 +887,6 @@ extension TransactionKind {
         updateTransaction: container.makeUpdateTransactionUseCase(),
         deleteTransaction: container.makeDeleteTransactionUseCase(),
         parseNaturalInput: container.makeParseNaturalInputUseCase(),
-        transactionClassifier: container.transactionClassifier,
-        selectedTab: .constant(.operations)
+        transactionClassifier: container.transactionClassifier
     )
 }

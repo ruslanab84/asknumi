@@ -34,6 +34,7 @@
 "dashboard.insight_card.top_category" = "Your largest recorded expense category is “%@”: %@ %@.";
 "dashboard.insight_card.recorded_income" = "Recorded income: %@ %@.";
 "dashboard.insight_card.empty" = "Add your first operation to receive a personalized insight.";
+"dashboard.attention.title" = "Needs Attention";
 "dashboard.financial_twin.title" = "Financial Digital Twin";
 "dashboard.financial_twin.empty" = "Add an operation to see your first financial result.";
 "dashboard.financial_twin.cta.details" = "Open data and calculations  →";

@@ -7,7 +7,6 @@ import SwiftUI
 
 struct AssistantView: View {
     let getAdvice: GetFinancialAdviceUseCase
-    @Binding var selectedTab: AppTab
     @Binding var exchanges: [AssistantExchange]
     @Environment(\.appAccentColor) private var accentColor
     @State private var draft = ""
@@ -65,12 +64,9 @@ struct AssistantView: View {
                 }
             }
             .safeAreaInset(edge: .bottom) {
-                VStack(spacing: 10) {
-                    inputBar
-                    AppTabBar(selection: $selectedTab)
-                }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 8)
+                inputBar
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 8)
             }
             .toolbar(.hidden, for: .navigationBar)
         }
@@ -382,7 +378,6 @@ private struct SpendingCategory: Identifiable {
 #Preview("Светлая тема") {
     AssistantView(
         getAdvice: AppContainer(isStoredInMemoryOnly: true).makeAdviceUseCase(),
-        selectedTab: .constant(.assistant),
         exchanges: .constant([])
     )
 }
@@ -390,7 +385,6 @@ private struct SpendingCategory: Identifiable {
 #Preview("Тёмная тема") {
     AssistantView(
         getAdvice: AppContainer(isStoredInMemoryOnly: true).makeAdviceUseCase(),
-        selectedTab: .constant(.assistant),
         exchanges: .constant([])
     )
     .preferredColorScheme(.dark)

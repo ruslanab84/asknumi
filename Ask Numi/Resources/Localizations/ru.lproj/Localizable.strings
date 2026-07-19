@@ -40,6 +40,7 @@
 "dashboard.insight_card.top_category" = "Самая крупная категория расходов — «%@»: %@ %@.";
 "dashboard.insight_card.recorded_income" = "Записанный доход: %@ %@.";
 "dashboard.insight_card.empty" = "Добавьте первую операцию, чтобы получить персональный инсайт.";
+"dashboard.attention.title" = "Требует внимания";
 "dashboard.financial_twin.title" = "Финансовый Digital Twin";
 "dashboard.financial_twin.empty" = "Добавьте операцию, чтобы увидеть первый финансовый результат.";
 "dashboard.financial_twin.cta.details" = "Открыть данные и расчёты  →";

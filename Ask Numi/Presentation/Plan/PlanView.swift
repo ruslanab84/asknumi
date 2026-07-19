@@ -16,7 +16,6 @@ struct PlanView: View {
     let fetchGoals: FetchSavingsGoalsUseCase
     let saveGoal: SaveSavingsGoalUseCase
     let deleteGoal: DeleteSavingsGoalUseCase
-    @Binding var selectedTab: AppTab
     @Binding var section: PlanSection
     @Environment(\.appAccentColor) private var accentColor
     @State private var transactions: [Transaction] = []
@@ -56,15 +55,10 @@ struct PlanView: View {
                         }
                         .padding(.horizontal, 16)
                         .padding(.top, 12)
-                        .padding(.bottom, 104)
+                        .padding(.bottom, 24)
                     }
                 }
                 .scrollIndicators(.hidden)
-            }
-            .safeAreaInset(edge: .bottom) {
-                AppTabBar(selection: $selectedTab)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 8)
             }
             .toolbar(.hidden, for: .navigationBar)
             .sheet(item: $editorItem) { item in
@@ -712,22 +706,27 @@ private struct BalanceForecast: View {
     let balance: Decimal
 
     var body: some View {
+        let isNegative = balance < 0
+        let statusColor: Color = isNegative ? .red : .green
+
         VStack(alignment: .leading, spacing: 8) {
             Text(L10n.Plan.forecastTitle)
                 .font(.caption)
-                .foregroundStyle(.green)
+                .foregroundStyle(statusColor)
 
             HStack {
                 Text(OperationFormatting.plain(balance))
                     .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .foregroundStyle(isNegative ? .red : .primary)
                 Spacer()
                 ForecastLine()
-                    .stroke(.green, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                    .stroke(statusColor, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
                     .frame(width: 92, height: 42)
+                    .scaleEffect(x: 1, y: isNegative ? -1 : 1)
             }
         }
         .padding(16)
-        .glassEffect(.regular.tint(.green.opacity(0.18)), in: .rect(cornerRadius: 22))
+        .glassEffect(.regular.tint(statusColor.opacity(0.18)), in: .rect(cornerRadius: 22))
         .accessibilityElement(children: .combine)
     }
 }
@@ -948,7 +947,6 @@ enum PlanSection: CaseIterable {
         fetchGoals: container.makeFetchSavingsGoalsUseCase(),
         saveGoal: container.makeSaveSavingsGoalUseCase(),
         deleteGoal: container.makeDeleteSavingsGoalUseCase(),
-        selectedTab: .constant(.plan),
         section: .constant(.payments)
     )
 }
@@ -966,7 +964,6 @@ enum PlanSection: CaseIterable {
         fetchGoals: container.makeFetchSavingsGoalsUseCase(),
         saveGoal: container.makeSaveSavingsGoalUseCase(),
         deleteGoal: container.makeDeleteSavingsGoalUseCase(),
-        selectedTab: .constant(.plan),
         section: .constant(.payments)
     )
         .preferredColorScheme(.dark)

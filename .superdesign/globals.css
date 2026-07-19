@@ -1,0 +1,37 @@
+:root {
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif;
+  --bg-top: #f6f7fb;
+  --bg-bottom: #ffffff;
+  --text-primary: #111827;
+  --text-secondary: rgba(60, 60, 67, 0.6);
+  --accent: #4f46e5;
+  --avatar-highlight: #7c7ff0;
+  --ai: #af52de;
+  --income: #34c759;
+  --income-label: #248a3d;
+  --expense: #ff3b30;
+  --glass: rgba(255, 255, 255, 0.64);
+  --glass-border: rgba(17, 24, 39, 0.06);
+  --screen-padding: 20px;
+  --section-gap: 24px;
+  --radius-metric: 18px;
+  --radius-card: 22px;
+  --radius-glass: 24px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  background: linear-gradient(135deg, var(--bg-top), var(--bg-bottom));
+}
+
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  box-shadow: 0 8px 24px rgba(20, 20, 50, 0.05);
+}

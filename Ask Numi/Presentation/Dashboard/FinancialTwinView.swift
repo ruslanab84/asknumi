@@ -11,34 +11,16 @@ struct FinancialTwinSummaryCard: View {
     let showDetails: () -> Void
 
     var body: some View {
-        Button(action: showDetails) {
-            GlassCard(tint: .orange.opacity(0.15)) {
-                HStack(alignment: .top, spacing: 12) {
-                    Image(systemName: "person.crop.circle.badge.checkmark")
-                        .font(.title3)
-                        .foregroundStyle(.orange)
-                        .frame(width: 38, height: 38)
-                        .background(.orange.opacity(0.15), in: .circle)
-
-                    VStack(alignment: .leading, spacing: 7) {
-                        Text(L10n.Dashboard.financialTwinTitle)
-                            .font(.subheadline.weight(.bold))
-                        Text(summary)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                            .lineLimit(3)
-                        Text(L10n.Dashboard.financialTwinDetails)
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.orange)
-                    }
-                    Spacer(minLength: 0)
-                }
+        AttentionCard(
+            title: L10n.Dashboard.financialTwinTitle,
+            systemImage: "person.crop.circle.badge.checkmark",
+            tint: DashboardPalette.primary,
+            isEnabled: !isLoading,
+            action: showDetails
+        ) {
+            Text(summary)
                 .redacted(reason: isLoading ? .placeholder : [])
-            }
-            .contentShape(.rect)
         }
-        .buttonStyle(.plain)
-        .disabled(isLoading)
     }
 
     private var summary: String {

@@ -68,6 +68,7 @@ enum L10n {
             String(format: l("dashboard.insight_card.recorded_income"), amount, currency)
         }
         static var insightEmpty: String { l("dashboard.insight_card.empty") }
+        static var attentionTitle: String { l("dashboard.attention.title") }
         static var financialTwinTitle: String { l("dashboard.financial_twin.title") }
         static var financialTwinEmpty: String { l("dashboard.financial_twin.empty") }
         static var financialTwinDetails: String { l("dashboard.financial_twin.cta.details") }

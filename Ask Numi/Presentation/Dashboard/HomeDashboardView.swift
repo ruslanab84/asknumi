@@ -5,6 +5,15 @@
 
 import SwiftUI
 
+enum DashboardPalette {
+    static let primary = Color(red: 79.0 / 255, green: 70.0 / 255, blue: 229.0 / 255)
+    static let avatarHighlight = Color(red: 124.0 / 255, green: 127.0 / 255, blue: 240.0 / 255)
+    static let ai = Color(red: 175.0 / 255, green: 82.0 / 255, blue: 222.0 / 255)
+    static let income = Color(red: 52.0 / 255, green: 199.0 / 255, blue: 89.0 / 255)
+    static let incomeLabel = Color(red: 36.0 / 255, green: 138.0 / 255, blue: 61.0 / 255)
+    static let expense = Color(red: 255.0 / 255, green: 59.0 / 255, blue: 48.0 / 255)
+}
+
 struct HomeDashboardView: View {
     let snapshot: DashboardSnapshot
     let fetchTransactions: FetchTransactionsUseCase
@@ -13,7 +22,7 @@ struct HomeDashboardView: View {
     let getMonthlyInsight: GetMonthlySpendingInsightUseCase
     let getFinancialTwin: GetFinancialTwinUseCase
     let showBudgets: () -> Void
-    @Binding var selectedTab: AppTab
+    let showAssistant: () -> Void
     @State private var isShowingSettings = false
     @State private var transactions: [Transaction] = []
     @State private var budgets: [Budget] = []
@@ -42,53 +51,44 @@ struct HomeDashboardView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                DashboardBackground()
+                DashboardBackground(isNeutral: true)
 
                 ScrollView {
-                    GlassEffectContainer(spacing: 22) {
-                        VStack(alignment: .leading, spacing: 20) {
-                            DashboardHeader {
-                                isShowingSettings = true
-                            }
-                            WelcomeView(name: snapshot.userName)
-                            BalanceCard(summary: summary, isLoading: isLoading)
-
-                            if let errorMessage {
-                                Text(errorMessage)
-                                    .font(.caption)
-                                    .foregroundStyle(.red)
-                            }
-
-                            BudgetCard(
-                                overview: budgetOverview,
-                                isLoading: isLoading,
-                                onTap: showBudgets
-                            )
-                            FinancialTwinSummaryCard(
-                                report: financialTwinReport,
-                                isLoading: isLoading
-                            ) {
-                                isShowingFinancialTwin = true
-                            }
-                            InsightCard(state: insightState) {
-                                selectedTab = .assistant
-                            }
-                            RecentTransactions(transactions: recentTransactions)
+                    VStack(alignment: .leading, spacing: 24) {
+                        DashboardHeader(name: snapshot.userName) {
+                            isShowingSettings = true
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.top, 12)
-                        .padding(.bottom, 104)
+                        FinancialOverviewSection(summary: summary, isLoading: isLoading)
+
+                        if let errorMessage {
+                            Label(errorMessage, systemImage: "exclamationmark.triangle.fill")
+                                .font(.footnote)
+                                .foregroundStyle(.red)
+                                .padding(12)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(.red.opacity(0.08), in: .rect(cornerRadius: 16))
+                        }
+
+                        AttentionCarousel(
+                            overview: budgetOverview,
+                            isLoading: isLoading,
+                            report: financialTwinReport,
+                            insightState: insightState,
+                            showBudgets: showBudgets,
+                            showFinancialTwin: { isShowingFinancialTwin = true },
+                            showInsight: showAssistant
+                        )
+                        RecentTransactions(transactions: recentTransactions)
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 16)
+                    .padding(.bottom, 24)
                 }
                 .scrollIndicators(.hidden)
+                .scrollEdgeEffectStyle(.soft, for: .top)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .clipped()
-            .safeAreaInset(edge: .bottom) {
-                AppTabBar(selection: $selectedTab)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 8)
-            }
             .toolbar(.hidden, for: .navigationBar)
             .fullScreenCover(isPresented: $isShowingSettings) {
                 SettingsView()
@@ -164,85 +164,216 @@ struct HomeDashboardView: View {
 }
 
 private struct DashboardHeader: View {
+    let name: String
     let showSettings: () -> Void
 
     var body: some View {
-        HStack {
-            Button(action: showSettings) {
-                Image(systemName: "line.3.horizontal")
+        ZStack {
+            Text("Ask Numi")
+                .font(.headline)
+
+            HStack {
+                Button(action: showSettings) {
+                    HStack(spacing: 6) {
+                        Image(systemName: "person.crop.circle.fill")
+                            .font(.system(size: 26))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [DashboardPalette.avatarHighlight, DashboardPalette.primary],
+                                    startPoint: .topLeading,
+                                    endPoint: .bottomTrailing
+                                )
+                            )
+
+                        Text(name)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(DashboardPalette.primary)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                            .frame(maxWidth: 72, alignment: .leading)
+                    }
+                    .padding(.leading, 8)
+                    .padding(.trailing, 12)
+                    .padding(.vertical, 8)
+                    .glassEffect(
+                        .regular.tint(DashboardPalette.primary.opacity(0.12)).interactive(),
+                        in: .capsule
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(L10n.Dashboard.settingsLabel)
+
+                Spacer()
+
+                Image(systemName: "bell")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 34, height: 34)
+                    .glassEffect(.regular, in: .circle)
+                    .accessibilityHidden(true)
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(L10n.Dashboard.settingsLabel)
-            Spacer()
-            Text(L10n.Dashboard.title)
-                .font(.subheadline.weight(.semibold))
-            Spacer()
-            Image(systemName: "bell")
         }
-        .font(.body.weight(.medium))
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, minHeight: 44)
     }
 }
 
-private struct WelcomeView: View {
-    let name: String
-
-    var body: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "person.crop.circle.fill")
-                .font(.title2)
-                .foregroundStyle(.orange, .pink)
-
-            Text(L10n.Dashboard.greeting(name))
-                .font(.subheadline.weight(.medium))
-        }
-    }
-}
-
-private struct BalanceCard: View {
+private struct FinancialOverviewSection: View {
     let summary: FinancialSummary
     let isLoading: Bool
 
     var body: some View {
-        GlassCard(tint: .indigo.opacity(0.12)) {
-            VStack(alignment: .leading, spacing: 16) {
-                HStack {
-                    Text(L10n.Dashboard.totalBalance)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Spacer()
-                    Image(systemName: "eye")
-                        .foregroundStyle(.secondary)
-                }
+        VStack(alignment: .leading, spacing: 16) {
+            BalanceHero(summary: summary, isLoading: isLoading)
+            IncomeExpenseRow(summary: summary, isLoading: isLoading)
+        }
+    }
+}
 
-                Text(OperationFormatting.plain(summary.balance))
-                    .font(.system(size: 30, weight: .bold, design: .rounded))
-                    .redacted(reason: isLoading ? .placeholder : [])
+private struct BalanceHero: View {
+    let summary: FinancialSummary
+    let isLoading: Bool
+    @ScaledMetric(relativeTo: .largeTitle) private var balanceFontSize = 40.0
 
-                Divider()
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Text(L10n.Dashboard.totalBalance)
+                    .font(.footnote.weight(.medium))
+                    .foregroundStyle(.secondary)
 
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 5) {
-                        Label(L10n.Dashboard.income, systemImage: "arrow.down.left.circle.fill")
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(.green)
-                        Text(OperationFormatting.amount(summary.totalIncome, sign: .income))
-                            .font(.title3.weight(.bold))
-                    }
-
-                    Spacer()
-
-                    VStack(alignment: .trailing, spacing: 5) {
-                        Label(L10n.Dashboard.expenses, systemImage: "arrow.up.right.circle.fill")
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(.red)
-                        Text(OperationFormatting.amount(summary.totalExpenses, sign: .expense))
-                            .font(.title3.weight(.bold))
-                            .foregroundStyle(.red)
-                    }
-                }
-                .redacted(reason: isLoading ? .placeholder : [])
+                Image(systemName: "eye")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.tertiary)
             }
+
+            Text(OperationFormatting.plain(summary.balance))
+                .font(.system(size: balanceFontSize, weight: .heavy, design: .rounded))
+                .tracking(-0.6)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+                .contentTransition(.numericText())
+                .redacted(reason: isLoading ? .placeholder : [])
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private struct IncomeExpenseRow: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+    let summary: FinancialSummary
+    let isLoading: Bool
+
+    private var layout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: 12))
+            : AnyLayout(HStackLayout(spacing: 12))
+    }
+
+    var body: some View {
+        layout {
+            metric(
+                title: L10n.Dashboard.income,
+                systemImage: "arrow.down",
+                amount: OperationFormatting.amount(summary.totalIncome, sign: .income),
+                labelColor: DashboardPalette.incomeLabel,
+                amountColor: .primary,
+                backgroundColor: DashboardPalette.income.opacity(0.1)
+            )
+            metric(
+                title: L10n.Dashboard.expenses,
+                systemImage: "arrow.up",
+                amount: OperationFormatting.amount(summary.totalExpenses, sign: .expense),
+                labelColor: DashboardPalette.expense,
+                amountColor: DashboardPalette.expense,
+                backgroundColor: DashboardPalette.expense.opacity(0.08)
+            )
+        }
+        .redacted(reason: isLoading ? .placeholder : [])
+    }
+
+    private func metric(
+        title: String,
+        systemImage: String,
+        amount: String,
+        labelColor: Color,
+        amountColor: Color,
+        backgroundColor: Color
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Label(title, systemImage: systemImage)
+                .font(.caption2.weight(.semibold))
+                .foregroundStyle(labelColor)
+            Text(amount)
+                .font(.headline)
+                .foregroundStyle(amountColor)
+                .lineLimit(1)
+                .minimumScaleFactor(0.7)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .glassEffect(.regular.tint(backgroundColor), in: .rect(cornerRadius: 18))
+    }
+}
+
+private enum AttentionPage: CaseIterable, Hashable {
+    case budget
+    case financialTwin
+    case insight
+}
+
+private struct AttentionCarousel: View {
+    let overview: BudgetOverview
+    let isLoading: Bool
+    let report: FinancialTwinReport
+    let insightState: DashboardInsightState
+    let showBudgets: () -> Void
+    let showFinancialTwin: () -> Void
+    let showInsight: () -> Void
+    @State private var activePage: AttentionPage? = .budget
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text(L10n.Dashboard.attentionTitle)
+                    .font(.headline)
+
+                Spacer()
+
+                HStack(spacing: 6) {
+                    ForEach(AttentionPage.allCases, id: \.self) { page in
+                        Circle()
+                            .fill(DashboardPalette.ai)
+                            .frame(width: 6, height: 6)
+                            .scaleEffect(activePage == page ? 1 : 0.72)
+                            .opacity(activePage == page ? 1 : 0.2)
+                    }
+                }
+                .animation(.snappy, value: activePage)
+                .accessibilityHidden(true)
+            }
+
+            ScrollView(.horizontal) {
+                HStack(spacing: 12) {
+                    BudgetCard(overview: overview, isLoading: isLoading, onTap: showBudgets)
+                        .containerRelativeFrame(.horizontal, count: 5, span: 4, spacing: 12)
+                        .id(AttentionPage.budget)
+                    FinancialTwinSummaryCard(
+                        report: report,
+                        isLoading: isLoading,
+                        showDetails: showFinancialTwin
+                    )
+                    .containerRelativeFrame(.horizontal, count: 5, span: 4, spacing: 12)
+                    .id(AttentionPage.financialTwin)
+                    InsightCard(state: insightState, showDetails: showInsight)
+                        .containerRelativeFrame(.horizontal, count: 5, span: 4, spacing: 12)
+                        .id(AttentionPage.insight)
+                }
+                .scrollTargetLayout()
+            }
+            .scrollIndicators(.hidden)
+            .scrollTargetBehavior(.viewAligned)
+            .scrollPosition(id: $activePage)
+            .scrollClipDisabled()
         }
     }
 }
@@ -253,83 +384,23 @@ private struct BudgetCard: View {
     let onTap: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
-            GlassCard(tint: cardColor.opacity(0.12)) {
-                if isLoading || !overview.items.isEmpty {
-                    budgetSummary
-                        .redacted(reason: isLoading ? .placeholder : [])
-                } else {
-                    budgetEmptyState
-                }
-            }
-            .contentShape(.rect)
-        }
-        .buttonStyle(.plain)
-    }
-
-    private var budgetSummary: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack(spacing: 8) {
-                Text(monthTitle)
-                    .font(.subheadline.weight(.semibold))
-                Spacer()
-                Text(progress.formatted(.percent.precision(.fractionLength(0))))
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(cardColor)
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.secondary)
-            }
-
-            ProgressView(value: min(max(progress, 0), 1))
-                .tint(cardColor)
-
-            HStack {
-                AmountCaption(
-                    title: L10n.Dashboard.spent,
-                    value: OperationFormatting.plain(overview.totalSpent)
-                )
-                Spacer()
-                AmountCaption(
-                    title: L10n.Dashboard.budgetPlan,
-                    value: OperationFormatting.plain(overview.totalLimit),
-                    alignment: .trailing
-                )
-            }
-
-            HStack {
-                Text(remainingText)
-                Spacer()
-                if overview.remaining >= 0 {
-                    Text(L10n.Dashboard.budgetPerDay(OperationFormatting.plain(overview.dailyAllowance)))
-                }
-            }
-            .font(.caption.weight(.medium))
-            .foregroundStyle(overview.remaining < 0 ? .red : .secondary)
+        AttentionCard(
+            title: overview.items.isEmpty && !isLoading ? L10n.Dashboard.budgetEmptyTitle : monthTitle,
+            systemImage: "chart.bar.fill",
+            tint: DashboardPalette.income,
+            isEnabled: true,
+            action: onTap
+        ) {
+            Text(message)
+                .redacted(reason: isLoading ? .placeholder : [])
         }
     }
 
-    private var budgetEmptyState: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(monthTitle)
-                    .font(.subheadline.weight(.semibold))
-                Spacer()
-                Image(systemName: "chevron.right")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(.secondary)
-            }
-
-            Label(L10n.Dashboard.budgetEmptyTitle, systemImage: "chart.bar.fill")
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.mint)
-            Text(L10n.Dashboard.budgetEmptyMessage)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Text(L10n.Dashboard.budgetSetup)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.mint)
+    private var message: String {
+        guard !overview.items.isEmpty else {
+            return L10n.Dashboard.budgetEmptyMessage
         }
+        return "\(progress.formatted(.percent.precision(.fractionLength(0)))) · \(remainingText)"
     }
 
     private var monthTitle: String {
@@ -354,24 +425,64 @@ private struct BudgetCard: View {
         return L10n.Dashboard.budgetRemaining(OperationFormatting.plain(overview.remaining))
     }
 
-    private var cardColor: Color {
-        overview.remaining < 0 ? .red : .mint
-    }
 }
 
-private struct AmountCaption: View {
+struct AttentionCard<Content: View>: View {
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let title: String
-    let value: String
-    var alignment: HorizontalAlignment = .leading
+    let systemImage: String
+    let tint: Color
+    let isEnabled: Bool
+    let action: () -> Void
+    @ViewBuilder let content: Content
 
     var body: some View {
-        VStack(alignment: alignment, spacing: 2) {
-            Text(title)
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-            Text(value)
-                .font(.caption.weight(.semibold))
+        Button(action: action) {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Image(systemName: systemImage)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(tint)
+                        .frame(width: 36, height: 36)
+                        .background(tint.opacity(0.14), in: .rect(cornerRadius: 12))
+                        .accessibilityHidden(true)
+
+                    Spacer()
+
+                    Image(systemName: "arrow.up.right")
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(tint.opacity(0.7))
+                        .accessibilityHidden(true)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.subheadline.weight(.bold))
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+
+                    content
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(dynamicTypeSize.isAccessibilitySize ? nil : 2)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, minHeight: 132, alignment: .topLeading)
+            .background(tint.opacity(0.05), in: .rect(cornerRadius: 22))
+            .glassEffect(
+                .regular.tint(tint.opacity(0.12)).interactive(),
+                in: .rect(cornerRadius: 22)
+            )
+            .overlay {
+                RoundedRectangle(cornerRadius: 22)
+                    .stroke(tint.opacity(0.18), lineWidth: 1)
+            }
+            .contentShape(.rect(cornerRadius: 22))
+            .accessibilityElement(children: .combine)
         }
+        .buttonStyle(.plain)
+        .disabled(!isEnabled)
     }
 }
 
@@ -380,27 +491,15 @@ private struct InsightCard: View {
     let showDetails: () -> Void
 
     var body: some View {
-        Button(action: showDetails) {
-            GlassCard(tint: .purple.opacity(0.18)) {
-                HStack(alignment: .top, spacing: 12) {
-                    Image(systemName: "sparkles")
-                        .font(.title3)
-                        .foregroundStyle(.purple)
-                        .frame(width: 38, height: 38)
-                        .background(.purple.opacity(0.15), in: .circle)
-
-                    VStack(alignment: .leading, spacing: 7) {
-                        Text(L10n.Dashboard.insightTitle)
-                            .font(.subheadline.weight(.bold))
-
-                        insightContent
-                    }
-                }
-            }
-            .contentShape(.rect)
+        AttentionCard(
+            title: L10n.Dashboard.insightTitle,
+            systemImage: "sparkles",
+            tint: DashboardPalette.ai,
+            isEnabled: state.showsDetails,
+            action: showDetails
+        ) {
+            insightContent
         }
-        .buttonStyle(.plain)
-        .disabled(!state.showsDetails)
     }
 
     @ViewBuilder
@@ -416,11 +515,6 @@ private struct InsightCard: View {
             .foregroundStyle(.secondary)
         case .content(let insight):
             Text(insight)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            Text(L10n.Dashboard.insightShowDetails)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.purple)
         case .downloading:
             status(L10n.Assistant.noticeDownloading)
         case .unavailable:
@@ -432,8 +526,6 @@ private struct InsightCard: View {
 
     private func status(_ text: String) -> some View {
         Text(text)
-            .font(.caption)
-            .foregroundStyle(.secondary)
     }
 }
 
@@ -457,11 +549,12 @@ private struct RecentTransactions: View {
             Text(L10n.Dashboard.recentTitle)
                 .font(.headline)
 
-            GlassCard(tint: .clear) {
+            Group {
                 if transactions.isEmpty {
                     Text(L10n.Dashboard.recentEmpty)
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                        .padding(.vertical, 16)
                 } else {
                     VStack(spacing: 0) {
                         ForEach(transactions) { transaction in
@@ -475,6 +568,22 @@ private struct RecentTransactions: View {
                     }
                 }
             }
+            .padding(.horizontal, 16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                Color(uiColor: .secondarySystemBackground).opacity(0.45),
+                in: .rect(cornerRadius: 22)
+            )
+            .glassEffect(.regular, in: .rect(cornerRadius: 22))
+            .overlay {
+                RoundedRectangle(cornerRadius: 22)
+                    .stroke(.primary.opacity(0.04), lineWidth: 1)
+            }
+            .shadow(
+                color: Color(red: 20.0 / 255, green: 20.0 / 255, blue: 50.0 / 255).opacity(0.05),
+                radius: 12,
+                y: 8
+            )
         }
     }
 }
@@ -539,16 +648,23 @@ struct GlassCard<Content: View>: View {
 
 struct DashboardBackground: View {
     @Environment(\.colorScheme) private var colorScheme
+    var isNeutral = false
 
     var body: some View {
         LinearGradient(
             colors: colorScheme == .dark
                 ? [.black, Color(red: 0.02, green: 0.06, blue: 0.12), Color(red: 0.06, green: 0.02, blue: 0.16)]
-                : [Color(red: 0.96, green: 0.97, blue: 1), .white, Color(red: 0.95, green: 1, blue: 0.98)],
+                : lightColors,
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
         .ignoresSafeArea()
+    }
+
+    private var lightColors: [Color] {
+        isNeutral
+            ? [Color(red: 246.0 / 255, green: 247.0 / 255, blue: 251.0 / 255), .white]
+            : [Color(red: 0.96, green: 0.97, blue: 1), .white, Color(red: 0.95, green: 1, blue: 0.98)]
     }
 }
 
@@ -561,28 +677,30 @@ struct DashboardSnapshot {
 }
 
 #Preview("Светлая тема") {
+    let container = AppContainer(isStoredInMemoryOnly: true)
     HomeDashboardView(
         snapshot: .preview,
-        fetchTransactions: AppContainer(isStoredInMemoryOnly: true).makeFetchTransactionsUseCase(),
-        fetchBudgets: AppContainer(isStoredInMemoryOnly: true).makeFetchBudgetsUseCase(),
-        fetchSubscriptions: AppContainer(isStoredInMemoryOnly: true).makeFetchSubscriptionsUseCase(),
-        getMonthlyInsight: AppContainer(isStoredInMemoryOnly: true).makeMonthlySpendingInsightUseCase(),
-        getFinancialTwin: AppContainer(isStoredInMemoryOnly: true).makeFinancialTwinUseCase(),
+        fetchTransactions: container.makeFetchTransactionsUseCase(),
+        fetchBudgets: container.makeFetchBudgetsUseCase(),
+        fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
+        getMonthlyInsight: container.makeMonthlySpendingInsightUseCase(),
+        getFinancialTwin: container.makeFinancialTwinUseCase(),
         showBudgets: {},
-        selectedTab: .constant(.home)
+        showAssistant: {}
     )
 }
 
 #Preview("Тёмная тема") {
+    let container = AppContainer(isStoredInMemoryOnly: true)
     HomeDashboardView(
         snapshot: .preview,
-        fetchTransactions: AppContainer(isStoredInMemoryOnly: true).makeFetchTransactionsUseCase(),
-        fetchBudgets: AppContainer(isStoredInMemoryOnly: true).makeFetchBudgetsUseCase(),
-        fetchSubscriptions: AppContainer(isStoredInMemoryOnly: true).makeFetchSubscriptionsUseCase(),
-        getMonthlyInsight: AppContainer(isStoredInMemoryOnly: true).makeMonthlySpendingInsightUseCase(),
-        getFinancialTwin: AppContainer(isStoredInMemoryOnly: true).makeFinancialTwinUseCase(),
+        fetchTransactions: container.makeFetchTransactionsUseCase(),
+        fetchBudgets: container.makeFetchBudgetsUseCase(),
+        fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
+        getMonthlyInsight: container.makeMonthlySpendingInsightUseCase(),
+        getFinancialTwin: container.makeFinancialTwinUseCase(),
         showBudgets: {},
-        selectedTab: .constant(.home)
+        showAssistant: {}
     )
     .preferredColorScheme(.dark)
 }
