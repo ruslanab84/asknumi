@@ -9,6 +9,7 @@ struct AssistantView: View {
     let getAdvice: GetFinancialAdviceUseCase
     @Binding var selectedTab: AppTab
     @Binding var exchanges: [AssistantExchange]
+    @Environment(\.appAccentColor) private var accentColor
     @State private var draft = ""
     @FocusState private var isInputFocused: Bool
 
@@ -126,7 +127,7 @@ struct AssistantView: View {
             submit(title)
         }
         .font(.caption.weight(.semibold))
-        .foregroundStyle(.indigo)
+        .foregroundStyle(.tint)
         .padding(.horizontal, 14)
         .frame(height: 36)
         .glassEffect(.regular.interactive(), in: .capsule)
@@ -157,7 +158,7 @@ struct AssistantView: View {
                     .foregroundStyle(.white)
                     .frame(width: 38, height: 38)
             }
-            .buttonStyle(.glass(.regular.tint(.indigo)))
+            .buttonStyle(.glass(.regular.tint(accentColor)))
             .disabled(
                 draft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                     || availability != .available
@@ -216,6 +217,7 @@ struct AssistantExchange: Identifiable {
 
 private struct UserBubble: View {
     let text: String
+    @Environment(\.appAccentColor) private var accentColor
 
     var body: some View {
         HStack {
@@ -225,7 +227,7 @@ private struct UserBubble: View {
                 .foregroundStyle(.white)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
-                .glassEffect(.regular.tint(.indigo), in: .rect(cornerRadius: 18))
+                .glassEffect(.regular.tint(accentColor), in: .rect(cornerRadius: 18))
                 .multilineTextAlignment(.leading)
         }
     }
@@ -260,6 +262,7 @@ private struct ErrorBubble: View {
 
 private struct AnswerCard: View {
     let report: FinancialAdviceReport
+    @Environment(\.appAccentColor) private var accentColor
 
     private static let palette: [Color] = [.blue, .green, .orange, .yellow]
 
@@ -318,7 +321,7 @@ private struct AnswerCard: View {
                     HStack(alignment: .top, spacing: 8) {
                         Image(systemName: "sparkle")
                             .font(.caption2)
-                            .foregroundStyle(.indigo)
+                            .foregroundStyle(.tint)
                             .padding(.top, 2)
                         Text(tip)
                             .font(.caption)
@@ -330,7 +333,7 @@ private struct AnswerCard: View {
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .multilineTextAlignment(.leading)
-        .glassEffect(.regular.tint(.indigo.opacity(0.12)), in: .rect(cornerRadius: 22))
+        .glassEffect(.regular.tint(accentColor.opacity(0.12)), in: .rect(cornerRadius: 22))
     }
 
     private static func share(_ amount: Decimal, of total: Decimal) -> Double {

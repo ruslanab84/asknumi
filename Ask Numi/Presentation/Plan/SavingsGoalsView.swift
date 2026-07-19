@@ -22,7 +22,6 @@ struct SavingsGoalsContent: View {
                 } actions: {
                     Button(L10n.Plan.goalCreate, action: onCreate)
                         .buttonStyle(.borderedProminent)
-                        .tint(.indigo)
                 }
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 38)
@@ -45,6 +44,7 @@ struct SavingsGoalsContent: View {
 
 private struct SavingsGoalsSummary: View {
     let overview: SavingsGoalsOverview
+    @Environment(\.appAccentColor) private var accentColor
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -96,7 +96,7 @@ private struct SavingsGoalsSummary: View {
     private var healthColor: Color {
         switch overview.health {
         case .complete, .feasible: .green
-        case .noHistory: .indigo
+        case .noHistory: accentColor
         case .strained: .orange
         }
     }
@@ -134,6 +134,7 @@ private struct SavingsGoalCard: View {
     let onEdit: () -> Void
     let onContribute: () -> Void
     let onDelete: () -> Void
+    @Environment(\.appAccentColor) private var accentColor
 
     var body: some View {
         VStack(spacing: 0) {
@@ -196,7 +197,7 @@ private struct SavingsGoalCard: View {
             Button(action: onContribute) {
                 Label(L10n.Plan.goalUpdateProgress, systemImage: "plusminus.circle")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.indigo)
+                    .foregroundStyle(.tint)
                     .frame(maxWidth: .infinity, minHeight: 42)
                     .contentShape(.rect)
             }
@@ -211,7 +212,7 @@ private struct SavingsGoalCard: View {
 
     private var statusColor: Color {
         switch progress.state {
-        case .active: .indigo
+        case .active: accentColor
         case .overdue: .orange
         case .complete: .green
         }
@@ -243,6 +244,7 @@ struct SavingsGoalEditorView: View {
     let onSaved: (SavingsGoal) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.appAccentColor) private var accentColor
     @State private var name: String
     @State private var symbol: String
     @State private var targetAmountText: String
@@ -295,10 +297,10 @@ struct SavingsGoalEditorView: View {
                                 } label: {
                                     Image(systemName: option.symbol)
                                         .font(.headline)
-                                        .foregroundStyle(symbol == option.symbol ? .white : .indigo)
+                                        .foregroundStyle(symbol == option.symbol ? .white : accentColor)
                                         .frame(width: 42, height: 42)
                                         .background(
-                                            symbol == option.symbol ? Color.indigo : Color.indigo.opacity(0.12),
+                                            symbol == option.symbol ? accentColor : accentColor.opacity(0.12),
                                             in: .circle
                                         )
                                 }

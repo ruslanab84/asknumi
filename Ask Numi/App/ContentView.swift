@@ -93,6 +93,7 @@ enum AppTab: CaseIterable {
 
 struct AppTabBar: View {
     @Binding var selection: AppTab
+    @Environment(\.appAccentColor) private var accentColor
 
     var body: some View {
         GlassEffectContainer(spacing: 18) {
@@ -120,7 +121,7 @@ struct AppTabBar: View {
                 Text(tab.title)
                     .font(.caption2.weight(.medium))
             }
-            .foregroundStyle(tab == selection ? .indigo : .secondary)
+            .foregroundStyle(tab == selection ? accentColor : .secondary)
             .frame(maxWidth: .infinity, minHeight: 54)
             .contentShape(Rectangle())
         }

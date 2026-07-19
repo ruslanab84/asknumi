@@ -6,6 +6,7 @@
 import SwiftUI
 
 struct OperationsView: View {
+    @Environment(\.appAccentColor) private var accentColor
     let fetchTransactions: FetchTransactionsUseCase
     let fetchCategories: FetchTransactionCategoriesUseCase
     let addCategory: AddTransactionCategoryUseCase
@@ -150,7 +151,7 @@ struct OperationsView: View {
                     .font(.headline.weight(.bold))
                     .foregroundStyle(.white)
                     .frame(width: 42, height: 42)
-                    .glassEffect(.regular.tint(.indigo).interactive(), in: .circle)
+                    .glassEffect(.regular.tint(accentColor).interactive(), in: .circle)
             }
             .accessibilityLabel(L10n.Operations.addLabel)
         }
@@ -187,7 +188,7 @@ struct OperationsView: View {
                 .foregroundStyle(filter == item ? .white : .primary)
                 .padding(.horizontal, 16)
                 .frame(height: 34)
-                .glassEffect(.regular.tint(filter == item ? .indigo : .clear).interactive(), in: .capsule)
+                .glassEffect(.regular.tint(filter == item ? accentColor : .clear).interactive(), in: .capsule)
                 .accessibilityAddTraits(filter == item ? .isSelected : [])
             }
 
@@ -630,7 +631,7 @@ private struct AddOperationView: View {
                     }
                 }
                 .buttonStyle(.plain)
-                .foregroundStyle(.indigo)
+                .foregroundStyle(.tint)
                 .disabled(trimmedMagicText.isEmpty || isParsing)
                 .accessibilityLabel(L10n.AddOperation.magicButton)
             }
@@ -743,7 +744,7 @@ private struct CategorySelectionView: View {
                             Spacer()
                             if category.name.caseInsensitiveCompare(selectedCategory) == .orderedSame {
                                 Image(systemName: "checkmark")
-                                    .foregroundStyle(.indigo)
+                                    .foregroundStyle(.tint)
                             }
                         }
                     }

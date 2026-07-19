@@ -20,3 +20,14 @@ extension CategoryColor {
         }
     }
 }
+
+private struct AppAccentColorKey: EnvironmentKey {
+    nonisolated static let defaultValue = Color.blue
+}
+
+extension EnvironmentValues {
+    var appAccentColor: Color {
+        get { self[AppAccentColorKey.self] }
+        set { self[AppAccentColorKey.self] = newValue }
+    }
+}

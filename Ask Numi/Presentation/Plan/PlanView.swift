@@ -18,6 +18,7 @@ struct PlanView: View {
     let deleteGoal: DeleteSavingsGoalUseCase
     @Binding var selectedTab: AppTab
     @Binding var section: PlanSection
+    @Environment(\.appAccentColor) private var accentColor
     @State private var transactions: [Transaction] = []
     @State private var subscriptions: [Subscription] = []
     @State private var budgets: [Budget] = []
@@ -134,7 +135,7 @@ struct PlanView: View {
                     .font(.headline.weight(.bold))
                     .foregroundStyle(.white)
                     .frame(width: 42, height: 42)
-                    .glassEffect(.regular.tint(.indigo).interactive(), in: .circle)
+                    .glassEffect(.regular.tint(accentColor).interactive(), in: .circle)
             }
             .accessibilityLabel(addButtonLabel)
         }
@@ -348,7 +349,7 @@ private struct UpcomingPayments: View {
                         HStack(alignment: .top, spacing: 12) {
                             VStack(spacing: 0) {
                                 Circle()
-                                    .fill(.indigo)
+                                    .fill(.tint)
                                     .frame(width: 10, height: 10)
                                 if index < subscriptions.count - 1 {
                                     Rectangle()
@@ -747,6 +748,7 @@ private struct ForecastLine: Shape {
 private struct BudgetPreviewCard: View {
     let overview: BudgetOverview
     let onShowAll: () -> Void
+    @Environment(\.appAccentColor) private var accentColor
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -756,7 +758,7 @@ private struct BudgetPreviewCard: View {
                 Spacer()
                 Button(L10n.Plan.budgetsAll, action: onShowAll)
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(.indigo)
+                    .foregroundStyle(.tint)
             }
 
             Text(L10n.Plan.budgetSpentOf(
@@ -766,7 +768,7 @@ private struct BudgetPreviewCard: View {
             .font(.subheadline.weight(.semibold))
 
             ProgressView(value: min(max(budgetProgress, 0), 1))
-                .tint(overview.remaining < 0 ? .red : .indigo)
+                .tint(overview.remaining < 0 ? .red : accentColor)
 
             Text(remainingText)
                 .font(.caption)
@@ -791,12 +793,13 @@ private struct BudgetPreviewCard: View {
 
 private struct BudgetSummaryCard: View {
     let overview: BudgetOverview
+    @Environment(\.appAccentColor) private var accentColor
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(monthTitle)
                 .font(.caption.weight(.semibold))
-                .foregroundStyle(.indigo)
+                .foregroundStyle(.tint)
 
             Text(L10n.Plan.budgetSpentOf(
                 OperationFormatting.plain(overview.totalSpent),
@@ -805,7 +808,7 @@ private struct BudgetSummaryCard: View {
             .font(.title3.weight(.bold))
 
             ProgressView(value: min(max(progress, 0), 1))
-                .tint(overview.remaining < 0 ? .red : .indigo)
+                .tint(overview.remaining < 0 ? .red : accentColor)
 
             if overview.remaining < 0 {
                 Text(L10n.Plan.budgetOverBy(OperationFormatting.plain(-overview.remaining)))
@@ -822,7 +825,7 @@ private struct BudgetSummaryCard: View {
             }
         }
         .padding(16)
-        .glassEffect(.regular.tint(.indigo.opacity(0.14)), in: .rect(cornerRadius: 22))
+        .glassEffect(.regular.tint(accentColor.opacity(0.14)), in: .rect(cornerRadius: 22))
         .accessibilityElement(children: .combine)
     }
 

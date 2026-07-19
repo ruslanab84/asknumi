@@ -15,6 +15,10 @@ struct Ask_NumiApp: App {
     @AppStorage(AppearanceSettings.darkModeStorageKey) private var isDarkModeEnabled = false
     @AppStorage(AppearanceSettings.accentColorStorageKey) private var accentColorID = AppearanceSettings.defaultAccentColorID
 
+    private var accentColor: Color {
+        CategoryColor(rawValue: accentColorID)?.displayColor ?? .blue
+    }
+
     init() {
         UIScrollView.appearance().bounces = false
         UIScrollView.appearance().alwaysBounceHorizontal = false
@@ -24,9 +28,10 @@ struct Ask_NumiApp: App {
         WindowGroup {
             ContentView(container: container)
                 .environmentObject(localization)
+                .environment(\.appAccentColor, accentColor)
                 .id(localization.currentLanguage)
                 .preferredColorScheme(isDarkModeEnabled ? .dark : .light)
-                .tint(CategoryColor(rawValue: accentColorID)?.displayColor ?? .indigo)
+                .tint(accentColor)
         }
     }
 }
