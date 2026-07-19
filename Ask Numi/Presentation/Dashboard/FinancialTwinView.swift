@@ -60,36 +60,32 @@ struct FinancialTwinDetailsView: View {
                 DashboardBackground()
 
                 ScrollView {
-                    LazyVStack(alignment: .leading, spacing: 16) {
-                        Label(L10n.FinancialTwin.privacy, systemImage: "lock.shield.fill")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
+                    GlassEffectContainer(spacing: 12) {
+                        LazyVStack(alignment: .leading, spacing: 20) {
+                            FinancialTwinHero(report: report)
 
-                        Text(L10n.FinancialTwin.sources(
-                            report.transactionCount,
-                            report.budgetCount,
-                            report.subscriptionCount
-                        ))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                        if report.insights.isEmpty {
-                            ContentUnavailableView(
-                                L10n.FinancialTwin.emptyTitle,
-                                systemImage: "chart.dots.scatter",
-                                description: Text(L10n.FinancialTwin.emptyMessage)
-                            )
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 36)
-                        } else {
-                            ForEach(report.insights) { insight in
-                                FinancialTwinInsightCard(content: FinancialTwinInsightContent(insight))
+                            if report.insights.isEmpty {
+                                ContentUnavailableView(
+                                    L10n.FinancialTwin.emptyTitle,
+                                    systemImage: "chart.dots.scatter",
+                                    description: Text(L10n.FinancialTwin.emptyMessage)
+                                )
+                                .frame(maxWidth: .infinity)
+                                .padding(28)
+                                .glassEffect(.regular, in: .rect(cornerRadius: 24))
+                            } else {
+                                ForEach(report.insights) { insight in
+                                    FinancialTwinInsightCard(content: FinancialTwinInsightContent(insight))
+                                }
                             }
                         }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 16)
+                        .padding(.bottom, 32)
                     }
-                    .padding(16)
-                    .padding(.bottom, 24)
                 }
+                .scrollIndicators(.hidden)
+                .scrollEdgeEffectStyle(.soft, for: .top)
             }
             .navigationTitle(L10n.FinancialTwin.title)
             .navigationBarTitleDisplayMode(.inline)
@@ -102,46 +98,185 @@ struct FinancialTwinDetailsView: View {
     }
 }
 
+private struct FinancialTwinHero: View {
+    let report: FinancialTwinReport
+
+    @Environment(\.appAccentColor) private var accentColor
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
+
+    private var headerLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(alignment: .leading, spacing: 16))
+            : AnyLayout(HStackLayout(alignment: .top, spacing: 16))
+    }
+
+    private var sourcesLayout: AnyLayout {
+        dynamicTypeSize.isAccessibilitySize
+            ? AnyLayout(VStackLayout(spacing: 10))
+            : AnyLayout(HStackLayout(spacing: 10))
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            headerLayout {
+                ZStack(alignment: .bottomTrailing) {
+                    Image(systemName: "person.crop.circle.dashed")
+                        .font(.system(size: 34, weight: .medium))
+                        .foregroundStyle(accentColor)
+                        .frame(width: 66, height: 66)
+                        .background(accentColor.opacity(0.12), in: .circle)
+
+                    Image(systemName: "lock.shield.fill")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.white)
+                        .frame(width: 26, height: 26)
+                        .background(accentColor, in: .circle)
+                }
+                .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(L10n.FinancialTwin.privacy)
+                        .font(.headline)
+                        .fixedSize(horizontal: false, vertical: true)
+
+                    Text(L10n.FinancialTwin.sources(
+                        report.transactionCount,
+                        report.budgetCount,
+                        report.subscriptionCount
+                    ))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            Divider()
+                .overlay(accentColor.opacity(0.18))
+
+            sourcesLayout {
+                FinancialTwinSourceMetric(
+                    title: L10n.Tab.operations,
+                    value: report.transactionCount,
+                    systemImage: "arrow.left.arrow.right"
+                )
+                FinancialTwinSourceMetric(
+                    title: L10n.Plan.sectionBudgets,
+                    value: report.budgetCount,
+                    systemImage: "chart.bar.fill"
+                )
+                FinancialTwinSourceMetric(
+                    title: L10n.Plan.sectionPayments,
+                    value: report.subscriptionCount,
+                    systemImage: "repeat.circle.fill"
+                )
+            }
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .glassEffect(.regular.tint(accentColor.opacity(0.14)), in: .rect(cornerRadius: 26))
+        .overlay {
+            RoundedRectangle(cornerRadius: 26)
+                .stroke(accentColor.opacity(0.16), lineWidth: 1)
+        }
+    }
+}
+
+private struct FinancialTwinSourceMetric: View {
+    let title: String
+    let value: Int
+    let systemImage: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Image(systemName: systemImage)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.tint)
+                .accessibilityHidden(true)
+
+            Text(value, format: .number)
+                .font(.title3.weight(.bold))
+                .monospacedDigit()
+                .contentTransition(.numericText())
+
+            Text(title)
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, minHeight: 88, alignment: .leading)
+        .background(.primary.opacity(0.04), in: .rect(cornerRadius: 16))
+        .accessibilityElement(children: .combine)
+    }
+}
+
 private struct FinancialTwinInsightCard: View {
     let content: FinancialTwinInsightContent
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Label(content.title, systemImage: content.icon)
-                .font(.headline)
-                .foregroundStyle(content.color)
+        VStack(alignment: .leading, spacing: 18) {
+            HStack(alignment: .top, spacing: 14) {
+                Image(systemName: content.icon)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(content.color)
+                    .frame(width: 46, height: 46)
+                    .background(content.color.opacity(0.14), in: .rect(cornerRadius: 15))
+                    .accessibilityHidden(true)
 
-            Text(content.headline)
-                .font(.body.weight(.semibold))
-
-            Divider()
-
-            Text(L10n.FinancialTwin.evidenceTitle)
-                .font(.caption.weight(.bold))
-                .foregroundStyle(.secondary)
-
-            ForEach(Array(content.evidence.enumerated()), id: \.offset) { _, line in
-                Label {
-                    Text(line)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                } icon: {
-                    Image(systemName: "circle.fill")
-                        .font(.system(size: 5))
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(content.title)
+                        .font(.subheadline.weight(.semibold))
                         .foregroundStyle(content.color)
+
+                    Text(content.headline)
+                        .font(.title3.weight(.bold))
+                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
 
-            Text(L10n.FinancialTwin.methodTitle)
-                .font(.caption.weight(.bold))
-                .foregroundStyle(.secondary)
-            Text(content.method)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 12) {
+                Label(L10n.FinancialTwin.evidenceTitle, systemImage: "checkmark.seal.fill")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.primary)
+
+                ForEach(Array(content.evidence.enumerated()), id: \.offset) { _, line in
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "circle.fill")
+                            .font(.system(size: 5))
+                            .foregroundStyle(content.color)
+                            .padding(.top, 6)
+                            .accessibilityHidden(true)
+
+                        Text(line)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.primary.opacity(0.035), in: .rect(cornerRadius: 16))
+
+            DisclosureGroup {
+                Text(content.method)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, 8)
+            } label: {
+                Label(L10n.FinancialTwin.methodTitle, systemImage: "function")
+                    .font(.footnote.weight(.semibold))
+            }
+            .tint(content.color)
         }
-        .padding(16)
+        .padding(18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .glassEffect(.regular.tint(content.color.opacity(0.1)), in: .rect(cornerRadius: 22))
+        .glassEffect(.regular.tint(content.color.opacity(0.12)), in: .rect(cornerRadius: 24))
+        .overlay {
+            RoundedRectangle(cornerRadius: 24)
+                .stroke(content.color.opacity(0.14), lineWidth: 1)
+        }
     }
 }
 
@@ -295,4 +430,42 @@ private struct FinancialTwinInsightContent {
     private static func weekday(_ value: Date) -> String {
         value.formatted(.dateTime.weekday(.wide).locale(locale))
     }
+}
+
+#Preview("Insights") {
+    FinancialTwinDetailsView(report: .preview)
+}
+
+#Preview("Empty") {
+    FinancialTwinDetailsView(report: .empty)
+}
+
+private extension FinancialTwinReport {
+    static let preview = FinancialTwinReport(
+        insights: [
+            .cashFlowSnapshot(CashFlowSnapshotInsight(
+                totalIncome: 4_800,
+                totalExpenses: 3_250,
+                balance: 1_550,
+                transactionCount: 28,
+                topExpenseCategory: "Food",
+                topExpenseAmount: 920,
+                topExpenseSharePercent: 28
+            )),
+            .monthEndBalance(MonthEndBalanceInsight(
+                medianBalance: 1_420,
+                samples: [
+                    MonthEndSample(
+                        month: Date(timeIntervalSince1970: 1_767_225_600),
+                        income: 4_700,
+                        expenses: 3_180,
+                        balance: 1_520
+                    )
+                ]
+            ))
+        ],
+        transactionCount: 28,
+        budgetCount: 3,
+        subscriptionCount: 5
+    )
 }
