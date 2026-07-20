@@ -312,6 +312,81 @@ enum L10n {
         static var recurringMethod: String { l("financial_twin.recurring.method") }
     }
 
+    enum PurchaseDecision {
+        static var title: String { l("purchase_decision.title") }
+        static var launchSubtitle: String { l("purchase_decision.launch.subtitle") }
+        static var inputSection: String { l("purchase_decision.input.section") }
+        static var amount: String { l("purchase_decision.input.amount") }
+        static var availableBalance: String { l("purchase_decision.input.balance") }
+        static var balanceHint: String { l("purchase_decision.input.balance_hint") }
+        static var date: String { l("purchase_decision.input.date") }
+        static var category: String { l("purchase_decision.input.category") }
+        static var calculate: String { l("purchase_decision.button.calculate") }
+        static var calculating: String { l("purchase_decision.calculating") }
+        static var invalidInput: String { l("purchase_decision.error.invalid_input") }
+        static var failed: String { l("purchase_decision.error.failed") }
+        static var resultSection: String { l("purchase_decision.result.section") }
+        static var currentMonthPayments: String { l("purchase_decision.result.current_month_payments") }
+        static var balanceAfterPayments: String { l("purchase_decision.result.balance_after_payments") }
+        static var safeAmount: String { l("purchase_decision.result.safe_amount") }
+        static var budgetImpact: String { l("purchase_decision.result.budget_impact") }
+        static var goalImpact: String { l("purchase_decision.result.goal_impact") }
+        static var betterDate: String { l("purchase_decision.result.better_date") }
+        static var noSuitableDate: String { l("purchase_decision.result.no_suitable_date") }
+        static var noGoal: String { l("purchase_decision.goal.none") }
+        static var scenariosSection: String { l("purchase_decision.scenarios.section") }
+        static var buyNow: String { l("purchase_decision.scenario.now") }
+        static var buyLater: String { l("purchase_decision.scenario.later") }
+        static var skip: String { l("purchase_decision.scenario.skip") }
+        static var recommended: String { l("purchase_decision.scenario.recommended") }
+        static var method: String { l("purchase_decision.method") }
+
+        static func recommendation(_ value: PurchaseRecommendation) -> String {
+            l("purchase_decision.recommendation.\(value.rawValue)")
+        }
+
+        static func fallback(_ value: PurchaseRecommendation) -> String {
+            l("purchase_decision.fallback.\(value.rawValue)")
+        }
+
+        static func noBudget(_ category: String) -> String {
+            String(format: l("purchase_decision.budget.none"), category)
+        }
+
+        static func budgetExceeded(_ category: String, _ amount: String) -> String {
+            String(format: l("purchase_decision.budget.exceeded"), category, amount)
+        }
+
+        static func budgetWithin(_ category: String, _ amount: String) -> String {
+            String(format: l("purchase_decision.budget.within"), category, amount)
+        }
+
+        static func goalOnTrack(_ name: String) -> String {
+            String(format: l("purchase_decision.goal.on_track"), name)
+        }
+
+        static func goalDelayed(_ name: String, _ months: Int, _ date: String) -> String {
+            String(format: l("purchase_decision.goal.delayed"), name, months, date)
+        }
+
+        static func goalDelayShort(_ name: String, _ months: Int) -> String {
+            String(format: l("purchase_decision.goal.delay_short"), name, months)
+        }
+
+        static func purchaseScenario(_ balance: String, _ isSafe: Bool) -> String {
+            String(
+                format: l(isSafe
+                    ? "purchase_decision.scenario.purchase.safe"
+                    : "purchase_decision.scenario.purchase.unsafe"),
+                balance
+            )
+        }
+
+        static func skipScenario(_ balance: String) -> String {
+            String(format: l("purchase_decision.scenario.skip.description"), balance)
+        }
+    }
+
     // MARK: - Assistant
 
     enum Assistant {

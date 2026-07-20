@@ -19,8 +19,10 @@ struct ContentView: View {
                     fetchTransactions: container.makeFetchTransactionsUseCase(),
                     fetchBudgets: container.makeFetchBudgetsUseCase(),
                     fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
+                    fetchGoals: container.makeFetchSavingsGoalsUseCase(),
                     getMonthlyInsight: container.makeMonthlySpendingInsightUseCase(),
                     getFinancialTwin: container.makeFinancialTwinUseCase(),
+                    simulatePurchase: container.makePurchaseSimulatorUseCase(),
                     showBudgets: {
                         planSection = .budgets
                         selectedTab = .plan

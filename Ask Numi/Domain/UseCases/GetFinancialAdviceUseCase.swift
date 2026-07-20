@@ -21,6 +21,7 @@ enum FinancialAdviceTask: Equatable, Sendable {
     case spendingTotal
     case spendingOverview
     case monthlySpendingTrend(MonthlySpendingTrend)
+    case purchaseDecision(PurchaseDecision)
     case savingsPlan
     case general
 

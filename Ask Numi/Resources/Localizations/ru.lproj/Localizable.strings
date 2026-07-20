@@ -266,6 +266,50 @@
 "financial_twin.recurring.evidence.sample" = "%@: %@.";
 "financial_twin.recurring.method" = "Ищутся траты с одинаковым продавцом или категорией минимум в трёх близких месяцах: одна в месяц, разница суммы до 10% и даты до четырёх дней. Сохранённые плановые платежи исключаются.";
 
+/* Симулятор решения о покупке */
+"purchase_decision.title" = "Можно ли мне это купить?";
+"purchase_decision.launch.subtitle" = "Проверьте покупку по платежам, бюджетам и целям до принятия решения.";
+"purchase_decision.input.section" = "Покупка";
+"purchase_decision.input.amount" = "Сумма покупки";
+"purchase_decision.input.balance" = "Доступный остаток сейчас";
+"purchase_decision.input.balance_hint" = "Укажите сумму, которой сейчас можно распоряжаться. Ask Numi не подменяет банковский остаток разницей доходов и расходов.";
+"purchase_decision.input.date" = "Дата покупки";
+"purchase_decision.input.category" = "Категория расхода";
+"purchase_decision.button.calculate" = "Рассчитать";
+"purchase_decision.calculating" = "Swift рассчитывает сценарии…";
+"purchase_decision.error.invalid_input" = "Укажите положительную сумму покупки, неотрицательный доступный остаток и категорию.";
+"purchase_decision.error.failed" = "Не удалось рассчитать сценарии покупки.";
+"purchase_decision.result.section" = "Решение";
+"purchase_decision.result.current_month_payments" = "Оставшиеся платежи текущего месяца";
+"purchase_decision.result.balance_after_payments" = "Остаток после платежей текущего месяца";
+"purchase_decision.result.safe_amount" = "Безопасная сумма на выбранную дату";
+"purchase_decision.result.budget_impact" = "Влияние на бюджет";
+"purchase_decision.result.goal_impact" = "Влияние на цель";
+"purchase_decision.result.better_date" = "Более подходящая дата";
+"purchase_decision.result.no_suitable_date" = "Безопасная дата при текущих условиях не найдена";
+"purchase_decision.recommendation.buyNow" = "Купить сейчас";
+"purchase_decision.recommendation.buyLater" = "Купить позже";
+"purchase_decision.recommendation.skip" = "Пока отказаться";
+"purchase_decision.fallback.buyNow" = "Покупка сейчас сохраняет покрытие известных платежей, выбранного бюджета и ближайшего взноса в цель.";
+"purchase_decision.fallback.buyLater" = "Подождать безопаснее: так снимается ограничение сценария покупки сейчас и сохраняются известные обязательства.";
+"purchase_decision.fallback.skip" = "На проверенных датах покупка не укладывается одновременно в ограничения платежей, бюджета и цели.";
+"purchase_decision.budget.none" = "Для «%@» бюджет не задан; безопасную сумму ограничивают остаток и ближайшая цель.";
+"purchase_decision.budget.exceeded" = "Бюджет «%@» будет превышен на %@.";
+"purchase_decision.budget.within" = "Бюджет «%@» не будет превышен, останется %@.";
+"purchase_decision.goal.none" = "Активная цель накопления не затрагивается.";
+"purchase_decision.goal.on_track" = "Цель «%@» остаётся в текущем графике.";
+"purchase_decision.goal.delayed" = "Цель «%@» может сдвинуться на %d мес., до %@.";
+"purchase_decision.goal.delay_short" = "Цель «%@» может сдвинуться на %d мес.";
+"purchase_decision.scenarios.section" = "Три сценария";
+"purchase_decision.scenario.now" = "Купить сейчас";
+"purchase_decision.scenario.later" = "Купить позже";
+"purchase_decision.scenario.skip" = "Отказаться";
+"purchase_decision.scenario.recommended" = "Рекомендуется";
+"purchase_decision.scenario.purchase.safe" = "После покупки и плановых платежей: %@. Сценарий проходит рассчитанные ограничения.";
+"purchase_decision.scenario.purchase.unsafe" = "После покупки и плановых платежей: %@. Одно или несколько ограничений не выполняются.";
+"purchase_decision.scenario.skip.description" = "Покупка не совершается; после плановых платежей текущего месяца останется %@.";
+"purchase_decision.method" = "Swift использует введённый остаток, платежи от сегодняшнего дня до конца месяца каждого сценария, бюджет выбранной категории и ближайший месячный взнос в активную цель. Будущий доход и несохранённые обязательства не предполагаются. AI может только сформулировать уже рассчитанный результат.";
+
 /* Assistant */
 "assistant.header.title" = "Помощник";
 "assistant.header.accessibility.history" = "История";

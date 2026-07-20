@@ -33,8 +33,14 @@ struct FinancialTwinSummaryCard: View {
 
 struct FinancialTwinDetailsView: View {
     let report: FinancialTwinReport
+    let transactions: [Transaction]
+    let budgets: [Budget]
+    let subscriptions: [Subscription]
+    let goals: [SavingsGoal]
+    let simulatePurchase: SimulatePurchaseUseCase
 
     @Environment(\.dismiss) private var dismiss
+    @State private var isShowingPurchaseDecision = false
 
     var body: some View {
         NavigationStack {
@@ -45,6 +51,41 @@ struct FinancialTwinDetailsView: View {
                     GlassEffectContainer(spacing: 12) {
                         LazyVStack(alignment: .leading, spacing: 20) {
                             FinancialTwinHero(report: report)
+
+                            Button {
+                                isShowingPurchaseDecision = true
+                            } label: {
+                                HStack(spacing: 14) {
+                                    Image(systemName: "cart.badge.questionmark")
+                                        .font(.title3.weight(.semibold))
+                                        .foregroundStyle(.white)
+                                        .frame(width: 46, height: 46)
+                                        .background(DashboardPalette.primary, in: .rect(cornerRadius: 15))
+
+                                    VStack(alignment: .leading, spacing: 4) {
+                                        Text(L10n.PurchaseDecision.title)
+                                            .font(.headline)
+                                            .foregroundStyle(.primary)
+                                        Text(L10n.PurchaseDecision.launchSubtitle)
+                                            .font(.footnote)
+                                            .foregroundStyle(.secondary)
+                                            .fixedSize(horizontal: false, vertical: true)
+                                    }
+
+                                    Spacer(minLength: 8)
+                                    Image(systemName: "chevron.right")
+                                        .font(.footnote.weight(.bold))
+                                        .foregroundStyle(.secondary)
+                                }
+                                .padding(18)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .contentShape(.rect)
+                                .glassEffect(
+                                    .regular.tint(DashboardPalette.primary.opacity(0.12)).interactive(),
+                                    in: .rect(cornerRadius: 24)
+                                )
+                            }
+                            .buttonStyle(.plain)
 
                             if report.insights.isEmpty {
                                 ContentUnavailableView(
@@ -75,6 +116,15 @@ struct FinancialTwinDetailsView: View {
                 ToolbarItem(placement: .confirmationAction) {
                     Button(L10n.FinancialTwin.close) { dismiss() }
                 }
+            }
+            .sheet(isPresented: $isShowingPurchaseDecision) {
+                PurchaseDecisionView(
+                    transactions: transactions,
+                    budgets: budgets,
+                    subscriptions: subscriptions,
+                    goals: goals,
+                    simulatePurchase: simulatePurchase
+                )
             }
         }
     }
@@ -407,11 +457,25 @@ private struct FinancialTwinInsightContent {
 }
 
 #Preview("Insights") {
-    FinancialTwinDetailsView(report: .preview)
+    FinancialTwinDetailsView(
+        report: .preview,
+        transactions: [],
+        budgets: [],
+        subscriptions: [],
+        goals: [],
+        simulatePurchase: SimulatePurchaseUseCase()
+    )
 }
 
 #Preview("Empty") {
-    FinancialTwinDetailsView(report: .empty)
+    FinancialTwinDetailsView(
+        report: .empty,
+        transactions: [],
+        budgets: [],
+        subscriptions: [],
+        goals: [],
+        simulatePurchase: SimulatePurchaseUseCase()
+    )
 }
 
 private extension FinancialTwinReport {

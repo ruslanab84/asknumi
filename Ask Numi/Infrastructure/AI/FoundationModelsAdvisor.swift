@@ -50,6 +50,25 @@ final class FoundationModelsAdvisor: FinancialAdvisor {
             )
             return FinancialAdvice(headline: response.content.headline, tips: [])
         }
+        if case .purchaseDecision(let decision) = task {
+            let response = try await LanguageModelSession {
+                """
+                You are Numi, an on-device personal-finance assistant. Swift already
+                calculated the purchase decision. Explain only the supplied result in
+                one short sentence in \(responseLanguage). Do not calculate or include
+                numbers, dates, amounts, percentages, currencies, or category labels.
+                """
+            }.respond(
+                to: purchaseDecisionPrompt(decision),
+                generating: PurchaseDecisionExplanationOutput.self
+            )
+            let headline = response.content.headline.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !headline.contains(where: \.isNumber),
+                  headline.rangeOfCharacter(from: CharacterSet(charactersIn: "$€£₼₽¥%")) == nil else {
+                return FinancialAdvice(headline: "", tips: [])
+            }
+            return FinancialAdvice(headline: headline, tips: [])
+        }
         if task == .savingsPlan,
            let advice = deterministicSavingsTargetAdvice(
                for: summary,
@@ -98,11 +117,27 @@ final class FoundationModelsAdvisor: FinancialAdvisor {
             return savingsPlanPrompt(for: summary, question: question, currencyCode: currencyCode)
         case .general:
             return generalPrompt(for: summary, question: question, currencyCode: currencyCode)
-        case .monthlySpendingTrend:
-            preconditionFailure("Monthly trends use a dedicated prompt")
+        case .monthlySpendingTrend, .purchaseDecision:
+            preconditionFailure("This task uses a dedicated prompt")
         case .categoryTotal, .spendingTotal:
             preconditionFailure("Deterministic totals do not use the language model")
         }
+    }
+
+    private func purchaseDecisionPrompt(_ decision: PurchaseDecision) -> String {
+        """
+        VERIFIED PURCHASE DECISION:
+        Recommendation: \(decision.recommendation.rawValue)
+        Buying now is within the computed safe amount: \(decision.buyNow.isSafe)
+        A safe later option was found: \(decision.buyLater.isSafe)
+        The selected-date scenario exceeds a saved category budget: \(!decision.exceededBudgets.isEmpty)
+        The selected-date scenario delays the earliest active savings goal: \((decision.goalImpact?.delayedByMonths ?? 0) > 0)
+        Future income is not included.
+
+        TASK: Explain why the supplied recommendation is the safer scenario. Refer
+        only to scheduled payments, the saved budget, goal timing, and the absence of
+        future-income assumptions. Do not introduce a new recommendation.
+        """
     }
 
     private func monthlySpendingTrendPrompt(
@@ -501,6 +536,12 @@ private struct SpendingOverviewOutput {
 @Generable
 private struct SpendingTrendOutput {
     @Guide(description: "One concise sentence stating the verified category spending percentage change compared with the previous month")
+    var headline: String
+}
+
+@Generable
+private struct PurchaseDecisionExplanationOutput {
+    @Guide(description: "One short explanation of the verified purchase recommendation without numbers, dates, currencies, percentages, or labels")
     var headline: String
 }
 

@@ -21,14 +21,17 @@ struct HomeDashboardView: View {
     let fetchTransactions: FetchTransactionsUseCase
     let fetchBudgets: FetchBudgetsUseCase
     let fetchSubscriptions: FetchSubscriptionsUseCase
+    let fetchGoals: FetchSavingsGoalsUseCase
     let getMonthlyInsight: GetMonthlySpendingInsightUseCase
     let getFinancialTwin: GetFinancialTwinUseCase
+    let simulatePurchase: SimulatePurchaseUseCase
     let showBudgets: () -> Void
     let showAssistant: () -> Void
     @State private var isShowingSettings = false
     @State private var transactions: [Transaction] = []
     @State private var budgets: [Budget] = []
     @State private var subscriptions: [Subscription] = []
+    @State private var goals: [SavingsGoal] = []
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var insightState: DashboardInsightState = .loading
@@ -118,7 +121,14 @@ struct HomeDashboardView: View {
                 SettingsView()
             }
             .sheet(isPresented: $isShowingFinancialTwin) {
-                FinancialTwinDetailsView(report: financialTwinReport)
+                FinancialTwinDetailsView(
+                    report: financialTwinReport,
+                    transactions: transactions,
+                    budgets: budgets,
+                    subscriptions: subscriptions,
+                    goals: goals,
+                    simulatePurchase: simulatePurchase
+                )
             }
             .task {
                 #if DEBUG
@@ -134,12 +144,14 @@ struct HomeDashboardView: View {
         isLoading = true
 
         do {
-            async let loadedTransactions = fetchTransactions.execute()
+            // Fetching transactions first posts due subscriptions and advances their next charge date.
+            transactions = try await fetchTransactions.execute()
             async let loadedBudgets = fetchBudgets.execute()
             async let loadedSubscriptions = fetchSubscriptions.execute()
-            transactions = try await loadedTransactions
+            async let loadedGoals = fetchGoals.execute()
             budgets = try await loadedBudgets
             subscriptions = try await loadedSubscriptions
+            goals = try await loadedGoals
             financialTwinReport = getFinancialTwin.execute(
                 transactions: transactions,
                 budgets: budgets,
@@ -1027,8 +1039,10 @@ struct DashboardSnapshot {
         fetchTransactions: container.makeFetchTransactionsUseCase(),
         fetchBudgets: container.makeFetchBudgetsUseCase(),
         fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
+        fetchGoals: container.makeFetchSavingsGoalsUseCase(),
         getMonthlyInsight: container.makeMonthlySpendingInsightUseCase(),
         getFinancialTwin: container.makeFinancialTwinUseCase(),
+        simulatePurchase: container.makePurchaseSimulatorUseCase(),
         showBudgets: {},
         showAssistant: {}
     )
@@ -1041,8 +1055,10 @@ struct DashboardSnapshot {
         fetchTransactions: container.makeFetchTransactionsUseCase(),
         fetchBudgets: container.makeFetchBudgetsUseCase(),
         fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
+        fetchGoals: container.makeFetchSavingsGoalsUseCase(),
         getMonthlyInsight: container.makeMonthlySpendingInsightUseCase(),
         getFinancialTwin: container.makeFinancialTwinUseCase(),
+        simulatePurchase: container.makePurchaseSimulatorUseCase(),
         showBudgets: {},
         showAssistant: {}
     )

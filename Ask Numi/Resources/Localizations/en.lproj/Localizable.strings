@@ -246,6 +246,50 @@
 "financial_twin.recurring.evidence.sample" = "%@: %@.";
 "financial_twin.recurring.method" = "Expenses with the same merchant or category are matched across at least three nearby months: once per month, within 10% in amount and four days in billing date. Saved scheduled payments are excluded.";
 
+/* Purchase decision simulator */
+"purchase_decision.title" = "Can I buy this?";
+"purchase_decision.launch.subtitle" = "Check the purchase against payments, budgets, and goals before deciding.";
+"purchase_decision.input.section" = "Purchase";
+"purchase_decision.input.amount" = "Purchase amount";
+"purchase_decision.input.balance" = "Available balance now";
+"purchase_decision.input.balance_hint" = "Enter the amount currently available to spend. Ask Numi does not substitute transaction cash flow for your account balance.";
+"purchase_decision.input.date" = "Purchase date";
+"purchase_decision.input.category" = "Expense category";
+"purchase_decision.button.calculate" = "Calculate";
+"purchase_decision.calculating" = "Swift is calculating the scenarios…";
+"purchase_decision.error.invalid_input" = "Enter a positive purchase amount, a nonnegative available balance, and a category.";
+"purchase_decision.error.failed" = "Couldn't calculate the purchase scenarios.";
+"purchase_decision.result.section" = "Decision";
+"purchase_decision.result.current_month_payments" = "Scheduled payments left this month";
+"purchase_decision.result.balance_after_payments" = "Balance after this month's payments";
+"purchase_decision.result.safe_amount" = "Safe purchase amount on selected date";
+"purchase_decision.result.budget_impact" = "Budget impact";
+"purchase_decision.result.goal_impact" = "Goal impact";
+"purchase_decision.result.better_date" = "Better date";
+"purchase_decision.result.no_suitable_date" = "No safe date found under current assumptions";
+"purchase_decision.recommendation.buyNow" = "Buy now";
+"purchase_decision.recommendation.buyLater" = "Buy later";
+"purchase_decision.recommendation.skip" = "Decline for now";
+"purchase_decision.fallback.buyNow" = "Buying now keeps the known payments, selected budget, and next goal contribution protected.";
+"purchase_decision.fallback.buyLater" = "Waiting is safer because it removes the constraint found for buying now while preserving known commitments.";
+"purchase_decision.fallback.skip" = "The tested dates do not keep this purchase inside all known payment, budget, and goal safeguards.";
+"purchase_decision.budget.none" = "No saved budget for “%@”; the safe amount is limited by balance and the nearest goal.";
+"purchase_decision.budget.exceeded" = "“%@” would exceed its saved limit by %@.";
+"purchase_decision.budget.within" = "“%@” stays within its saved limit, with %@ left.";
+"purchase_decision.goal.none" = "No active savings goal is affected.";
+"purchase_decision.goal.on_track" = "“%@” stays on its current schedule.";
+"purchase_decision.goal.delayed" = "“%@” may shift by %d month(s), to %@.";
+"purchase_decision.goal.delay_short" = "“%@” may shift by %d month(s).";
+"purchase_decision.scenarios.section" = "Three scenarios";
+"purchase_decision.scenario.now" = "Buy now";
+"purchase_decision.scenario.later" = "Buy later";
+"purchase_decision.scenario.skip" = "Decline";
+"purchase_decision.scenario.recommended" = "Recommended";
+"purchase_decision.scenario.purchase.safe" = "After the purchase and scheduled payments: %@. This fits the calculated safeguards.";
+"purchase_decision.scenario.purchase.unsafe" = "After the purchase and scheduled payments: %@. One or more calculated safeguards are not met.";
+"purchase_decision.scenario.skip.description" = "The purchase is not made; after this month's scheduled payments the balance remains %@.";
+"purchase_decision.method" = "Swift uses the balance you entered, charges scheduled from today through the end of each scenario month, the saved budget for the selected category, and the nearest active goal's next monthly contribution. Future income and unsaved obligations are excluded. AI may only phrase this completed result.";
+
 /* Assistant */
 "assistant.header.title" = "Assistant";
 "assistant.header.accessibility.history" = "History";
