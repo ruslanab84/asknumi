@@ -13,7 +13,7 @@ struct UpdateTransactionUseCase: Sendable {
     }
 
     func execute(_ transaction: Transaction) async throws {
-        guard transaction.amount > 0 else { throw DomainError.invalidAmount }
+        guard transaction.amount > 0, transaction.hasValidReceiptItem else { throw DomainError.invalidAmount }
         try await repository.update(transaction)
     }
 }

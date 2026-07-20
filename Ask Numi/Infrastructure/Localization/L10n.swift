@@ -127,6 +127,24 @@ enum L10n {
         static var impulseLabel: String     { l("operations.row.accessibility.impulse") }
     }
 
+    enum ReceiptPrices {
+        static var title: String { l("receipt_prices.title") }
+        static func basketUp(_ percent: Int, _ count: Int, _ previous: String, _ current: String) -> String {
+            String(format: l("receipt_prices.basket.up"), percent, count, previous, current)
+        }
+        static func basketDown(_ percent: Int, _ count: Int, _ previous: String, _ current: String) -> String {
+            String(format: l("receipt_prices.basket.down"), percent, count, previous, current)
+        }
+        static func basketStable(_ count: Int, _ total: String) -> String {
+            String(format: l("receipt_prices.basket.stable"), count, total)
+        }
+        static var topItems: String { l("receipt_prices.top_items") }
+        static func itemIncrease(_ count: Int, _ amount: String) -> String {
+            String(format: l("receipt_prices.item.increase"), count, amount)
+        }
+        static var method: String { l("receipt_prices.method") }
+    }
+
     // MARK: - Add Operation
 
     enum AddOperation {
@@ -174,6 +192,27 @@ enum L10n {
             ["salary", "bank_card", "credit_card", "current_account", "deposit", "freelance", "gift", "interest"]
                 .map { l("add_operation.category.default.\($0)") }
         }
+    }
+
+    enum ReceiptReview {
+        static var title: String { l("receipt_review.title") }
+        static var instructions: String { l("receipt_review.instructions") }
+        static var itemName: String { l("receipt_review.item.name") }
+        static var quantity: String { l("receipt_review.item.quantity") }
+        static var unitPrice: String { l("receipt_review.item.unit_price") }
+        static var category: String { l("receipt_review.item.category") }
+        static var lineTotal: String { l("receipt_review.item.total") }
+        static func previousPrice(_ amount: String) -> String {
+            String(format: l("receipt_review.item.previous_price"), amount)
+        }
+        static func verifyPrice(_ amount: String, _ percent: Int) -> String {
+            String(format: l("receipt_review.item.verify_price"), amount, percent)
+        }
+        static var removeItem: String { l("receipt_review.item.remove") }
+        static var addItem: String { l("receipt_review.item.add") }
+        static var receiptTotal: String { l("receipt_review.total") }
+        static var save: String { l("receipt_review.save") }
+        static var saveFailed: String { l("receipt_review.save_failed") }
     }
 
     // MARK: - Financial Twin

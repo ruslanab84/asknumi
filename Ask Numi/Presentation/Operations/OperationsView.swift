@@ -37,6 +37,10 @@ struct OperationsView: View {
         }
     }
 
+    private var receiptPriceInsights: ReceiptPriceInsights {
+        ReceiptPriceInsights(transactions: transactions)
+    }
+
     private var sections: [OperationDaySection] {
         let calendar = Calendar.current
         let grouped = Dictionary(grouping: filteredTransactions) { calendar.startOfDay(for: $0.date) }
@@ -273,6 +277,11 @@ struct OperationsView: View {
             }
             .padding(.top, 48)
         } else {
+            let priceInsights = receiptPriceInsights
+            if priceInsights.hasInsights {
+                ReceiptPriceInsightsCard(insights: priceInsights)
+            }
+
             switch presentation {
             case .daily:
                 dailyContent
@@ -422,6 +431,66 @@ struct OperationsView: View {
     }
 }
 
+private struct ReceiptPriceInsightsCard: View {
+    let insights: ReceiptPriceInsights
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label(L10n.ReceiptPrices.title, systemImage: "cart.badge.clock")
+                .font(.headline)
+
+            if let basket = insights.basketChange {
+                Label {
+                    Text(basketText(basket))
+                } icon: {
+                    Image(systemName: basket.percent > 0 ? "arrow.up.right" : basket.percent < 0 ? "arrow.down.right" : "equal")
+                        .foregroundStyle(basket.percent > 0 ? .orange : .green)
+                }
+                .font(.subheadline)
+            }
+
+            if !insights.topIncreasingItems.isEmpty {
+                Text(L10n.ReceiptPrices.topItems)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+
+                ForEach(insights.topIncreasingItems) { item in
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text(item.name)
+                            .font(.subheadline.weight(.semibold))
+                        Spacer()
+                        Text(L10n.ReceiptPrices.itemIncrease(
+                            item.increaseCount,
+                            OperationFormatting.plain(item.addedCost)
+                        ))
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.trailing)
+                    }
+                }
+            }
+
+            Text(L10n.ReceiptPrices.method)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .glassEffect(.regular, in: .rect(cornerRadius: 20))
+    }
+
+    private func basketText(_ basket: ReceiptBasketPriceChange) -> String {
+        let previous = OperationFormatting.plain(basket.previousTotal)
+        let current = OperationFormatting.plain(basket.currentTotal)
+        if basket.percent > 0 {
+            return L10n.ReceiptPrices.basketUp(basket.percent, basket.itemCount, previous, current)
+        }
+        if basket.percent < 0 {
+            return L10n.ReceiptPrices.basketDown(abs(basket.percent), basket.itemCount, previous, current)
+        }
+        return L10n.ReceiptPrices.basketStable(basket.itemCount, current)
+    }
+}
+
 private struct OperationsRow: View {
     let transaction: Transaction
 
@@ -559,6 +628,9 @@ private struct AddOperationView: View {
     @State private var capturedReceipt: CapturedReceipt?
     @State private var isImportingReceipt = false
     @State private var receiptError: String?
+    @State private var receiptDrafts: [ReceiptExpenseDraft] = []
+    @State private var isPresentingReceiptReview = false
+    @State private var didSaveReceipt = false
     @State private var classificationViewModel: AddOperationClassificationViewModel
     @State private var hasUserSelectedCategory: Bool
     @FocusState private var focusedField: Field?
@@ -761,6 +833,21 @@ private struct AddOperationView: View {
                 )
                 .ignoresSafeArea()
             }
+            .sheet(isPresented: $isPresentingReceiptReview, onDismiss: finishReceiptReview) {
+                ReceiptReviewView(
+                    drafts: receiptDrafts,
+                    categories: availableCategories,
+                    fundingSources: availableFundingSources,
+                    initialFundingSource: trimmedFundingSource,
+                    priceHistory: ReceiptPriceInsights(transactions: existingTransactions)
+                ) { items, selectedFundingSource in
+                    let transactions = makeReceiptTransactions(items, fundingSource: selectedFundingSource)
+                    try await addTransaction.execute(transactions)
+                    transactions.forEach(onSaved)
+                    fundingSource = selectedFundingSource
+                    didSaveReceipt = true
+                }
+            }
             .alert(
                 L10n.AddOperation.receiptErrorTitle,
                 isPresented: Binding(
@@ -819,6 +906,7 @@ private struct AddOperationView: View {
         guard !isImportingReceipt else { return }
         focusedField = nil
         receiptError = nil
+        didSaveReceipt = false
 
         guard ReceiptDocumentScanner.isSupported else {
             receiptError = L10n.AddOperation.receiptCameraUnavailable
@@ -842,11 +930,8 @@ private struct AddOperationView: View {
         }
 
         do {
-            let drafts = try await receiptImporter.expenses(from: receipt.images)
-            let transactions = drafts.map(makeReceiptTransaction)
-            try await addTransaction.execute(transactions)
-            transactions.forEach(onSaved)
-            dismiss()
+            receiptDrafts = try await receiptImporter.expenses(from: receipt.images)
+            isPresentingReceiptReview = true
         } catch is CancellationError {
             return
         } catch ReceiptImportError.noLineItems {
@@ -856,22 +941,37 @@ private struct AddOperationView: View {
         }
     }
 
-    private func makeReceiptTransaction(_ draft: ReceiptExpenseDraft) -> Transaction {
-        let categoryName = draft.category.localized
-        let savedCategory = categories.first {
-            $0.kind == .expense && $0.name.caseInsensitiveCompare(categoryName) == .orderedSame
+    private func makeReceiptTransactions(
+        _ items: [ReviewedReceiptItem],
+        fundingSource: String
+    ) -> [Transaction] {
+        let receiptID = UUID()
+        return items.map { item in
+            let receiptItem = ReceiptItem(
+                receiptID: receiptID,
+                name: item.name,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice
+            )
+            return Transaction(
+                amount: receiptItem.total,
+                kind: .expense,
+                category: item.categoryName,
+                categoryIcon: item.categoryIcon,
+                categoryColor: item.categoryColor,
+                fundingSource: fundingSource,
+                date: date,
+                note: item.name,
+                receiptItem: receiptItem
+            )
         }
+    }
 
-        return Transaction(
-            amount: draft.amount,
-            kind: .expense,
-            category: savedCategory?.name ?? categoryName,
-            categoryIcon: savedCategory?.icon ?? draft.category.icon,
-            categoryColor: savedCategory?.color ?? CategoryColor.defaultColor(for: .expense),
-            fundingSource: trimmedFundingSource,
-            date: date,
-            note: draft.name
-        )
+    private func finishReceiptReview() {
+        receiptDrafts = []
+        guard didSaveReceipt else { return }
+        didSaveReceipt = false
+        dismiss()
     }
 
     private var fundingSourceSection: some View {
@@ -975,6 +1075,21 @@ private struct AddOperationView: View {
         let merchant = classificationViewModel.merchantText
             .trimmingCharacters(in: .whitespacesAndNewlines)
 
+        let transactionNote: String?
+        if let receiptItem = editing?.receiptItem {
+            transactionNote = merchant.isEmpty ? receiptItem.name : merchant
+        } else {
+            transactionNote = merchant.isEmpty ? nil : merchant
+        }
+        let updatedReceiptItem = editing?.receiptItem.map {
+            ReceiptItem(
+                receiptID: $0.receiptID,
+                name: transactionNote ?? $0.name,
+                quantity: $0.quantity,
+                unitPrice: amount / $0.quantity
+            )
+        }
+
         let transaction = Transaction(
             id: editing?.id ?? UUID(),
             amount: amount,
@@ -984,8 +1099,9 @@ private struct AddOperationView: View {
             categoryColor: categoryColor,
             fundingSource: trimmedFundingSource,
             date: date,
-            note: merchant.isEmpty ? nil : merchant,
-            isImpulse: kind == .expense && isImpulse
+            note: transactionNote,
+            isImpulse: kind == .expense && isImpulse,
+            receiptItem: updatedReceiptItem
         )
 
         do {
@@ -1011,6 +1127,280 @@ private struct AddOperationView: View {
         hasUserSelectedCategory = false
         if newKind == .income {
             isImpulse = false
+        }
+    }
+}
+
+private struct ReviewedReceiptItem: Sendable {
+    let name: String
+    let quantity: Decimal
+    let unitPrice: Decimal
+    let categoryName: String
+    let categoryIcon: String
+    let categoryColor: CategoryColor
+}
+
+private struct ReceiptReviewItemState: Identifiable {
+    let id = UUID()
+    var name: String
+    var quantityText: String
+    var unitPriceText: String
+    var categoryName: String
+    var categoryIcon: String
+    var categoryColor: CategoryColor
+
+    init(draft: ReceiptExpenseDraft, categories: [OperationCategorySuggestion]) {
+        let suggestedName = draft.category.localized
+        let category = categories.first {
+            $0.name.caseInsensitiveCompare(suggestedName) == .orderedSame
+        } ?? OperationCategorySuggestion(
+            name: suggestedName,
+            icon: draft.category.icon,
+            color: CategoryColor.defaultColor(for: .expense)
+        )
+        name = draft.name
+        quantityText = Self.text(draft.quantity)
+        unitPriceText = Self.text(draft.unitPrice)
+        categoryName = category.name
+        categoryIcon = category.icon
+        categoryColor = category.color
+    }
+
+    init(category: OperationCategorySuggestion) {
+        name = ""
+        quantityText = "1"
+        unitPriceText = ""
+        categoryName = category.name
+        categoryIcon = category.icon
+        categoryColor = category.color
+    }
+
+    var quantity: Decimal? { Self.decimal(quantityText) }
+    var unitPrice: Decimal? { Self.decimal(unitPriceText) }
+
+    var total: Decimal? {
+        guard let quantity, let unitPrice else { return nil }
+        return quantity * unitPrice
+    }
+
+    var reviewed: ReviewedReceiptItem? {
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedName.isEmpty,
+              trimmedName.count <= 80,
+              let quantity,
+              let unitPrice,
+              !categoryName.isEmpty
+        else { return nil }
+        return ReviewedReceiptItem(
+            name: trimmedName,
+            quantity: quantity,
+            unitPrice: unitPrice,
+            categoryName: categoryName,
+            categoryIcon: categoryIcon,
+            categoryColor: categoryColor
+        )
+    }
+
+    private static func decimal(_ text: String) -> Decimal? {
+        let normalized = text
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .replacingOccurrences(of: ",", with: ".")
+        guard let value = Decimal(string: normalized, locale: Locale(identifier: "en_US_POSIX")), value > 0 else {
+            return nil
+        }
+        return value
+    }
+
+    private static func text(_ value: Decimal) -> String {
+        NSDecimalNumber(decimal: value).stringValue
+    }
+}
+
+private struct ReceiptReviewView: View {
+    private let categories: [OperationCategorySuggestion]
+    private let fundingSources: [OperationCategorySuggestion]
+    private let priceHistory: ReceiptPriceInsights
+    private let onSave: @MainActor ([ReviewedReceiptItem], String) async throws -> Void
+
+    @Environment(\.dismiss) private var dismiss
+    @State private var items: [ReceiptReviewItemState]
+    @State private var selectedFundingSource: String
+    @State private var isSaving = false
+    @State private var errorMessage: String?
+
+    init(
+        drafts: [ReceiptExpenseDraft],
+        categories: [OperationCategorySuggestion],
+        fundingSources: [OperationCategorySuggestion],
+        initialFundingSource: String,
+        priceHistory: ReceiptPriceInsights,
+        onSave: @escaping @MainActor ([ReviewedReceiptItem], String) async throws -> Void
+    ) {
+        var options = categories
+        for draft in drafts {
+            let name = draft.category.localized
+            if !options.contains(where: { $0.name.caseInsensitiveCompare(name) == .orderedSame }) {
+                options.append(OperationCategorySuggestion(
+                    name: name,
+                    icon: draft.category.icon,
+                    color: CategoryColor.defaultColor(for: .expense)
+                ))
+            }
+        }
+        let otherName = ClassifiedTransactionCategory.other.localized
+        if !options.contains(where: { $0.name.caseInsensitiveCompare(otherName) == .orderedSame }) {
+            options.append(OperationCategorySuggestion(
+                name: otherName,
+                icon: ClassifiedTransactionCategory.other.icon,
+                color: CategoryColor.defaultColor(for: .expense)
+            ))
+        }
+
+        self.categories = options
+        self.fundingSources = fundingSources
+        self.priceHistory = priceHistory
+        self.onSave = onSave
+        _items = State(initialValue: drafts.map { ReceiptReviewItemState(draft: $0, categories: options) })
+        _selectedFundingSource = State(initialValue: initialFundingSource)
+    }
+
+    private var canSave: Bool {
+        !items.isEmpty &&
+            !selectedFundingSource.isEmpty &&
+            items.allSatisfy { $0.reviewed != nil } &&
+            !isSaving
+    }
+
+    private var total: Decimal {
+        items.compactMap(\.total).reduce(Decimal.zero, +)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    Text(L10n.ReceiptReview.instructions)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+
+                Section(L10n.AddOperation.sectionFundingSource) {
+                    Picker(L10n.AddOperation.selectFundingSource, selection: $selectedFundingSource) {
+                        Text(L10n.AddOperation.selectFundingSource).tag("")
+                        ForEach(fundingSources) { source in
+                            Label(source.name, systemImage: source.icon).tag(source.name)
+                        }
+                    }
+                }
+
+                ForEach($items) { $item in
+                    Section {
+                        TextField(L10n.ReceiptReview.itemName, text: $item.name)
+
+                        HStack {
+                            TextField(L10n.ReceiptReview.quantity, text: $item.quantityText)
+                                .keyboardType(.decimalPad)
+                            Divider()
+                            TextField(L10n.ReceiptReview.unitPrice, text: $item.unitPriceText)
+                                .keyboardType(.decimalPad)
+                            Text(CurrencySettings.symbol(for: CurrencySettings.selectedCode))
+                                .foregroundStyle(.secondary)
+                        }
+
+                        Menu {
+                            ForEach(categories) { category in
+                                Button {
+                                    item.categoryName = category.name
+                                    item.categoryIcon = category.icon
+                                    item.categoryColor = category.color
+                                } label: {
+                                    Label(category.name, systemImage: category.icon)
+                                }
+                            }
+                        } label: {
+                            LabeledContent(L10n.ReceiptReview.category) {
+                                Label(item.categoryName, systemImage: item.categoryIcon)
+                            }
+                        }
+
+                        if let total = item.total {
+                            LabeledContent(
+                                L10n.ReceiptReview.lineTotal,
+                                value: OperationFormatting.plain(total)
+                            )
+                        }
+
+                        if let unitPrice = item.unitPrice,
+                           let comparison = priceHistory.comparison(for: item.name, currentUnitPrice: unitPrice)
+                        {
+                            Text(comparison.shouldVerify
+                                ? L10n.ReceiptReview.verifyPrice(
+                                    OperationFormatting.plain(comparison.previousUnitPrice),
+                                    comparison.percent
+                                )
+                                : L10n.ReceiptReview.previousPrice(
+                                    OperationFormatting.plain(comparison.previousUnitPrice)
+                                ))
+                            .font(.caption)
+                            .foregroundStyle(comparison.shouldVerify ? .orange : .secondary)
+                        }
+
+                        Button(L10n.ReceiptReview.removeItem, systemImage: "trash", role: .destructive) {
+                            items.removeAll { $0.id == item.id }
+                        }
+                    }
+                }
+
+                Section {
+                    Button(L10n.ReceiptReview.addItem, systemImage: "plus.circle") {
+                        guard let category = categories.first(where: {
+                            $0.name.caseInsensitiveCompare(ClassifiedTransactionCategory.other.localized) == .orderedSame
+                        }) ?? categories.first else { return }
+                        items.append(ReceiptReviewItemState(category: category))
+                    }
+
+                    LabeledContent(L10n.ReceiptReview.receiptTotal) {
+                        Text(OperationFormatting.plain(total))
+                            .fontWeight(.semibold)
+                    }
+                }
+
+                if let errorMessage {
+                    Section {
+                        Text(errorMessage)
+                            .foregroundStyle(.red)
+                    }
+                }
+            }
+            .navigationTitle(L10n.ReceiptReview.title)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button(L10n.Common.cancel) { dismiss() }
+                        .disabled(isSaving)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(isSaving ? L10n.Common.saving : L10n.ReceiptReview.save) {
+                        Task { await save() }
+                    }
+                    .disabled(!canSave)
+                }
+            }
+            .interactiveDismissDisabled(isSaving)
+        }
+    }
+
+    private func save() async {
+        let reviewed = items.compactMap(\.reviewed)
+        guard reviewed.count == items.count, canSave else { return }
+        isSaving = true
+        errorMessage = nil
+        do {
+            try await onSave(reviewed, selectedFundingSource)
+            dismiss()
+        } catch {
+            errorMessage = L10n.ReceiptReview.saveFailed
+            isSaving = false
         }
     }
 }

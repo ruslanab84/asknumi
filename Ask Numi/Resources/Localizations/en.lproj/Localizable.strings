@@ -111,6 +111,15 @@
 "operations.delete_alert.button.ok" = "OK";
 "operations.row.accessibility.impulse" = "Marked as an impulse purchase";
 
+/* Receipt Price History */
+"receipt_prices.title" = "Receipt price watch";
+"receipt_prices.basket.up" = "The tracked basket is %d%% more expensive across %d products: %@ → %@.";
+"receipt_prices.basket.down" = "The tracked basket is %d%% cheaper across %d products: %@ → %@.";
+"receipt_prices.basket.stable" = "The tracked basket is unchanged across %d products: %@.";
+"receipt_prices.top_items" = "Items most often increasing receipts";
+"receipt_prices.item.increase" = "rose %d× · +%@";
+"receipt_prices.method" = "Compares the last two saved unit prices for every product scanned at least twice; the basket uses one unit of each product.";
+
 /* Add Operation */
 "add_operation.title.new" = "New operation";
 "add_operation.title.edit" = "Edit operation";
@@ -140,6 +149,22 @@
 "add_operation.receipt.error.camera_denied" = "Allow camera access in Settings to scan receipts.";
 "add_operation.receipt.error.no_items" = "No products with prices were found. Retake the photo with the full receipt in view.";
 "add_operation.receipt.error.failed" = "The receipt couldn't be processed. Try taking the photo again.";
+
+/* Receipt Review */
+"receipt_review.title" = "Review receipt";
+"receipt_review.instructions" = "Check every recognized item, category, quantity, and unit price. Nothing is saved until you confirm.";
+"receipt_review.item.name" = "Product name";
+"receipt_review.item.quantity" = "Quantity";
+"receipt_review.item.unit_price" = "Unit price";
+"receipt_review.item.category" = "Category";
+"receipt_review.item.total" = "Line total";
+"receipt_review.item.previous_price" = "Previous unit price: %@.";
+"receipt_review.item.verify_price" = "Previous unit price %@; change %d%%. Check the recognized value.";
+"receipt_review.item.remove" = "Remove item";
+"receipt_review.item.add" = "Add missing item";
+"receipt_review.total" = "Receipt total";
+"receipt_review.save" = "Save items";
+"receipt_review.save_failed" = "The receipt items couldn't be saved. Check the values and try again.";
 "add_operation.merchant.section" = "Merchant";
 "add_operation.merchant.placeholder" = "For example: WALMART #2847";
 "add_operation.ml.suggested_category" = "Suggested category";

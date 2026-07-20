@@ -13,12 +13,14 @@ struct AddTransactionUseCase: Sendable {
     }
 
     func execute(_ transaction: Transaction) async throws {
-        guard transaction.amount > 0 else { throw DomainError.invalidAmount }
+        guard transaction.amount > 0, transaction.hasValidReceiptItem else { throw DomainError.invalidAmount }
         try await repository.add(transaction)
     }
 
     func execute(_ transactions: [Transaction]) async throws {
-        guard !transactions.isEmpty, transactions.allSatisfy({ $0.amount > 0 }) else {
+        guard !transactions.isEmpty,
+              transactions.allSatisfy({ $0.amount > 0 && $0.hasValidReceiptItem })
+        else {
             throw DomainError.invalidAmount
         }
         try await repository.add(transactions)

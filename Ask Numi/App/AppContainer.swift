@@ -46,6 +46,8 @@ final class AppContainer {
 
         #if DEBUG
         Transaction.assertSelfCheck()
+        TransactionEntity.assertSelfCheck()
+        ReceiptPriceInsights.assertSelfCheck()
         Subscription.assertSelfCheck()
         CategoryColor.assertSelfCheck()
         BudgetOverview.assertSelfCheck()

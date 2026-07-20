@@ -9,8 +9,11 @@ import Vision
 
 struct ReceiptExpenseDraft: Equatable, Sendable {
     let name: String
-    let amount: Decimal
+    let quantity: Decimal
+    let unitPrice: Decimal
     let category: ClassifiedTransactionCategory
+
+    var amount: Decimal { quantity * unitPrice }
 }
 
 enum ReceiptImportError: Error {
@@ -59,7 +62,8 @@ struct ReceiptImportService {
             let predicted = await classifier.classify(text: item.name)?.category ?? merchantCategory ?? .other
             expenses.append(ReceiptExpenseDraft(
                 name: item.name,
-                amount: item.amount,
+                quantity: item.quantity,
+                unitPrice: item.unitPrice,
                 category: predicted == .income ? .other : predicted
             ))
         }
@@ -135,7 +139,8 @@ private struct ParsedReceipt {
 
 private struct ReceiptLineItem: Equatable {
     let name: String
-    let amount: Decimal
+    let quantity: Decimal
+    let unitPrice: Decimal
 }
 
 private enum ReceiptLineItemParser {
@@ -143,7 +148,7 @@ private enum ReceiptLineItemParser {
         pattern: #"(?i)(?:^|\s)(?:AZN|₼|RUB|₽|USD|\$|EUR|€)?\s*([-+]?(?:(?:\d{1,3}(?:[ .]\d{3})+)|\d+)(?:[,.]\d{1,2})?)\s*(?:AZN|₼|RUB|₽|USD|EUR|€|[A-ZА-Я]{1,2}|\*)?\s*$"#
     )
     private static let trailingQuantity = try! NSRegularExpression(
-        pattern: #"(?i)\s+\d+(?:[,.]\d+)?\s*(?:x|х|\*)\s*\d+(?:[,.]\d+)?\s*$"#
+        pattern: #"(?i)\s+(\d+(?:[,.]\d+)?)\s*(?:x|х|\*)\s*(\d+(?:[,.]\d+)?)\s*$"#
     )
     private static let leadingQuantity = try! NSRegularExpression(
         pattern: #"(?i)^\s*\d+(?:[,.]\d+)?\s*(?:x|х|\*)\s*"#
@@ -187,11 +192,24 @@ private enum ReceiptLineItemParser {
 
         var name = String(line[..<matchRange.lowerBound])
             .trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
-        name = trailingQuantity.stringByReplacingMatches(
-            in: name,
-            range: NSRange(name.startIndex..<name.endIndex, in: name),
-            withTemplate: ""
-        )
+        var quantity: Decimal = 1
+        var unitPrice = amount
+        let nameRange = NSRange(name.startIndex..<name.endIndex, in: name)
+        if let quantityMatch = trailingQuantity.firstMatch(in: name, range: nameRange),
+           let quantityRange = Range(quantityMatch.range(at: 1), in: name),
+           let unitPriceRange = Range(quantityMatch.range(at: 2), in: name),
+           let parsedQuantity = decimal(from: String(name[quantityRange])),
+           let parsedUnitPrice = decimal(from: String(name[unitPriceRange])),
+           parsedQuantity * parsedUnitPrice == amount
+        {
+            quantity = parsedQuantity
+            unitPrice = parsedUnitPrice
+            name = trailingQuantity.stringByReplacingMatches(
+                in: name,
+                range: nameRange,
+                withTemplate: ""
+            )
+        }
         name = leadingQuantity.stringByReplacingMatches(
             in: name,
             range: NSRange(name.startIndex..<name.endIndex, in: name),
@@ -200,7 +218,11 @@ private enum ReceiptLineItemParser {
         name = name.trimmingCharacters(in: .whitespacesAndNewlines.union(.punctuationCharacters))
 
         guard name.count >= 2, name.rangeOfCharacter(from: .letters) != nil else { return nil }
-        return ReceiptLineItem(name: String(name.prefix(80)), amount: amount)
+        return ReceiptLineItem(
+            name: String(name.prefix(80)),
+            quantity: quantity,
+            unitPrice: unitPrice
+        )
     }
 
     private static func decimal(from value: String) -> Decimal? {
@@ -256,8 +278,8 @@ extension ReceiptImportService {
 
         assert(receipt.merchant == "BRAVO SUPERMARKET")
         assert(receipt.items == [
-            ReceiptLineItem(name: "MILK", amount: Decimal(string: "2.40")!),
-            ReceiptLineItem(name: "BREAD", amount: Decimal(string: "1.30")!)
+            ReceiptLineItem(name: "MILK", quantity: 2, unitPrice: Decimal(string: "1.20")!),
+            ReceiptLineItem(name: "BREAD", quantity: 1, unitPrice: Decimal(string: "1.30")!)
         ], "receipt totals and taxes must not become expenses")
     }
 }

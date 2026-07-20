@@ -129,6 +129,15 @@
 "operations.delete_alert.button.ok" = "Понятно";
 "operations.row.accessibility.impulse" = "Отмечено как импульсивная покупка";
 
+/* История цен из чеков */
+"receipt_prices.title" = "Контроль цен по чекам";
+"receipt_prices.basket.up" = "Отслеживаемая корзина подорожала на %d%% по %d товарам: %@ → %@.";
+"receipt_prices.basket.down" = "Отслеживаемая корзина подешевела на %d%% по %d товарам: %@ → %@.";
+"receipt_prices.basket.stable" = "Цена отслеживаемой корзины по %d товарам не изменилась: %@.";
+"receipt_prices.top_items" = "Товары, которые чаще всего увеличивают чек";
+"receipt_prices.item.increase" = "рост %d раз · +%@";
+"receipt_prices.method" = "Сравниваются две последние цены каждого товара, встречавшегося минимум в двух чеках; корзина включает по одной единице товара.";
+
 /* Add Operation */
 "add_operation.title.new" = "Новая операция";
 "add_operation.title.edit" = "Изменить операцию";
@@ -158,6 +167,22 @@
 "add_operation.receipt.error.camera_denied" = "Разрешите доступ к камере в Настройках, чтобы сканировать чеки.";
 "add_operation.receipt.error.no_items" = "Товары с ценами не найдены. Сфотографируйте чек целиком ещё раз.";
 "add_operation.receipt.error.failed" = "Не удалось обработать чек. Попробуйте сфотографировать его ещё раз.";
+
+/* Проверка чека */
+"receipt_review.title" = "Проверка чека";
+"receipt_review.instructions" = "Проверьте каждый товар, категорию, количество и цену за единицу. До подтверждения ничего не сохранится.";
+"receipt_review.item.name" = "Название товара";
+"receipt_review.item.quantity" = "Количество";
+"receipt_review.item.unit_price" = "Цена за единицу";
+"receipt_review.item.category" = "Категория";
+"receipt_review.item.total" = "Сумма позиции";
+"receipt_review.item.previous_price" = "Предыдущая цена за единицу: %@.";
+"receipt_review.item.verify_price" = "Предыдущая цена %@; изменение %d%%. Проверьте распознанное значение.";
+"receipt_review.item.remove" = "Удалить позицию";
+"receipt_review.item.add" = "Добавить пропущенный товар";
+"receipt_review.total" = "Итого по чеку";
+"receipt_review.save" = "Сохранить товары";
+"receipt_review.save_failed" = "Не удалось сохранить позиции чека. Проверьте значения и повторите попытку.";
 "add_operation.merchant.section" = "Продавец";
 "add_operation.merchant.placeholder" = "Например: WALMART #2847";
 "add_operation.ml.suggested_category" = "Предложенная категория";

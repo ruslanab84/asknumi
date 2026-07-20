@@ -21,6 +21,10 @@ final class TransactionEntity {
     var date: Date
     var note: String?
     var isImpulse: Bool?
+    var receiptID: UUID?
+    var receiptItemName: String?
+    var receiptQuantity: Decimal?
+    var receiptUnitPrice: Decimal?
 
     init(
         id: UUID,
@@ -32,7 +36,11 @@ final class TransactionEntity {
         fundingSourceRaw: String?,
         date: Date,
         note: String?,
-        isImpulse: Bool?
+        isImpulse: Bool?,
+        receiptID: UUID?,
+        receiptItemName: String?,
+        receiptQuantity: Decimal?,
+        receiptUnitPrice: Decimal?
     ) {
         self.id = id
         self.amount = amount
@@ -44,6 +52,10 @@ final class TransactionEntity {
         self.date = date
         self.note = note
         self.isImpulse = isImpulse
+        self.receiptID = receiptID
+        self.receiptItemName = receiptItemName
+        self.receiptQuantity = receiptQuantity
+        self.receiptUnitPrice = receiptUnitPrice
     }
 }
 
@@ -59,7 +71,11 @@ extension TransactionEntity {
             fundingSourceRaw: transaction.fundingSource,
             date: transaction.date,
             note: transaction.note,
-            isImpulse: transaction.isImpulse
+            isImpulse: transaction.isImpulse,
+            receiptID: transaction.receiptItem?.receiptID,
+            receiptItemName: transaction.receiptItem?.name,
+            receiptQuantity: transaction.receiptItem?.quantity,
+            receiptUnitPrice: transaction.receiptItem?.unitPrice
         )
     }
 
@@ -67,6 +83,17 @@ extension TransactionEntity {
     /// callers drop such rows via `compactMap`.
     func toDomain() -> Transaction? {
         guard let kind = TransactionKind(rawValue: kindRaw) else { return nil }
+        let receiptItem: ReceiptItem?
+        if let receiptID, let receiptItemName, let receiptQuantity, let receiptUnitPrice {
+            receiptItem = ReceiptItem(
+                receiptID: receiptID,
+                name: receiptItemName,
+                quantity: receiptQuantity,
+                unitPrice: receiptUnitPrice
+            )
+        } else {
+            receiptItem = nil
+        }
         return Transaction(
             id: id,
             amount: amount,
@@ -77,7 +104,28 @@ extension TransactionEntity {
             fundingSource: fundingSourceRaw,
             date: date,
             note: note,
-            isImpulse: isImpulse ?? false
+            isImpulse: isImpulse ?? false,
+            receiptItem: receiptItem
         )
     }
 }
+
+#if DEBUG
+extension TransactionEntity {
+    static func assertSelfCheck() {
+        let receiptID = UUID()
+        let transaction = Transaction(
+            amount: 3,
+            kind: .expense,
+            category: "Groceries",
+            note: "Milk",
+            receiptItem: ReceiptItem(receiptID: receiptID, name: "Milk", quantity: 2, unitPrice: 1.5)
+        )
+        let restored = TransactionEntity(transaction).toDomain()
+        assert(restored?.receiptItem?.receiptID == receiptID)
+        assert(restored?.receiptItem?.name == "Milk")
+        assert(restored?.receiptItem?.quantity == 2)
+        assert(restored?.receiptItem?.unitPrice == 1.5)
+    }
+}
+#endif
