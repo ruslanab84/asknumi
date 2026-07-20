@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Prompt Engineering"
+  short_description: "Write grounded prompts for on-device models"
+  default_prompt: "Use $ai-prompt-engineering to design or audit this on-device model prompt."

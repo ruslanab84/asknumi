@@ -1,0 +1,4 @@
+interface:
+  display_name: "Observation"
+  short_description: "Model SwiftUI state with Observation"
+  default_prompt: "Use $observation to model this SwiftUI state with the Observation framework."

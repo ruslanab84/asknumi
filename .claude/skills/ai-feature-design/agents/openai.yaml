@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Feature Design"
+  short_description: "Design native trustworthy AI experiences"
+  default_prompt: "Use $ai-feature-design to turn this AI capability into a native iOS feature."

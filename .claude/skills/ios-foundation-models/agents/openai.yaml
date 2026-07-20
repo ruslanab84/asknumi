@@ -1,0 +1,4 @@
+interface:
+  display_name: "iOS Foundation Models"
+  short_description: "Use Apple Foundation Models safely on device"
+  default_prompt: "Use $ios-foundation-models to implement or review this Foundation Models integration."

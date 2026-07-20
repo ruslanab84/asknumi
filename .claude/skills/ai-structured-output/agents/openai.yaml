@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Structured Output"
+  short_description: "Generate validated Swift data with schemas"
+  default_prompt: "Use $ai-structured-output to define and validate this generated Swift output."

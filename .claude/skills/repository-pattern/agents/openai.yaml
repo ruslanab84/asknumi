@@ -1,0 +1,4 @@
+interface:
+  display_name: "Repository Pattern"
+  short_description: "Design domain-first data access boundaries"
+  default_prompt: "Use $repository-pattern to implement or review this data access flow."

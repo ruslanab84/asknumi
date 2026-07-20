@@ -1,0 +1,4 @@
+interface:
+  display_name: "Foundation Model Evaluation"
+  short_description: "Evaluate Ask Numi model behavior reliably"
+  default_prompt: "Use $foundation-model-evaluation to build or run an evaluation for this Ask Numi AI behavior."

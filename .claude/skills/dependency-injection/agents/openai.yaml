@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dependency Injection"
+  short_description: "Wire explicit testable iOS dependencies"
+  default_prompt: "Use $dependency-injection to wire this dependency through the composition root."

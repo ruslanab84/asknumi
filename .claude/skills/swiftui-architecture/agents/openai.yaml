@@ -1,0 +1,4 @@
+interface:
+  display_name: "SwiftUI Architecture"
+  short_description: "Compose maintainable SwiftUI feature screens"
+  default_prompt: "Use $swiftui-architecture to design or refactor this SwiftUI feature."

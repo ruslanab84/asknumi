@@ -1,0 +1,4 @@
+interface:
+  display_name: "Swift Concurrency"
+  short_description: "Build safe structured async Swift flows"
+  default_prompt: "Use $swift-concurrency to implement or review this async Swift flow."

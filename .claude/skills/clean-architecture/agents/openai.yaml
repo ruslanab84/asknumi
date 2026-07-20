@@ -1,0 +1,4 @@
+interface:
+  display_name: "Clean Architecture"
+  short_description: "Keep iOS feature boundaries dependency-safe"
+  default_prompt: "Use $clean-architecture to place this iOS change in the correct layer."

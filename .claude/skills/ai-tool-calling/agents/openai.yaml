@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI Tool Calling"
+  short_description: "Design safe minimal Foundation Models tools"
+  default_prompt: "Use $ai-tool-calling to design or review these Foundation Models tools."

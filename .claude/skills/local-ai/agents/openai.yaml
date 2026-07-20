@@ -1,0 +1,4 @@
+interface:
+  display_name: "Local AI"
+  short_description: "Choose private on-device intelligence paths"
+  default_prompt: "Use $local-ai to select the smallest on-device intelligence approach for this feature."
