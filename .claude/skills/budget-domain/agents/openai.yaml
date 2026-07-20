@@ -1,0 +1,4 @@
+interface:
+  display_name: "Budget Domain"
+  short_description: "Model deterministic personal-finance rules"
+  default_prompt: "Use $budget-domain to implement or review this Ask Numi finance-domain behavior."

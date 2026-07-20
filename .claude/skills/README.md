@@ -27,6 +27,14 @@ Claude Code reads `.claude/skills`. Codex uses the `.agents/skills` symlink, so 
 | `foundation-model-evaluation` | Ask Numi AI regression cases and quality gates |
 | `ai-feature-design` | Native, trustworthy AI product interactions |
 
+## Phase 3
+
+| Skill | Owns |
+| --- | --- |
+| `swiftdata` | Ask Numi entities, mappings, queries, migrations, and model actors |
+| `budget-domain` | Transactions, budgets, goals, subscriptions, forecasts, and insights |
+| `financial-ai-coach` | Evidence-grounded personal-finance coaching policy |
+
 ## Boundaries
 
 ```text
@@ -43,7 +51,6 @@ Observation  Concurrency       Dependency injection
 
 ## Roadmap
 
-- Phase 3: `swiftdata`, `budget-domain`, `financial-ai-coach`.
 - Phase 4: `mvvm`, `performance-review`, `code-review`, `testing`, `human-interface-guidelines`, final consistency pass.
 
 The planned library contains 18 general iOS skills and 3 Ask Numi-specific skills.

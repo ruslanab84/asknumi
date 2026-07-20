@@ -48,7 +48,7 @@ Do not add a server model, MLX runtime, llama.cpp, or a multi-backend abstractio
 - Foundation Models APIs belong to `$ios-foundation-models`.
 - Core ML implementation details belong to the existing `coreml` skill.
 - Feature interaction belongs to `$ai-feature-design`.
-- Finance recommendation policy belongs to the later `financial-ai-coach` skill.
+- Finance recommendation policy belongs to `$financial-ai-coach`.
 
 ## Check
 

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Ask Numi SwiftData"
+  short_description: "Persist Ask Numi finance data safely"
+  default_prompt: "Use $swiftdata to implement or review this Ask Numi persistence change."

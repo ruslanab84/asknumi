@@ -1,0 +1,4 @@
+interface:
+  display_name: "Financial AI Coach"
+  short_description: "Generate grounded personal-finance guidance"
+  default_prompt: "Use $financial-ai-coach to design or review this grounded Ask Numi coaching behavior."

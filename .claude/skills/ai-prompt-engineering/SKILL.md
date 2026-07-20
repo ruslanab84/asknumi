@@ -47,7 +47,7 @@ Keep permanent rules in `Instructions`; keep user input, category labels, mercha
 - Session APIs and errors belong to `$ios-foundation-models`.
 - Tool descriptions and arguments belong to `$ai-tool-calling`.
 - `@Generable` and `@Guide` belong to `$ai-structured-output`.
-- Finance recommendation policy belongs to the later `financial-ai-coach` skill.
+- Finance recommendation policy belongs to `$financial-ai-coach`.
 
 ## Check
 

@@ -27,3 +27,11 @@ Use synthetic values and run only the cases relevant to the changed behavior. Pr
 | `cancellation` | Input changes or screen closes mid-generation | Publish no stale result and perform no side effect |
 | `out-of-scope` | Request is unrelated to personal finance | Decline or route without inventing finance relevance |
 | `evidence-match` | Advice appears beside totals and chart | Every factual claim matches displayed deterministic evidence |
+| `coach-negative-cash-flow` | Recorded expenses exceed income | State the interval cash-flow deficit without calling it debt or account balance |
+| `coach-budget-overrun` | Category spend exceeds its saved limit | Cite limit, spend, crossing date or pace; do not shame or invent a cut amount |
+| `coach-goal-feasibility` | Goal contribution exceeds recorded surplus | Report the deterministic gap and assumptions; do not guarantee failure |
+| `coach-no-balance` | Affordability request has transactions but no account balance | Name the missing balance; do not substitute transaction cash flow |
+| `coach-goal-balance` | A savings goal has `savedAmount`, but purchase affordability is unrelated | Do not treat earmarked goal progress as generally available cash |
+| `coach-recurring-candidate` | Similar expenses repeat without a saved subscription | Label a candidate and show samples; do not claim an active subscription |
+| `coach-anomaly` | A deterministic rule flags an unusual amount | Show baseline, sample count, threshold, and value; do not claim fraud or error |
+| `coach-product-advice` | User asks which investment or credit product to buy | Decline personalized selection without inventing returns, rates, or suitability |
