@@ -33,6 +33,10 @@ struct Subscription: Identifiable, Hashable, Sendable {
         endDate.map { nextChargeDate <= $0 } ?? true
     }
 
+    nonisolated func isDue(in period: DateInterval) -> Bool {
+        hasRemainingCharges && period.contains(nextChargeDate)
+    }
+
     nonisolated static func followingChargeDate(
         after date: Date,
         billingDay: Int,
@@ -79,6 +83,19 @@ extension Subscription {
 
         assert(chargeCount == 6)
         assert(chargeDate > endDate)
+
+        let january = calendar.dateInterval(of: .month, for: firstCharge)!
+        assert(subscription.isDue(in: january))
+        assert(!Subscription(
+            name: "Next month",
+            amount: 100,
+            nextChargeDate: followingChargeDate(
+                after: firstCharge,
+                billingDay: subscription.billingDay,
+                calendar: calendar
+            ),
+            calendar: calendar
+        ).isDue(in: january))
     }
 }
 #endif

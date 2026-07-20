@@ -204,21 +204,21 @@
 "financial_twin.button.close" = "Закрыть";
 
 "financial_twin.snapshot.title" = "Сохранённый денежный поток";
-"financial_twin.snapshot.headline.top_category" = "Самая крупная категория расходов — «%@»: %@ %@ (%d%% всех расходов).";
-"financial_twin.snapshot.headline.balance" = "Разница доходов и расходов по сохранённым операциям: %@ %@.";
-"financial_twin.snapshot.evidence.totals" = "Доходы %@ %@; расходы %@ %@; разница %@ %@ по %d операциям.";
+"financial_twin.snapshot.headline.top_category" = "Самая крупная категория расходов — «%@»: %@ (%d%% всех расходов).";
+"financial_twin.snapshot.headline.balance" = "Разница доходов и расходов по сохранённым операциям: %@.";
+"financial_twin.snapshot.evidence.totals" = "Доходы %@; расходы %@; разница %@ по %d операциям.";
 "financial_twin.snapshot.method" = "Доходы и расходы суммируются по всем сохранённым операциям. Для крупнейшей категории рассчитывается её доля в записанных расходах.";
 
 "financial_twin.payday.title" = "После зарплаты";
 "financial_twin.payday.headline" = "После зарплаты расходы в категории «%@» выше на %d%% в первые пять дней.";
-"financial_twin.payday.evidence.comparison" = "Сравнено окон после зарплаты: %d. В среднем за первые 5 дней: %@ %@; обычные 5 дней: %@ %@.";
+"financial_twin.payday.evidence.comparison" = "Сравнено окон после зарплаты: %d. В среднем за первые 5 дней: %@; обычные 5 дней: %@.";
 "financial_twin.payday.evidence.date" = "Учтена зарплата: %@.";
 "financial_twin.payday.method" = "Средняя сумма категории в завершённых пятидневных окнах после зарплаты сравнена с расходами в остальные дни, приведёнными к пяти дням. Показывается рост от 20% и минимум по двум зарплатам.";
 
 "financial_twin.impulse.title" = "Импульсивные покупки";
 "financial_twin.impulse.headline" = "Чаще всего отмеченные импульсивные покупки происходят: %@, %@.";
-"financial_twin.impulse.evidence.summary" = "Совпало отмеченных операций: %d из %d, общая сумма %@ %@.";
-"financial_twin.impulse.evidence.sample" = "%@: %@ %@.";
+"financial_twin.impulse.evidence.summary" = "Совпало отмеченных операций: %d из %d, общая сумма %@.";
+"financial_twin.impulse.evidence.sample" = "%@: %@.";
 "financial_twin.impulse.day_part.morning" = "утром";
 "financial_twin.impulse.day_part.afternoon" = "днём";
 "financial_twin.impulse.day_part.evening" = "вечером";
@@ -227,18 +227,18 @@
 
 "financial_twin.budget.title" = "Превышение бюджета";
 "financial_twin.budget.headline" = "Один или несколько текущих лимитов превышены в этом месяце.";
-"financial_twin.budget.evidence.crossing" = "%@: лимит %@ %@, превышен %@ после учтённых расходов %@ %@.";
+"financial_twin.budget.evidence.crossing" = "%@: лимит %@, превышен %@ после учтённых расходов %@.";
 "financial_twin.budget.method" = "Расходы текущего месяца суммируются по категории в порядке дат. Показывается первая операция, после которой сумма стала выше текущего лимита.";
 
 "financial_twin.month_end.title" = "Остаток к концу месяца";
-"financial_twin.month_end.headline" = "Медианный остаток по завершённым месяцам: %@ %@.";
-"financial_twin.month_end.evidence.sample" = "%@: доход %@, расходы %@, остаток %@ %@.";
+"financial_twin.month_end.headline" = "Медианный остаток по завершённым месяцам: %@.";
+"financial_twin.month_end.evidence.sample" = "%@: доход %@, расходы %@, остаток %@.";
 "financial_twin.month_end.method" = "Берётся медиана доходов минус расходы максимум за шесть последних завершённых месяцев, где записаны и доходы, и расходы. Это остаток по операциям, а не банковский баланс.";
 
 "financial_twin.recurring.title" = "Неучтённые регулярные траты";
 "financial_twin.recurring.headline" = "Возможная регулярная трата вне плана: «%@».";
-"financial_twin.recurring.evidence.summary" = "%@: типичная сумма %@ %@, совпадений — %d.";
-"financial_twin.recurring.evidence.sample" = "%@: %@ %@.";
+"financial_twin.recurring.evidence.summary" = "%@: типичная сумма %@, совпадений — %d.";
+"financial_twin.recurring.evidence.sample" = "%@: %@.";
 "financial_twin.recurring.method" = "Ищутся траты с одинаковым продавцом или категорией минимум в трёх близких месяцах: одна в месяц, разница суммы до 10% и даты до четырёх дней. Сохранённые плановые платежи исключаются.";
 
 /* Assistant */

@@ -170,7 +170,10 @@ struct PlanView: View {
     }
 
     private var forecastBalance: Decimal {
-        subscriptions.reduce(
+        let currentMonth = Calendar.current.dateInterval(of: .month, for: .now)
+        return subscriptions
+            .filter { currentMonth.map($0.isDue(in:)) ?? false }
+            .reduce(
             FinancialSummary(
                 transactions: transactions,
                 period: DateInterval(start: .distantPast, end: .distantFuture)

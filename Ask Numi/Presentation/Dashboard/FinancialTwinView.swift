@@ -271,7 +271,6 @@ private struct FinancialTwinInsightContent {
     let color: Color
 
     init(_ insight: FinancialTwinInsight) {
-        let currency = CurrencySettings.selectedCode
         switch insight {
         case .cashFlowSnapshot(let value):
             title = L10n.FinancialTwin.snapshotTitle
@@ -279,18 +278,16 @@ private struct FinancialTwinInsightContent {
                 headline = L10n.FinancialTwin.snapshotTopCategory(
                     category,
                     Self.amount(value.topExpenseAmount),
-                    currency,
                     value.topExpenseSharePercent
                 )
             } else {
-                headline = L10n.FinancialTwin.snapshotBalance(Self.amount(value.balance), currency)
+                headline = L10n.FinancialTwin.snapshotBalance(Self.amount(value.balance))
             }
             evidence = [
                 L10n.FinancialTwin.snapshotTotals(
                     Self.amount(value.totalIncome),
                     Self.amount(value.totalExpenses),
                     Self.amount(value.balance),
-                    currency,
                     value.transactionCount
                 )
             ]
@@ -305,8 +302,7 @@ private struct FinancialTwinInsightContent {
                 L10n.FinancialTwin.paydayComparison(
                     value.paydayCount,
                     Self.amount(value.firstFiveDayAverage),
-                    Self.amount(value.baselineFiveDayAverage),
-                    currency
+                    Self.amount(value.baselineFiveDayAverage)
                 )
             ] + value.paydayDates.map {
                 L10n.FinancialTwin.paydayDate(Self.date($0))
@@ -326,11 +322,10 @@ private struct FinancialTwinInsightContent {
                 L10n.FinancialTwin.impulseSummary(
                     value.matchingCount,
                     value.totalCount,
-                    Self.amount(value.matchingAmount),
-                    currency
+                    Self.amount(value.matchingAmount)
                 )
             ] + value.samples.map {
-                L10n.FinancialTwin.impulseSample(Self.dateTime($0.date), Self.amount($0.amount), currency)
+                L10n.FinancialTwin.impulseSample(Self.dateTime($0.date), Self.amount($0.amount))
             }
             method = L10n.FinancialTwin.impulseMethod
             icon = "bolt.fill"
@@ -344,8 +339,7 @@ private struct FinancialTwinInsightContent {
                     $0.category,
                     Self.amount($0.limit),
                     Self.date($0.date),
-                    Self.amount($0.spentAtCrossing),
-                    currency
+                    Self.amount($0.spentAtCrossing)
                 )
             }
             method = L10n.FinancialTwin.budgetMethod
@@ -354,14 +348,13 @@ private struct FinancialTwinInsightContent {
 
         case .monthEndBalance(let value):
             title = L10n.FinancialTwin.monthEndTitle
-            headline = L10n.FinancialTwin.monthEndHeadline(Self.amount(value.medianBalance), currency)
+            headline = L10n.FinancialTwin.monthEndHeadline(Self.amount(value.medianBalance))
             evidence = value.samples.map {
                 L10n.FinancialTwin.monthEndSample(
                     Self.month($0.month),
                     Self.amount($0.income),
                     Self.amount($0.expenses),
-                    Self.amount($0.balance),
-                    currency
+                    Self.amount($0.balance)
                 )
             }
             method = L10n.FinancialTwin.monthEndMethod
@@ -377,10 +370,9 @@ private struct FinancialTwinInsightContent {
                 [L10n.FinancialTwin.recurringSummary(
                     candidate.name,
                     Self.amount(candidate.typicalAmount),
-                    currency,
                     candidate.occurrenceCount
                 )] + candidate.samples.map {
-                    L10n.FinancialTwin.recurringSample(Self.date($0.date), Self.amount($0.amount), currency)
+                    L10n.FinancialTwin.recurringSample(Self.date($0.date), Self.amount($0.amount))
                 }
             }
             method = L10n.FinancialTwin.recurringMethod

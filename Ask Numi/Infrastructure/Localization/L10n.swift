@@ -191,20 +191,19 @@ enum L10n {
         }
 
         static var snapshotTitle: String { l("financial_twin.snapshot.title") }
-        static func snapshotTopCategory(_ category: String, _ amount: String, _ currency: String, _ percent: Int) -> String {
-            String(format: l("financial_twin.snapshot.headline.top_category"), category, amount, currency, percent)
+        static func snapshotTopCategory(_ category: String, _ amount: String, _ percent: Int) -> String {
+            String(format: l("financial_twin.snapshot.headline.top_category"), category, amount, percent)
         }
-        static func snapshotBalance(_ balance: String, _ currency: String) -> String {
-            String(format: l("financial_twin.snapshot.headline.balance"), balance, currency)
+        static func snapshotBalance(_ balance: String) -> String {
+            String(format: l("financial_twin.snapshot.headline.balance"), balance)
         }
         static func snapshotTotals(
             _ income: String,
             _ expenses: String,
             _ balance: String,
-            _ currency: String,
             _ count: Int
         ) -> String {
-            String(format: l("financial_twin.snapshot.evidence.totals"), income, currency, expenses, currency, balance, currency, count)
+            String(format: l("financial_twin.snapshot.evidence.totals"), income, expenses, balance, count)
         }
         static var snapshotMethod: String { l("financial_twin.snapshot.method") }
 
@@ -212,8 +211,8 @@ enum L10n {
         static func paydayHeadline(_ category: String, _ percent: Int) -> String {
             String(format: l("financial_twin.payday.headline"), category, percent)
         }
-        static func paydayComparison(_ count: Int, _ firstFive: String, _ baseline: String, _ currency: String) -> String {
-            String(format: l("financial_twin.payday.evidence.comparison"), count, firstFive, currency, baseline, currency)
+        static func paydayComparison(_ count: Int, _ firstFive: String, _ baseline: String) -> String {
+            String(format: l("financial_twin.payday.evidence.comparison"), count, firstFive, baseline)
         }
         static func paydayDate(_ date: String) -> String {
             String(format: l("financial_twin.payday.evidence.date"), date)
@@ -224,11 +223,11 @@ enum L10n {
         static func impulseHeadline(_ weekday: String, _ dayPart: String) -> String {
             String(format: l("financial_twin.impulse.headline"), weekday, dayPart)
         }
-        static func impulseSummary(_ matching: Int, _ total: Int, _ amount: String, _ currency: String) -> String {
-            String(format: l("financial_twin.impulse.evidence.summary"), matching, total, amount, currency)
+        static func impulseSummary(_ matching: Int, _ total: Int, _ amount: String) -> String {
+            String(format: l("financial_twin.impulse.evidence.summary"), matching, total, amount)
         }
-        static func impulseSample(_ date: String, _ amount: String, _ currency: String) -> String {
-            String(format: l("financial_twin.impulse.evidence.sample"), date, amount, currency)
+        static func impulseSample(_ date: String, _ amount: String) -> String {
+            String(format: l("financial_twin.impulse.evidence.sample"), date, amount)
         }
         static func dayPart(_ value: FinancialTwinDayPart) -> String {
             l("financial_twin.impulse.day_part.\(value.rawValue)")
@@ -241,25 +240,23 @@ enum L10n {
             _ category: String,
             _ limit: String,
             _ date: String,
-            _ spent: String,
-            _ currency: String
+            _ spent: String
         ) -> String {
-            String(format: l("financial_twin.budget.evidence.crossing"), category, limit, currency, date, spent, currency)
+            String(format: l("financial_twin.budget.evidence.crossing"), category, limit, date, spent)
         }
         static var budgetMethod: String { l("financial_twin.budget.method") }
 
         static var monthEndTitle: String { l("financial_twin.month_end.title") }
-        static func monthEndHeadline(_ amount: String, _ currency: String) -> String {
-            String(format: l("financial_twin.month_end.headline"), amount, currency)
+        static func monthEndHeadline(_ amount: String) -> String {
+            String(format: l("financial_twin.month_end.headline"), amount)
         }
         static func monthEndSample(
             _ month: String,
             _ income: String,
             _ expenses: String,
-            _ balance: String,
-            _ currency: String
+            _ balance: String
         ) -> String {
-            String(format: l("financial_twin.month_end.evidence.sample"), month, income, expenses, balance, currency)
+            String(format: l("financial_twin.month_end.evidence.sample"), month, income, expenses, balance)
         }
         static var monthEndMethod: String { l("financial_twin.month_end.method") }
 
@@ -267,11 +264,11 @@ enum L10n {
         static func recurringHeadline(_ name: String) -> String {
             String(format: l("financial_twin.recurring.headline"), name)
         }
-        static func recurringSummary(_ name: String, _ amount: String, _ currency: String, _ count: Int) -> String {
-            String(format: l("financial_twin.recurring.evidence.summary"), name, amount, currency, count)
+        static func recurringSummary(_ name: String, _ amount: String, _ count: Int) -> String {
+            String(format: l("financial_twin.recurring.evidence.summary"), name, amount, count)
         }
-        static func recurringSample(_ date: String, _ amount: String, _ currency: String) -> String {
-            String(format: l("financial_twin.recurring.evidence.sample"), date, amount, currency)
+        static func recurringSample(_ date: String, _ amount: String) -> String {
+            String(format: l("financial_twin.recurring.evidence.sample"), date, amount)
         }
         static var recurringMethod: String { l("financial_twin.recurring.method") }
     }
