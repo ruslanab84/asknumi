@@ -9,9 +9,13 @@ struct OperationsView: View {
     @Environment(\.appAccentColor) private var accentColor
     let fetchTransactions: FetchTransactionsUseCase
     let fetchCategories: FetchTransactionCategoriesUseCase
+    let fetchSubscriptions: FetchSubscriptionsUseCase
+    let fetchBudgets: FetchBudgetsUseCase
+    let fetchGoals: FetchSavingsGoalsUseCase
     let addCategory: AddTransactionCategoryUseCase
     let updateCategory: UpdateTransactionCategoryUseCase
     let addTransaction: AddTransactionUseCase
+    let saveGoals: SaveSavingsGoalUseCase
     let updateTransaction: UpdateTransactionUseCase
     let deleteTransaction: DeleteTransactionUseCase
     let parseNaturalInput: ParseNaturalInputUseCase
@@ -27,6 +31,8 @@ struct OperationsView: View {
     @State private var isLoading = true
     @State private var errorMessage: String?
     @State private var isPresentingAddOperation = false
+    @State private var pendingSalaryAutopilotIncome: Transaction?
+    @State private var salaryAutopilotIncome: Transaction?
     @State private var editingTransaction: Transaction?
     @State private var deleteErrorMessage: String?
 
@@ -95,7 +101,7 @@ struct OperationsView: View {
                     .padding(.vertical, 10)
             }
             .toolbar(.hidden, for: .navigationBar)
-            .sheet(isPresented: $isPresentingAddOperation) {
+            .sheet(isPresented: $isPresentingAddOperation, onDismiss: presentSalaryAutopilotIfNeeded) {
                 AddOperationView(
                     addTransaction: addTransaction,
                     updateTransaction: updateTransaction,
@@ -108,6 +114,9 @@ struct OperationsView: View {
                 ) { transaction in
                     transactions.append(transaction)
                     transactions.sort { $0.date > $1.date }
+                    if transaction.kind == .income {
+                        pendingSalaryAutopilotIncome = transaction
+                    }
                 } onCategorySaved: { category in
                     storeCategory(category)
                 }
@@ -130,6 +139,16 @@ struct OperationsView: View {
                 } onCategorySaved: { category in
                     storeCategory(category)
                 }
+            }
+            .sheet(item: $salaryAutopilotIncome) { income in
+                SalaryAutopilotPreviewView(
+                    income: income,
+                    transactions: transactions,
+                    fetchSubscriptions: fetchSubscriptions,
+                    fetchBudgets: fetchBudgets,
+                    fetchGoals: fetchGoals,
+                    saveGoals: saveGoals
+                )
             }
             .alert(
                 L10n.Operations.deleteAlertTitle,
@@ -428,6 +447,11 @@ struct OperationsView: View {
             categories.append(category)
         }
         categories.sort { $0.name.localizedStandardCompare($1.name) == .orderedAscending }
+    }
+
+    private func presentSalaryAutopilotIfNeeded() {
+        salaryAutopilotIncome = pendingSalaryAutopilotIncome
+        pendingSalaryAutopilotIncome = nil
     }
 }
 
@@ -1645,9 +1669,13 @@ extension TransactionKind {
     OperationsView(
         fetchTransactions: container.makeFetchTransactionsUseCase(),
         fetchCategories: container.makeFetchTransactionCategoriesUseCase(),
+        fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
+        fetchBudgets: container.makeFetchBudgetsUseCase(),
+        fetchGoals: container.makeFetchSavingsGoalsUseCase(),
         addCategory: container.makeAddTransactionCategoryUseCase(),
         updateCategory: container.makeUpdateTransactionCategoryUseCase(),
         addTransaction: container.makeAddTransactionUseCase(),
+        saveGoals: container.makeSaveSavingsGoalUseCase(),
         updateTransaction: container.makeUpdateTransactionUseCase(),
         deleteTransaction: container.makeDeleteTransactionUseCase(),
         parseNaturalInput: container.makeParseNaturalInputUseCase(),

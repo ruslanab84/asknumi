@@ -76,6 +76,48 @@
 "dashboard.recent.title" = "Recent operations";
 "dashboard.recent.empty" = "No operations yet — add your first one in the Operations tab.";
 
+/* Safe to Spend */
+"safe_to_spend.title" = "Safe to Spend";
+"safe_to_spend.per_day" = "%@ per day";
+"safe_to_spend.summary" = "You can spend up to %@ per day until %@ while keeping known payments and goals funded.";
+"safe_to_spend.evidence" = "Balance %@ + expected income %@ − payments %@ − reserve %@ − goals %@.";
+"safe_to_spend.missing" = "Missing: %@. Tap to add the known values.";
+"safe_to_spend.missing.balance" = "current balance";
+"safe_to_spend.missing.income" = "expected income before payday";
+"safe_to_spend.missing.reserve" = "reserve";
+"safe_to_spend.missing.payday" = "payday date";
+"safe_to_spend.missing.payments" = "scheduled payments";
+"safe_to_spend.missing.goals" = "goals";
+"safe_to_spend.input.section" = "Known values";
+"safe_to_spend.input.balance" = "Current balance";
+"safe_to_spend.input.income" = "Expected income before payday";
+"safe_to_spend.input.reserve" = "Reserve to protect";
+"safe_to_spend.input.payday" = "Payday";
+"safe_to_spend.method" = "Swift uses only these saved values, scheduled payments through payday, and the monthly plan for all active goals. Enter 0 when a value is known to be zero. No future income or expense is inferred, and AI does not calculate the result.";
+
+/* Salary Day Autopilot */
+"salary_autopilot.title" = "Salary Day Autopilot";
+"salary_autopilot.loading" = "Preparing allocation…";
+"salary_autopilot.intro" = "Review every amount before applying this plan. Nothing below changes until you confirm.";
+"salary_autopilot.action.apply" = "Apply";
+"salary_autopilot.action.applying" = "Applying…";
+"salary_autopilot.error.load" = "Couldn't prepare the allocation.";
+"salary_autopilot.error.apply" = "Couldn't apply the allocation.";
+"salary_autopilot.bucket.payments" = "Required payments";
+"salary_autopilot.bucket.budgets" = "Budgets";
+"salary_autopilot.bucket.cushion" = "Financial cushion";
+"salary_autopilot.bucket.goals" = "Goals";
+"salary_autopilot.bucket.free" = "Free money";
+"salary_autopilot.empty.payments" = "No scheduled payments in the next month.";
+"salary_autopilot.empty.budgets" = "No monthly budgets are configured.";
+"salary_autopilot.empty.cushion" = "No active goal with the Financial cushion icon.";
+"salary_autopilot.empty.goals" = "No other active goals.";
+"salary_autopilot.reason.payment" = "Scheduled for %@.";
+"salary_autopilot.reason.budget" = "Fills the monthly limit after %@ spent out of %@.";
+"salary_autopilot.reason.goal" = "%@ remains to reach this goal by %@.";
+"salary_autopilot.reason.free" = "Left after known payments, budgets, the cushion, and goals.";
+"salary_autopilot.method" = "Priority: payments due in the next month, remaining monthly budgets, the active cushion goal, other active goals, then free money. Applying only adds the shown contributions to saved goal progress; it does not create expenses or edit payment and budget settings.";
+
 /* Operations */
 "operations.header.title" = "Operations";
 "operations.header.accessibility.add" = "Add operation";

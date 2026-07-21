@@ -83,6 +83,74 @@ enum L10n {
         static var recentEmpty: String      { l("dashboard.recent.empty") }
     }
 
+    enum SafeToSpend {
+        static var title: String { l("safe_to_spend.title") }
+        static func perDay(_ amount: String) -> String {
+            String(format: l("safe_to_spend.per_day"), amount)
+        }
+        static func summary(_ amount: String, _ date: String) -> String {
+            String(format: l("safe_to_spend.summary"), amount, date)
+        }
+        static func evidence(
+            _ balance: String,
+            _ income: String,
+            _ payments: String,
+            _ reserve: String,
+            _ goals: String
+        ) -> String {
+            String(format: l("safe_to_spend.evidence"), balance, income, payments, reserve, goals)
+        }
+        static func missing(_ inputs: String) -> String {
+            String(format: l("safe_to_spend.missing"), inputs)
+        }
+        static func missingInput(_ input: SafeToSpendMissingInput) -> String {
+            switch input {
+            case .currentBalance: l("safe_to_spend.missing.balance")
+            case .expectedIncome: l("safe_to_spend.missing.income")
+            case .reserve: l("safe_to_spend.missing.reserve")
+            case .payday: l("safe_to_spend.missing.payday")
+            case .scheduledPayments: l("safe_to_spend.missing.payments")
+            case .goals: l("safe_to_spend.missing.goals")
+            }
+        }
+        static var inputSection: String { l("safe_to_spend.input.section") }
+        static var balance: String { l("safe_to_spend.input.balance") }
+        static var income: String { l("safe_to_spend.input.income") }
+        static var reserve: String { l("safe_to_spend.input.reserve") }
+        static var payday: String { l("safe_to_spend.input.payday") }
+        static var method: String { l("safe_to_spend.method") }
+    }
+
+    enum SalaryAutopilot {
+        static var title: String { l("salary_autopilot.title") }
+        static var loading: String { l("salary_autopilot.loading") }
+        static var intro: String { l("salary_autopilot.intro") }
+        static var apply: String { l("salary_autopilot.action.apply") }
+        static var applying: String { l("salary_autopilot.action.applying") }
+        static var loadError: String { l("salary_autopilot.error.load") }
+        static var applyError: String { l("salary_autopilot.error.apply") }
+        static var requiredPayments: String { l("salary_autopilot.bucket.payments") }
+        static var budgets: String { l("salary_autopilot.bucket.budgets") }
+        static var cushion: String { l("salary_autopilot.bucket.cushion") }
+        static var goals: String { l("salary_autopilot.bucket.goals") }
+        static var freeMoney: String { l("salary_autopilot.bucket.free") }
+        static var noPayments: String { l("salary_autopilot.empty.payments") }
+        static var noBudgets: String { l("salary_autopilot.empty.budgets") }
+        static var noCushion: String { l("salary_autopilot.empty.cushion") }
+        static var noGoals: String { l("salary_autopilot.empty.goals") }
+        static var freeReason: String { l("salary_autopilot.reason.free") }
+        static var method: String { l("salary_autopilot.method") }
+        static func paymentReason(_ date: String) -> String {
+            String(format: l("salary_autopilot.reason.payment"), date)
+        }
+        static func budgetReason(_ spent: String, _ limit: String) -> String {
+            String(format: l("salary_autopilot.reason.budget"), spent, limit)
+        }
+        static func goalReason(_ remaining: String, _ date: String) -> String {
+            String(format: l("salary_autopilot.reason.goal"), remaining, date)
+        }
+    }
+
     // MARK: - Operations
 
     enum Operations {

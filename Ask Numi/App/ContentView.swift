@@ -36,9 +36,13 @@ struct ContentView: View {
                 OperationsView(
                     fetchTransactions: container.makeFetchTransactionsUseCase(),
                     fetchCategories: container.makeFetchTransactionCategoriesUseCase(),
+                    fetchSubscriptions: container.makeFetchSubscriptionsUseCase(),
+                    fetchBudgets: container.makeFetchBudgetsUseCase(),
+                    fetchGoals: container.makeFetchSavingsGoalsUseCase(),
                     addCategory: container.makeAddTransactionCategoryUseCase(),
                     updateCategory: container.makeUpdateTransactionCategoryUseCase(),
                     addTransaction: container.makeAddTransactionUseCase(),
+                    saveGoals: container.makeSaveSavingsGoalUseCase(),
                     updateTransaction: container.makeUpdateTransactionUseCase(),
                     deleteTransaction: container.makeDeleteTransactionUseCase(),
                     parseNaturalInput: container.makeParseNaturalInputUseCase(),

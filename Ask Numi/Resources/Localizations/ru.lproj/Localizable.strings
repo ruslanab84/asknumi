@@ -86,6 +86,48 @@
 "dashboard.recent.title" = "Последние операции";
 "dashboard.recent.empty" = "Пока нет операций — добавьте первую во вкладке «Операции».";
 
+/* Safe to Spend */
+"safe_to_spend.title" = "Безопасно до зарплаты";
+"safe_to_spend.per_day" = "%@ в день";
+"safe_to_spend.summary" = "Можно потратить до %@ в день до %@, сохранив известные платежи и цели.";
+"safe_to_spend.evidence" = "Остаток %@ + ожидаемый доход %@ − платежи %@ − резерв %@ − цели %@.";
+"safe_to_spend.missing" = "Не хватает: %@. Нажмите, чтобы указать известные значения.";
+"safe_to_spend.missing.balance" = "текущего остатка";
+"safe_to_spend.missing.income" = "ожидаемого дохода до зарплаты";
+"safe_to_spend.missing.reserve" = "резерва";
+"safe_to_spend.missing.payday" = "даты зарплаты";
+"safe_to_spend.missing.payments" = "обязательных платежей";
+"safe_to_spend.missing.goals" = "целей";
+"safe_to_spend.input.section" = "Известные данные";
+"safe_to_spend.input.balance" = "Текущий остаток";
+"safe_to_spend.input.income" = "Ожидаемый доход до зарплаты";
+"safe_to_spend.input.reserve" = "Неприкосновенный резерв";
+"safe_to_spend.input.payday" = "Дата зарплаты";
+"safe_to_spend.method" = "Swift использует только эти сохранённые значения, плановые платежи до зарплаты и месячный план всех активных целей. Если значение точно равно нулю, введите 0. Будущие доходы и расходы не предполагаются, AI в расчёте не участвует.";
+
+/* Salary Day Autopilot */
+"salary_autopilot.title" = "Автопилот зарплаты";
+"salary_autopilot.loading" = "Готовим распределение…";
+"salary_autopilot.intro" = "Проверьте каждую сумму перед применением. До подтверждения ничего ниже не изменится.";
+"salary_autopilot.action.apply" = "Применить";
+"salary_autopilot.action.applying" = "Применяем…";
+"salary_autopilot.error.load" = "Не удалось подготовить распределение.";
+"salary_autopilot.error.apply" = "Не удалось применить распределение.";
+"salary_autopilot.bucket.payments" = "Обязательные платежи";
+"salary_autopilot.bucket.budgets" = "Бюджеты";
+"salary_autopilot.bucket.cushion" = "Финансовая подушка";
+"salary_autopilot.bucket.goals" = "Цели";
+"salary_autopilot.bucket.free" = "Свободные деньги";
+"salary_autopilot.empty.payments" = "В ближайший месяц нет запланированных платежей.";
+"salary_autopilot.empty.budgets" = "Месячные бюджеты не настроены.";
+"salary_autopilot.empty.cushion" = "Нет активной цели с иконкой «Финансовая подушка».";
+"salary_autopilot.empty.goals" = "Нет других активных целей.";
+"salary_autopilot.reason.payment" = "Запланировано на %@.";
+"salary_autopilot.reason.budget" = "Заполняет месячный лимит после трат %@ из %@.";
+"salary_autopilot.reason.goal" = "До цели осталось %@, срок — %@.";
+"salary_autopilot.reason.free" = "Остаток после известных платежей, бюджетов, подушки и целей.";
+"salary_autopilot.method" = "Приоритет: платежи ближайшего месяца, остатки месячных бюджетов, активная цель-подушка, остальные активные цели и затем свободные деньги. Применение только пополняет прогресс целей на показанные суммы; расходы не создаются, настройки платежей и бюджетов не меняются.";
+
 /* Operations — Header & Search */
 "operations.header.title" = "Операции";
 "operations.header.accessibility.add" = "Добавить операцию";

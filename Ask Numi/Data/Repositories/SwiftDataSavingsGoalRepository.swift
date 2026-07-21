@@ -20,6 +20,14 @@ actor SwiftDataSavingsGoalRepository: SavingsGoalRepository {
         try modelContext.save()
     }
 
+    func save(_ goals: [SavingsGoal]) async throws {
+        try modelContext.transaction {
+            for goal in goals {
+                modelContext.insert(SavingsGoalEntity(goal))
+            }
+        }
+    }
+
     func delete(id: UUID) async throws {
         try modelContext.delete(model: SavingsGoalEntity.self, where: #Predicate { $0.id == id })
         try modelContext.save()
