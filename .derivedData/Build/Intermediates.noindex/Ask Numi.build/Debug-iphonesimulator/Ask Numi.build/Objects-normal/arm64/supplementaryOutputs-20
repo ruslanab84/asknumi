@@ -1,0 +1,44 @@
+{
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/Infrastructure/AI/MLClassificationService.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/MLClassificationService.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/MLClassificationService.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/MLClassificationService.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/MLClassificationService.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/MLClassificationService.swiftdeps"
+  },
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/Infrastructure/CategoryColor+SwiftUI.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/CategoryColor+SwiftUI.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/CategoryColor+SwiftUI.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/CategoryColor+SwiftUI.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/CategoryColor+SwiftUI.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/CategoryColor+SwiftUI.swiftdeps"
+  },
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/Infrastructure/CurrencySettings.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/CurrencySettings.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/CurrencySettings.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/CurrencySettings.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/CurrencySettings.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/CurrencySettings.swiftdeps"
+  },
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/Infrastructure/Localization/Bundle+Localization.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/Bundle+Localization.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/Bundle+Localization.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/Bundle+Localization.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/Bundle+Localization.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/Bundle+Localization.swiftdeps"
+  },
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/Infrastructure/Localization/L10n.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/L10n.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/L10n.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/L10n.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/L10n.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/L10n.swiftdeps"
+  },
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/Infrastructure/Localization/LocalizationManager.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/LocalizationManager.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/LocalizationManager.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/LocalizationManager.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/LocalizationManager.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/LocalizationManager.swiftdeps"
+  }
+}

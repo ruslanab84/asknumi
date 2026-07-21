@@ -1,0 +1,44 @@
+{
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/Domain/UseCases/SaveSavingsGoalUseCase.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/SaveSavingsGoalUseCase.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/SaveSavingsGoalUseCase.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/SaveSavingsGoalUseCase.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/SaveSavingsGoalUseCase.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/SaveSavingsGoalUseCase.swiftdeps"
+  },
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/Domain/UseCases/SaveSubscriptionUseCase.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/SaveSubscriptionUseCase.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/SaveSubscriptionUseCase.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/SaveSubscriptionUseCase.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/SaveSubscriptionUseCase.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/SaveSubscriptionUseCase.swiftdeps"
+  },
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/Domain/UseCases/UpdateTransactionCategoryUseCase.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/UpdateTransactionCategoryUseCase.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/UpdateTransactionCategoryUseCase.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/UpdateTransactionCategoryUseCase.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/UpdateTransactionCategoryUseCase.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/UpdateTransactionCategoryUseCase.swiftdeps"
+  },
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/Domain/UseCases/UpdateTransactionUseCase.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/UpdateTransactionUseCase.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/UpdateTransactionUseCase.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/UpdateTransactionUseCase.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/UpdateTransactionUseCase.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/UpdateTransactionUseCase.swiftdeps"
+  },
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/Infrastructure/AI/FoundationModelsAdvisor.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/FoundationModelsAdvisor.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/FoundationModelsAdvisor.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/FoundationModelsAdvisor.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/FoundationModelsAdvisor.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/FoundationModelsAdvisor.swiftdeps"
+  },
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/Infrastructure/AI/FoundationModelsTransactionParser.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/FoundationModelsTransactionParser.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/FoundationModelsTransactionParser.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/FoundationModelsTransactionParser.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/FoundationModelsTransactionParser.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/FoundationModelsTransactionParser.swiftdeps"
+  }
+}

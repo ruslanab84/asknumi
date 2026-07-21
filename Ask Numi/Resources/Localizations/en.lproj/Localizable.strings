@@ -290,6 +290,42 @@
 "purchase_decision.scenario.skip.description" = "The purchase is not made; after this month's scheduled payments the balance remains %@.";
 "purchase_decision.method" = "Swift uses the balance you entered, charges scheduled from today through the end of each scenario month, the saved budget for the selected category, and the nearest active goal's next monthly contribution. Future income and unsaved obligations are excluded. AI may only phrase this completed result.";
 
+"time_machine.title" = "Financial Time Machine";
+"time_machine.launch.subtitle" = "Test changes to spending, income timing, subscriptions, and savings without touching saved data.";
+"time_machine.scenario.section" = "What if…";
+"time_machine.spending.category" = "Spending category";
+"time_machine.spending.reduction" = "Reduce “%@” by %d%%";
+"time_machine.spending.empty" = "Add an expense to test a category reduction.";
+"time_machine.income.category" = "Income category";
+"time_machine.income.delay" = "Delay “%@” by %d day(s)";
+"time_machine.income.empty" = "Add income to test a payment delay.";
+"time_machine.subscriptions.increase" = "Subscriptions increase by %d%%";
+"time_machine.savings.monthly" = "Set aside each month";
+"time_machine.horizon" = "Forecast horizon";
+"time_machine.horizon.months" = "%d mo";
+"time_machine.simulation_only" = "Changing these values never edits operations, budgets, scheduled payments, or goals. The scenario is calculated only after you tap the button.";
+"time_machine.button.calculate" = "Run scenario";
+"time_machine.error.invalid_input" = "Check the scenario values and enter a nonnegative monthly savings amount.";
+"time_machine.outcome.section" = "Scenario result";
+"time_machine.chart.title" = "Projected cumulative cash flow";
+"time_machine.chart.series" = "Projection";
+"time_machine.chart.month" = "Month";
+"time_machine.chart.cash_flow" = "Cash flow";
+"time_machine.baseline" = "Baseline";
+"time_machine.scenario" = "Scenario";
+"time_machine.outcome.baseline_end" = "Baseline at the end";
+"time_machine.outcome.scenario_end" = "Scenario at the end";
+"time_machine.outcome.difference" = "Difference in spendable cash flow";
+"time_machine.factors.section" = "What changed the result";
+"time_machine.factors.spending_saved" = "Less spending in “%@”";
+"time_machine.factors.subscription_cost" = "Additional subscription cost";
+"time_machine.factors.savings_total" = "Set aside for savings";
+"time_machine.factors.income_shift" = "The next “%@” payment of %@ moves from %@ to %@.";
+"time_machine.factors.no_income_shift" = "No upcoming income payment was shifted in this scenario.";
+"time_machine.monthly.section" = "Month by month";
+"time_machine.monthly.net" = "Monthly cash flow: baseline %@; scenario %@.";
+"time_machine.method" = "Swift builds a monthly pattern from %d recent active completed month(s), or the current recorded month when completed history is absent. It projects full months starting next month, excludes posted scheduled-payment categories from regular spending, and uses saved future payment dates separately. Only the next selected income payment is delayed. Figures are income minus expenses, scheduled payments, and planned savings—not a bank balance. No saved data is changed.";
+
 /* Assistant */
 "assistant.header.title" = "Assistant";
 "assistant.header.accessibility.history" = "History";

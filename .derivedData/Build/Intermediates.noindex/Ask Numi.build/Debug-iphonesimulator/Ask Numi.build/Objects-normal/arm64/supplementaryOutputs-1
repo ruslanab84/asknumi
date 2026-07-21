@@ -1,0 +1,23 @@
+{
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/App/AppContainer.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/AppContainer.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/AppContainer.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/AppContainer.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/AppContainer.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/AppContainer.swiftdeps"
+  },
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/App/ContentView.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/ContentView.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/ContentView.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/ContentView.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/ContentView.swiftdeps"
+  },
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/Data/Local/TransactionEntity.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/TransactionEntity.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/TransactionEntity.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/TransactionEntity.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/TransactionEntity.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/arm64/TransactionEntity.swiftdeps"
+  }
+}

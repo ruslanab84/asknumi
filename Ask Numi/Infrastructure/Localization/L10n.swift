@@ -387,6 +387,79 @@ enum L10n {
         }
     }
 
+    enum TimeMachine {
+        static var title: String { l("time_machine.title") }
+        static var launchSubtitle: String { l("time_machine.launch.subtitle") }
+        static var scenarioSection: String { l("time_machine.scenario.section") }
+        static var spendingCategory: String { l("time_machine.spending.category") }
+        static var noExpenseData: String { l("time_machine.spending.empty") }
+        static var incomeCategory: String { l("time_machine.income.category") }
+        static var noIncomeData: String { l("time_machine.income.empty") }
+        static var monthlySavings: String { l("time_machine.savings.monthly") }
+        static var horizon: String { l("time_machine.horizon") }
+        static var simulationOnly: String { l("time_machine.simulation_only") }
+        static var calculate: String { l("time_machine.button.calculate") }
+        static var invalidInput: String { l("time_machine.error.invalid_input") }
+        static var outcomeSection: String { l("time_machine.outcome.section") }
+        static var chartTitle: String { l("time_machine.chart.title") }
+        static var chartSeries: String { l("time_machine.chart.series") }
+        static var monthAxis: String { l("time_machine.chart.month") }
+        static var cashFlowAxis: String { l("time_machine.chart.cash_flow") }
+        static var baseline: String { l("time_machine.baseline") }
+        static var scenario: String { l("time_machine.scenario") }
+        static var baselineEnd: String { l("time_machine.outcome.baseline_end") }
+        static var scenarioEnd: String { l("time_machine.outcome.scenario_end") }
+        static var difference: String { l("time_machine.outcome.difference") }
+        static var factorsSection: String { l("time_machine.factors.section") }
+        static var subscriptionCost: String { l("time_machine.factors.subscription_cost") }
+        static var savingsTotal: String { l("time_machine.factors.savings_total") }
+        static var noIncomeShift: String { l("time_machine.factors.no_income_shift") }
+        static var monthlySection: String { l("time_machine.monthly.section") }
+
+        static func spendingReduction(_ category: String, _ percent: Int) -> String {
+            String(format: l("time_machine.spending.reduction"), category, percent)
+        }
+
+        static func incomeDelay(_ category: String, _ days: Int) -> String {
+            String(format: l("time_machine.income.delay"), category, days)
+        }
+
+        static func subscriptionIncrease(_ percent: Int) -> String {
+            String(format: l("time_machine.subscriptions.increase"), percent)
+        }
+
+        static func horizonMonths(_ months: Int) -> String {
+            String(format: l("time_machine.horizon.months"), months)
+        }
+
+        static func spendingSaved(_ category: String) -> String {
+            String(format: l("time_machine.factors.spending_saved"), category)
+        }
+
+        static func incomeShift(
+            _ category: String,
+            _ amount: String,
+            _ originalDate: String,
+            _ delayedDate: String
+        ) -> String {
+            String(
+                format: l("time_machine.factors.income_shift"),
+                category,
+                amount,
+                originalDate,
+                delayedDate
+            )
+        }
+
+        static func monthlyNet(_ baseline: String, _ scenario: String) -> String {
+            String(format: l("time_machine.monthly.net"), baseline, scenario)
+        }
+
+        static func method(_ sampleMonthCount: Int) -> String {
+            String(format: l("time_machine.method"), sampleMonthCount)
+        }
+    }
+
     // MARK: - Assistant
 
     enum Assistant {

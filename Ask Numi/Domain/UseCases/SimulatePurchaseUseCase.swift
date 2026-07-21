@@ -301,17 +301,11 @@ struct SimulatePurchaseUseCase: Sendable {
         calendar: Calendar
     ) -> Decimal {
         subscriptions.reduce(Decimal.zero) { total, subscription in
-            var amount = Decimal.zero
-            var chargeDate = subscription.nextChargeDate
-            while chargeDate < end && subscription.endDate.map({ chargeDate <= $0 }) != false {
-                if chargeDate >= start { amount += subscription.amount }
-                chargeDate = Subscription.followingChargeDate(
-                    after: chargeDate,
-                    billingDay: subscription.billingDay,
-                    calendar: calendar
-                )
-            }
-            return total + amount
+            total + Decimal(subscription.chargeDates(
+                from: start,
+                before: end,
+                calendar: calendar
+            ).count) * subscription.amount
         }
     }
 }

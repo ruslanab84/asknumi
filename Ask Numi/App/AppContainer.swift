@@ -56,6 +56,7 @@ final class AppContainer {
         GetMonthlySpendingInsightUseCase.assertSelfCheck()
         GetFinancialTwinUseCase.assertSelfCheck()
         SimulatePurchaseUseCase.assertSelfCheck()
+        SimulateFinancialTimeMachineUseCase.assertSelfCheck()
         FoundationModelsAdvisor.assertSelfCheck()
         ReceiptImportService.assertSelfCheck()
         Task { await GetFinancialAdviceUseCase.assertAsyncSelfCheck() }
@@ -146,5 +147,9 @@ final class AppContainer {
 
     func makePurchaseSimulatorUseCase() -> SimulatePurchaseUseCase {
         SimulatePurchaseUseCase(advisor: advisor)
+    }
+
+    func makeFinancialTimeMachineUseCase() -> SimulateFinancialTimeMachineUseCase {
+        SimulateFinancialTimeMachineUseCase()
     }
 }

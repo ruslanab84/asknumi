@@ -1,0 +1,23 @@
+{
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/App/ContentView.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/x86_64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/x86_64/ContentView.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/x86_64/ContentView.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/x86_64/ContentView.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/x86_64/ContentView.swiftdeps"
+  },
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/Data/Local/TransactionCategoryEntity.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/x86_64/TransactionCategoryEntity.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/x86_64/TransactionCategoryEntity.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/x86_64/TransactionCategoryEntity.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/x86_64/TransactionCategoryEntity.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/x86_64/TransactionCategoryEntity.swiftdeps"
+  },
+  "/Users/ruslanabdulov/Desktop/Ask Numi/Ask Numi/Data/Repositories/SwiftDataTransactionCategoryRepository.swift" : {
+    "const-values" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/x86_64/SwiftDataTransactionCategoryRepository.swiftconstvalues",
+    "dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/x86_64/SwiftDataTransactionCategoryRepository.d",
+    "diagnostics" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/x86_64/SwiftDataTransactionCategoryRepository.dia",
+    "object" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/x86_64/SwiftDataTransactionCategoryRepository.o",
+    "swift-dependencies" : "/Users/ruslanabdulov/Desktop/Ask Numi/.derivedData/Build/Intermediates.noindex/Ask Numi.build/Debug-iphonesimulator/Ask Numi.build/Objects-normal/x86_64/SwiftDataTransactionCategoryRepository.swiftdeps"
+  }
+}

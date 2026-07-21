@@ -25,6 +25,7 @@ struct HomeDashboardView: View {
     let getMonthlyInsight: GetMonthlySpendingInsightUseCase
     let getFinancialTwin: GetFinancialTwinUseCase
     let simulatePurchase: SimulatePurchaseUseCase
+    let simulateTimeMachine: SimulateFinancialTimeMachineUseCase
     let showBudgets: () -> Void
     let showAssistant: () -> Void
     @State private var isShowingSettings = false
@@ -127,7 +128,8 @@ struct HomeDashboardView: View {
                     budgets: budgets,
                     subscriptions: subscriptions,
                     goals: goals,
-                    simulatePurchase: simulatePurchase
+                    simulatePurchase: simulatePurchase,
+                    simulateTimeMachine: simulateTimeMachine
                 )
             }
             .task {
@@ -1043,6 +1045,7 @@ struct DashboardSnapshot {
         getMonthlyInsight: container.makeMonthlySpendingInsightUseCase(),
         getFinancialTwin: container.makeFinancialTwinUseCase(),
         simulatePurchase: container.makePurchaseSimulatorUseCase(),
+        simulateTimeMachine: container.makeFinancialTimeMachineUseCase(),
         showBudgets: {},
         showAssistant: {}
     )
@@ -1059,6 +1062,7 @@ struct DashboardSnapshot {
         getMonthlyInsight: container.makeMonthlySpendingInsightUseCase(),
         getFinancialTwin: container.makeFinancialTwinUseCase(),
         simulatePurchase: container.makePurchaseSimulatorUseCase(),
+        simulateTimeMachine: container.makeFinancialTimeMachineUseCase(),
         showBudgets: {},
         showAssistant: {}
     )

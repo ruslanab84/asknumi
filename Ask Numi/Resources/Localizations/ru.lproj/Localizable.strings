@@ -310,6 +310,42 @@
 "purchase_decision.scenario.skip.description" = "Покупка не совершается; после плановых платежей текущего месяца останется %@.";
 "purchase_decision.method" = "Swift использует введённый остаток, платежи от сегодняшнего дня до конца месяца каждого сценария, бюджет выбранной категории и ближайший месячный взнос в активную цель. Будущий доход и несохранённые обязательства не предполагаются. AI может только сформулировать уже рассчитанный результат.";
 
+"time_machine.title" = "Financial Time Machine";
+"time_machine.launch.subtitle" = "Проверьте изменения расходов, дат дохода, подписок и накоплений без изменения сохранённых данных.";
+"time_machine.scenario.section" = "Что, если…";
+"time_machine.spending.category" = "Категория расходов";
+"time_machine.spending.reduction" = "Сократить «%@» на %d%%";
+"time_machine.spending.empty" = "Добавьте расход, чтобы проверить сокращение категории.";
+"time_machine.income.category" = "Категория дохода";
+"time_machine.income.delay" = "Задержать «%@» на %d дн.";
+"time_machine.income.empty" = "Добавьте доход, чтобы проверить задержку выплаты.";
+"time_machine.subscriptions.increase" = "Подписки подорожают на %d%%";
+"time_machine.savings.monthly" = "Откладывать каждый месяц";
+"time_machine.horizon" = "Горизонт прогноза";
+"time_machine.horizon.months" = "%d мес.";
+"time_machine.simulation_only" = "Изменение параметров не редактирует операции, бюджеты, плановые платежи или цели. Сценарий рассчитывается только после нажатия кнопки.";
+"time_machine.button.calculate" = "Проверить сценарий";
+"time_machine.error.invalid_input" = "Проверьте параметры и укажите неотрицательную сумму ежемесячных накоплений.";
+"time_machine.outcome.section" = "Результат сценария";
+"time_machine.chart.title" = "Прогноз накопленного денежного потока";
+"time_machine.chart.series" = "Прогноз";
+"time_machine.chart.month" = "Месяц";
+"time_machine.chart.cash_flow" = "Денежный поток";
+"time_machine.baseline" = "Без изменений";
+"time_machine.scenario" = "Сценарий";
+"time_machine.outcome.baseline_end" = "Без изменений к концу периода";
+"time_machine.outcome.scenario_end" = "По сценарию к концу периода";
+"time_machine.outcome.difference" = "Разница доступного денежного потока";
+"time_machine.factors.section" = "Что изменило результат";
+"time_machine.factors.spending_saved" = "Сокращение расходов в «%@»";
+"time_machine.factors.subscription_cost" = "Дополнительная стоимость подписок";
+"time_machine.factors.savings_total" = "Отложено в накопления";
+"time_machine.factors.income_shift" = "Следующая выплата «%@» на %@ переносится с %@ на %@.";
+"time_machine.factors.no_income_shift" = "В этом сценарии ближайшая выплата дохода не переносится.";
+"time_machine.monthly.section" = "По месяцам";
+"time_machine.monthly.net" = "Денежный поток за месяц: без изменений %@; сценарий %@.";
+"time_machine.method" = "Swift строит месячный шаблон по %d последним активным завершённым месяцам или по записанной части текущего месяца, если завершённой истории нет. Прогнозируются полные месяцы со следующего месяца; уже проведённые категории плановых платежей исключаются из обычных расходов, а будущие платежи учитываются отдельно по сохранённым датам. Переносится только ближайшая выбранная выплата дохода. Результат — доходы минус расходы, плановые платежи и накопления, а не банковский баланс. Сохранённые данные не изменяются.";
+
 /* Assistant */
 "assistant.header.title" = "Помощник";
 "assistant.header.accessibility.history" = "История";

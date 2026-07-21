@@ -38,9 +38,11 @@ struct FinancialTwinDetailsView: View {
     let subscriptions: [Subscription]
     let goals: [SavingsGoal]
     let simulatePurchase: SimulatePurchaseUseCase
+    let simulateTimeMachine: SimulateFinancialTimeMachineUseCase
 
     @Environment(\.dismiss) private var dismiss
     @State private var isShowingPurchaseDecision = false
+    @State private var isShowingTimeMachine = false
 
     var body: some View {
         NavigationStack {
@@ -52,40 +54,23 @@ struct FinancialTwinDetailsView: View {
                         LazyVStack(alignment: .leading, spacing: 20) {
                             FinancialTwinHero(report: report)
 
-                            Button {
-                                isShowingPurchaseDecision = true
-                            } label: {
-                                HStack(spacing: 14) {
-                                    Image(systemName: "cart.badge.questionmark")
-                                        .font(.title3.weight(.semibold))
-                                        .foregroundStyle(.white)
-                                        .frame(width: 46, height: 46)
-                                        .background(DashboardPalette.primary, in: .rect(cornerRadius: 15))
-
-                                    VStack(alignment: .leading, spacing: 4) {
-                                        Text(L10n.PurchaseDecision.title)
-                                            .font(.headline)
-                                            .foregroundStyle(.primary)
-                                        Text(L10n.PurchaseDecision.launchSubtitle)
-                                            .font(.footnote)
-                                            .foregroundStyle(.secondary)
-                                            .fixedSize(horizontal: false, vertical: true)
-                                    }
-
-                                    Spacer(minLength: 8)
-                                    Image(systemName: "chevron.right")
-                                        .font(.footnote.weight(.bold))
-                                        .foregroundStyle(.secondary)
-                                }
-                                .padding(18)
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                                .contentShape(.rect)
-                                .glassEffect(
-                                    .regular.tint(DashboardPalette.primary.opacity(0.12)).interactive(),
-                                    in: .rect(cornerRadius: 24)
-                                )
+                            FinancialTwinActionCard(
+                                title: L10n.TimeMachine.title,
+                                subtitle: L10n.TimeMachine.launchSubtitle,
+                                systemImage: "clock.arrow.trianglehead.counterclockwise.rotate.90",
+                                tint: DashboardPalette.ai
+                            ) {
+                                isShowingTimeMachine = true
                             }
-                            .buttonStyle(.plain)
+
+                            FinancialTwinActionCard(
+                                title: L10n.PurchaseDecision.title,
+                                subtitle: L10n.PurchaseDecision.launchSubtitle,
+                                systemImage: "cart.badge.questionmark",
+                                tint: DashboardPalette.primary
+                            ) {
+                                isShowingPurchaseDecision = true
+                            }
 
                             if report.insights.isEmpty {
                                 ContentUnavailableView(
@@ -126,7 +111,57 @@ struct FinancialTwinDetailsView: View {
                     simulatePurchase: simulatePurchase
                 )
             }
+            .sheet(isPresented: $isShowingTimeMachine) {
+                FinancialTimeMachineView(
+                    transactions: transactions,
+                    subscriptions: subscriptions,
+                    simulate: simulateTimeMachine
+                )
+            }
         }
+    }
+}
+
+private struct FinancialTwinActionCard: View {
+    let title: String
+    let subtitle: String
+    let systemImage: String
+    let tint: Color
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 14) {
+                Image(systemName: systemImage)
+                    .font(.title3.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .frame(width: 46, height: 46)
+                    .background(tint, in: .rect(cornerRadius: 15))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(title)
+                        .font(.headline)
+                        .foregroundStyle(.primary)
+                    Text(subtitle)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Spacer(minLength: 8)
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.bold))
+                    .foregroundStyle(.secondary)
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(.rect)
+            .glassEffect(
+                .regular.tint(tint.opacity(0.12)).interactive(),
+                in: .rect(cornerRadius: 24)
+            )
+        }
+        .buttonStyle(.plain)
     }
 }
 
@@ -463,7 +498,8 @@ private struct FinancialTwinInsightContent {
         budgets: [],
         subscriptions: [],
         goals: [],
-        simulatePurchase: SimulatePurchaseUseCase()
+        simulatePurchase: SimulatePurchaseUseCase(),
+        simulateTimeMachine: SimulateFinancialTimeMachineUseCase()
     )
 }
 
@@ -474,7 +510,8 @@ private struct FinancialTwinInsightContent {
         budgets: [],
         subscriptions: [],
         goals: [],
-        simulatePurchase: SimulatePurchaseUseCase()
+        simulatePurchase: SimulatePurchaseUseCase(),
+        simulateTimeMachine: SimulateFinancialTimeMachineUseCase()
     )
 }
 

@@ -23,6 +23,7 @@ struct ContentView: View {
                     getMonthlyInsight: container.makeMonthlySpendingInsightUseCase(),
                     getFinancialTwin: container.makeFinancialTwinUseCase(),
                     simulatePurchase: container.makePurchaseSimulatorUseCase(),
+                    simulateTimeMachine: container.makeFinancialTimeMachineUseCase(),
                     showBudgets: {
                         planSection = .budgets
                         selectedTab = .plan
