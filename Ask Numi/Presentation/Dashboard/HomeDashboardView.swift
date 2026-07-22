@@ -85,7 +85,10 @@ struct HomeDashboardView: View {
                             summary: summary,
                             monthlyBalance: monthlySummary.balance,
                             spending: monthlySpending,
-                            isLoading: isLoading
+                            subscriptions: subscriptions,
+                            goals: goals,
+                            isLoading: isLoading,
+                            hasCommitmentData: errorMessage == nil
                         )
 
                         if let errorMessage {
@@ -260,11 +263,20 @@ private struct FinancialOverviewSection: View {
     let summary: FinancialSummary
     let monthlyBalance: Decimal
     let spending: DashboardSpendingBreakdown
+    let subscriptions: [Subscription]
+    let goals: [SavingsGoal]
     let isLoading: Bool
+    let hasCommitmentData: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             BalanceHero(summary: summary, monthlyBalance: monthlyBalance, isLoading: isLoading)
+            SafeToSpendCard(
+                subscriptions: subscriptions,
+                goals: goals,
+                isLoading: isLoading,
+                hasCommitmentData: hasCommitmentData
+            )
             SpendingOverviewCard(breakdown: spending, isLoading: isLoading)
             DailyMoneyTipCard()
         }
